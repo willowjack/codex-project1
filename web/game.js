@@ -508,6 +508,12 @@ class Game {
 
         this.messageLog = [];
 
+        // 3D 렌더러
+        this.renderer3D = new ASCII3DRenderer(50, 18);
+        this.compass = new Compass();
+        this.playerDirection = { dx: 0, dy: -1 }; // 초기 방향: 북쪽
+        this.viewMode = 'both'; // 'both', '3d-only', '2d-only'
+
         this.setupEventListeners();
     }
 
@@ -645,6 +651,12 @@ class Game {
 
     handlePlayerTurn(dx, dy) {
         if (this.gameState !== 'playing') return;
+
+        // 플레이어 방향 업데이트 (3D 뷰용)
+        if (dx !== 0 || dy !== 0) {
+            this.playerDirection = { dx, dy };
+            this.renderer3D.setAngleFromMovement(dx, dy);
+        }
 
         const newX = this.player.x + dx;
         const newY = this.player.y + dy;
@@ -1123,6 +1135,7 @@ class Game {
 
     render() {
         this.renderMap();
+        this.render3D();
         this.renderUI();
     }
 
@@ -1168,6 +1181,97 @@ class Game {
         }
 
         display.innerHTML = html;
+    }
+
+    render3D() {
+        const display = document.getElementById('view3d-display');
+        const compassDisplay = document.getElementById('compass-display');
+
+        if (!display) return;
+
+        // 맵을 2D 문자 배열로 변환
+        const mapData = [];
+        for (let y = 0; y < this.gameMap.height; y++) {
+            const row = [];
+            for (let x = 0; x < this.gameMap.width; x++) {
+                const tile = this.gameMap.tiles[x][y];
+                row.push(tile.walkable ? '.' : '#');
+            }
+            mapData.push(row);
+        }
+
+        // 시야 내의 엔티티 목록 생성
+        const entities = [];
+        for (const entity of this.gameMap.entities) {
+            if (entity === this.player) continue;
+            if (!this.gameMap.visible[entity.x][entity.y]) continue;
+
+            let type = 'monster';
+            let color = '#f00';
+
+            if (entity.isNPC) {
+                type = 'npc';
+                color = '#ff0';
+            } else if (!entity.isAlive) {
+                continue;
+            }
+
+            entities.push({
+                x: entity.x,
+                y: entity.y,
+                type: type,
+                color: color,
+            });
+        }
+
+        // 아이템 추가
+        for (const item of this.gameMap.items) {
+            if (!this.gameMap.visible[item.x][item.y]) continue;
+
+            entities.push({
+                x: item.x,
+                y: item.y,
+                type: 'item',
+                color: '#88f',
+            });
+        }
+
+        // 3D 뷰 렌더링
+        const html = this.renderer3D.renderToHTML(
+            mapData,
+            this.player.x,
+            this.player.y,
+            entities
+        );
+        display.innerHTML = html;
+
+        // 나침반 업데이트
+        const angle = this.renderer3D.playerAngle;
+        let direction;
+        if (angle > -Math.PI/4 && angle <= Math.PI/4) direction = 'E';
+        else if (angle > Math.PI/4 && angle <= 3*Math.PI/4) direction = 'S';
+        else if (angle > -3*Math.PI/4 && angle <= -Math.PI/4) direction = 'N';
+        else direction = 'W';
+        compassDisplay.textContent = `[${direction}]`;
+    }
+
+    toggleView() {
+        const container = document.getElementById('view-container');
+        container.classList.remove('view-3d-only', 'view-2d-only');
+
+        if (this.viewMode === 'both') {
+            this.viewMode = '3d-only';
+            container.classList.add('view-3d-only');
+            this.addMessage('3D 뷰 전용 모드', 'system');
+        } else if (this.viewMode === '3d-only') {
+            this.viewMode = '2d-only';
+            container.classList.add('view-2d-only');
+            this.addMessage('2D 맵 전용 모드', 'system');
+        } else {
+            this.viewMode = 'both';
+            this.addMessage('분할 뷰 모드', 'system');
+        }
+        this.render();
     }
 
     renderUI() {
@@ -1423,6 +1527,12 @@ class Game {
             case '?':
                 // 도움말
                 this.showHelp();
+                break;
+
+            case 'v':
+            case 'V':
+                // 뷰 전환
+                this.toggleView();
                 break;
 
             case 'Escape':

@@ -41,8 +41,23 @@
 
         <!-- 게임 화면 -->
         <div id="game-screen" class="screen hidden">
-            <div id="map-container">
-                <pre id="map-display"></pre>
+            <div id="view-container">
+                <!-- 3D 뷰 (1인칭 시점) -->
+                <div id="view3d-container">
+                    <div class="view-header">
+                        <span class="view-title">[ 1인칭 뷰 ]</span>
+                        <span id="compass-display"></span>
+                    </div>
+                    <pre id="view3d-display"></pre>
+                </div>
+                <!-- 2D 맵 -->
+                <div id="map-container">
+                    <div class="view-header">
+                        <span class="view-title">[ 던전 맵 ]</span>
+                        <button id="toggle-view-btn" onclick="game.toggleView()">뷰 전환 (V)</button>
+                    </div>
+                    <pre id="map-display"></pre>
+                </div>
             </div>
             <div id="ui-panel">
                 <div id="status-bar">
@@ -142,6 +157,7 @@
                     <h3>시스템</h3>
                     <p><kbd>S</kbd> : 저장</p>
                     <p><kbd>L</kbd> : 불러오기</p>
+                    <p><kbd>v</kbd> : 뷰 전환 (3D/2D/분할)</p>
                     <p><kbd>?</kbd> : 도움말</p>
                     <p><kbd>ESC</kbd> : 창 닫기</p>
 
@@ -174,6 +190,7 @@
     </div>
 
     <script src="weapons.js"></script>
+    <script src="view3d.js"></script>
     <script src="game.js"></script>
 </body>
 </html>
