@@ -11,6 +11,9 @@ if TYPE_CHECKING:
     from components.fighter import Fighter
     from components.inventory import Inventory
     from components.survival import Survival
+    from components.npc import NPCComponent
+    from systems.quest import QuestLog
+    from systems.religion import Religion
 
 
 class Entity:
@@ -78,6 +81,8 @@ class Actor(Entity):
         fighter: Optional[Fighter] = None,
         inventory: Optional[Inventory] = None,
         survival: Optional[Survival] = None,
+        npc: Optional[NPCComponent] = None,
+        gold: int = 0,
     ):
         super().__init__(
             x=x,
@@ -102,6 +107,18 @@ class Actor(Entity):
         self.survival = survival
         if self.survival:
             self.survival.entity = self
+
+        # NPC 컴포넌트
+        self.npc = npc
+        if self.npc:
+            self.npc.entity = self
+
+        # 경제 시스템
+        self.gold = gold
+
+        # 퀘스트/종교 (플레이어 전용, 나중에 설정)
+        self.quest_log: Optional[QuestLog] = None
+        self.religion: Optional[Religion] = None
 
     @property
     def is_alive(self) -> bool:

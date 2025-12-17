@@ -7,6 +7,7 @@ from components.fighter import Fighter
 from components.survival import Survival, SurvivalStatus
 from components.inventory import Inventory
 from components.ai import BaseAI, HostileAI, PassiveAI
+from components.npc import NPCComponent, NPCRole, Dialogue, DialogueOption
 
 __all__ = [
     "Entity",
@@ -19,4 +20,8 @@ __all__ = [
     "BaseAI",
     "HostileAI",
     "PassiveAI",
+    "NPCComponent",
+    "NPCRole",
+    "Dialogue",
+    "DialogueOption",
 ]
