@@ -382,6 +382,9 @@ class ASCII3DRenderer {
     }
 
     drawEntity(buffer, entity) {
+        // 디버깅: 엔티티 정보 확인
+        console.log('Drawing entity:', entity.char, entity.type, entity);
+
         const depth = entity.depth;
         const vp = this.viewports[depth];
 
@@ -496,6 +499,10 @@ class ASCII3DRenderer {
     }
 
     getEntityPattern(char, scaleLevel) {
+        // 디버깅: 패턴 로딩 확인
+        if (!this.asciiScalePatterns[char]) {
+            console.log(`Pattern not found for char: '${char}', available:`, Object.keys(this.asciiScalePatterns).slice(0, 10));
+        }
         const patterns = this.asciiScalePatterns[char] || this.asciiScalePatterns['default'];
         return patterns ? (patterns[scaleLevel] || patterns[1]) : null;
     }
