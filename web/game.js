@@ -1219,6 +1219,24 @@ class Game {
         return this.directionArrows[key] || '^';
     }
 
+    updatePlayerDirectionFromFacing() {
+        // 3D 렌더러의 facing 값을 playerDirection으로 변환
+        const facingToDir = {
+            'N': { dx: 0, dy: -1 },
+            'S': { dx: 0, dy: 1 },
+            'E': { dx: 1, dy: 0 },
+            'W': { dx: -1, dy: 0 },
+            'NE': { dx: 1, dy: -1 },
+            'NW': { dx: -1, dy: -1 },
+            'SE': { dx: 1, dy: 1 },
+            'SW': { dx: -1, dy: 1 }
+        };
+        const facing = this.renderer3D.getFacing();
+        if (facingToDir[facing]) {
+            this.playerDirection = facingToDir[facing];
+        }
+    }
+
     renderMap() {
         const display = document.getElementById('map-display');
         let html = '';
@@ -1603,9 +1621,11 @@ class Game {
                 e.preventDefault();
                 if (this.gameState === 'playing' && this.renderer3D) {
                     this.renderer3D.rotateLeft();
+                    this.updatePlayerDirectionFromFacing();
                     this.render3D();
+                    this.renderMap();
                     const facing = this.renderer3D.getFacing();
-                    const dirNames = { 'N': '북', 'S': '남', 'E': '동', 'W': '서' };
+                    const dirNames = { 'N': '북', 'S': '남', 'E': '동', 'W': '서', 'NE': '북동', 'NW': '북서', 'SE': '남동', 'SW': '남서' };
                     this.addMessage(`${dirNames[facing]}쪽을 바라봤다.`, 'system');
                 }
             });
@@ -1620,9 +1640,11 @@ class Game {
                 e.preventDefault();
                 if (this.gameState === 'playing' && this.renderer3D) {
                     this.renderer3D.rotateRight();
+                    this.updatePlayerDirectionFromFacing();
                     this.render3D();
+                    this.renderMap();
                     const facing = this.renderer3D.getFacing();
-                    const dirNames = { 'N': '북', 'S': '남', 'E': '동', 'W': '서' };
+                    const dirNames = { 'N': '북', 'S': '남', 'E': '동', 'W': '서', 'NE': '북동', 'NW': '북서', 'SE': '남동', 'SW': '남서' };
                     this.addMessage(`${dirNames[facing]}쪽을 바라봤다.`, 'system');
                 }
             });
