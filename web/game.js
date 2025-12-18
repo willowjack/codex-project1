@@ -13,9 +13,31 @@ const CONFIG = {
     MAX_ROOMS: 20,
     ROOM_MIN_SIZE: 4,
     ROOM_MAX_SIZE: 10,
-    MAX_MONSTERS_PER_ROOM: 2,
+    MAX_MONSTERS_PER_ROOM: 3,
     MAX_ITEMS_PER_ROOM: 2,
-    MAX_FLOORS: 10, // 최대 층 수
+    MAX_FLOORS: 15, // 최대 층 수
+};
+
+// 몬스터 데이터 (층별 출현)
+const MONSTER_DATA = {
+    // 1-3층: 약한 몬스터
+    '쥐': { char: 'r', hp: 5, power: 2, defense: 0, detection: 5, minFloor: 1, maxFloor: 4, weight: 50, xp: 5, gold: 2, strength: 'none', weakness: 'none' },
+    '박쥐': { char: 'b', hp: 6, power: 2, defense: 0, detection: 8, minFloor: 1, maxFloor: 5, weight: 40, xp: 5, gold: 1, strength: 'dark', weakness: 'lightning' },
+    '거미': { char: 's', hp: 8, power: 3, defense: 0, detection: 6, minFloor: 2, maxFloor: 6, weight: 35, xp: 8, gold: 3, strength: 'poison', weakness: 'fire' },
+    // 4-6층: 중간 몬스터
+    '고블린': { char: 'g', hp: 12, power: 4, defense: 1, detection: 6, minFloor: 3, maxFloor: 8, weight: 40, xp: 15, gold: 10, strength: 'none', weakness: 'holy' },
+    '슬라임': { char: 'j', hp: 15, power: 3, defense: 2, detection: 4, minFloor: 3, maxFloor: 7, weight: 25, xp: 12, gold: 5, strength: 'physical', weakness: 'fire' },
+    '스켈레톤': { char: 'S', hp: 14, power: 5, defense: 1, detection: 6, minFloor: 4, maxFloor: 9, weight: 30, xp: 18, gold: 8, strength: 'dark', weakness: 'holy' },
+    // 7-10층: 강한 몬스터
+    '오크': { char: 'o', hp: 20, power: 6, defense: 2, detection: 7, minFloor: 5, maxFloor: 10, weight: 35, xp: 25, gold: 15, strength: 'physical', weakness: 'ice' },
+    '좀비': { char: 'z', hp: 25, power: 5, defense: 3, detection: 4, minFloor: 5, maxFloor: 11, weight: 25, xp: 20, gold: 5, strength: 'poison', weakness: 'holy' },
+    '늑대': { char: 'w', hp: 18, power: 7, defense: 1, detection: 10, minFloor: 6, maxFloor: 11, weight: 25, xp: 22, gold: 8, strength: 'ice', weakness: 'fire' },
+    // 10-12층: 더 강한 몬스터
+    '트롤': { char: 'T', hp: 40, power: 8, defense: 3, detection: 6, minFloor: 8, maxFloor: 13, weight: 20, xp: 50, gold: 30, strength: 'physical', weakness: 'fire' },
+    '곰': { char: 'B', hp: 35, power: 9, defense: 2, detection: 8, minFloor: 9, maxFloor: 14, weight: 15, xp: 45, gold: 25, strength: 'physical', weakness: 'ice' },
+    // 12-15층: 보스급 몬스터
+    '미노타우로스': { char: 'M', hp: 60, power: 12, defense: 4, detection: 7, minFloor: 11, maxFloor: 15, weight: 10, xp: 100, gold: 80, strength: 'physical', weakness: 'lightning' },
+    '드래곤': { char: 'D', hp: 80, power: 15, defense: 5, detection: 10, minFloor: 13, maxFloor: 15, weight: 5, xp: 200, gold: 150, strength: 'fire', weakness: 'ice' },
 };
 
 // ============================================================================
@@ -339,18 +361,18 @@ const ITEM_PRICES = {
     '열쇠': 25,
     // 시체 (몬스터별)
     '쥐의 시체': 2,
-    '거미의 시체': 5,
     '박쥐의 시체': 3,
+    '거미의 시체': 5,
     '고블린의 시체': 15,
-    '오크의 시체': 25,
-    '스켈레톤의 시체': 10,
-    '좀비의 시체': 8,
     '슬라임의 시체': 5,
-    '트롤의 시체': 50,
-    '미노타우로스의 시체': 80,
-    // 기타 시체
+    '스켈레톤의 시체': 10,
+    '오크의 시체': 25,
+    '좀비의 시체': 8,
     '늑대의 시체': 12,
+    '트롤의 시체': 50,
     '곰의 시체': 30,
+    '미노타우로스의 시체': 80,
+    '드래곤의 시체': 200,
     // 기본 시체 가격
     '시체': 5,
 };
@@ -673,29 +695,60 @@ class Game {
         this.render();
     }
 
+    // 현재 층에서 출현 가능한 몬스터 선택
+    getRandomMonster(floor) {
+        // 현재 층에서 출현 가능한 몬스터 필터링
+        const availableMonsters = [];
+        for (const [name, data] of Object.entries(MONSTER_DATA)) {
+            if (floor >= data.minFloor && floor <= data.maxFloor) {
+                availableMonsters.push({ name, ...data });
+            }
+        }
+
+        if (availableMonsters.length === 0) {
+            // 기본 몬스터 (쥐)
+            return { name: '쥐', ...MONSTER_DATA['쥐'] };
+        }
+
+        // 가중치 기반 랜덤 선택
+        const totalWeight = availableMonsters.reduce((sum, m) => sum + m.weight, 0);
+        let roll = Math.random() * totalWeight;
+
+        for (const monster of availableMonsters) {
+            roll -= monster.weight;
+            if (roll <= 0) {
+                return monster;
+            }
+        }
+
+        return availableMonsters[0];
+    }
+
     placeEntities(room) {
-        // 몬스터 배치
-        const numMonsters = randomInt(0, CONFIG.MAX_MONSTERS_PER_ROOM);
+        const floor = this.currentFloor || 1;
+
+        // 몬스터 배치 (층이 높을수록 더 많은 몬스터)
+        const baseMonsters = Math.min(CONFIG.MAX_MONSTERS_PER_ROOM, 1 + Math.floor(floor / 4));
+        const numMonsters = randomInt(0, baseMonsters);
+
         for (let i = 0; i < numMonsters; i++) {
             const x = randomInt(room.x1 + 1, room.x2 - 1);
             const y = randomInt(room.y1 + 1, room.y2 - 1);
 
             if (this.gameMap.getBlockingEntityAt(x, y)) continue;
 
-            let monster;
-            if (Math.random() < 0.6) {
-                monster = new Actor(x, y, 'r', 'tile-monster', '쥐', {
-                    maxHp: 5, defense: 0, power: 2, isHostile: true, detectionRange: 5
-                });
-            } else if (Math.random() < 0.8) {
-                monster = new Actor(x, y, 'g', 'tile-monster', '고블린', {
-                    maxHp: 10, defense: 0, power: 3, isHostile: true, detectionRange: 6
-                });
-            } else {
-                monster = new Actor(x, y, 'o', 'tile-monster', '오크', {
-                    maxHp: 16, defense: 1, power: 4, isHostile: true, detectionRange: 8
-                });
-            }
+            const monsterData = this.getRandomMonster(floor);
+            const monster = new Actor(x, y, monsterData.char, 'tile-monster', monsterData.name, {
+                maxHp: monsterData.hp,
+                defense: monsterData.defense,
+                power: monsterData.power,
+                isHostile: true,
+                detectionRange: monsterData.detection,
+                xpValue: monsterData.xp,
+                goldValue: monsterData.gold,
+                strength: monsterData.strength,
+                weakness: monsterData.weakness
+            });
             monster.ai = 'hostile';
             this.gameMap.addEntity(monster);
         }
@@ -2147,6 +2200,8 @@ class Game {
     }
 
     placeEntitiesForFloor(room, difficulty) {
+        const floor = this.currentFloor || 1;
+
         // 난이도에 따라 몬스터 수 증가
         const numMonsters = randomInt(0, CONFIG.MAX_MONSTERS_PER_ROOM + Math.floor(difficulty / 2));
         for (let i = 0; i < numMonsters; i++) {
@@ -2154,33 +2209,19 @@ class Game {
             const y = randomInt(room.y1 + 1, room.y2 - 1);
 
             if (!this.gameMap.isBlocked(x, y)) {
-                let monster;
-                const roll = Math.random();
-
-                // 층이 깊을수록 강한 몬스터 출현 확률 증가
-                if (roll < 0.3 + (difficulty * 0.05)) {
-                    // 강한 몬스터
-                    if (difficulty >= 3 && Math.random() < 0.3) {
-                        monster = new Actor(x, y, 'O', 'tile-monster', '오크', {
-                            maxHp: 20 + difficulty * 3,
-                            defense: 2 + Math.floor(difficulty / 2),
-                            power: 6 + difficulty,
-                        });
-                    } else {
-                        monster = new Actor(x, y, 'g', 'tile-monster', '고블린', {
-                            maxHp: 12 + difficulty * 2,
-                            defense: 1,
-                            power: 4 + Math.floor(difficulty / 2),
-                        });
-                    }
-                } else {
-                    monster = new Actor(x, y, 'r', 'tile-monster', '쥐', {
-                        maxHp: 5 + difficulty,
-                        defense: 0,
-                        power: 2 + Math.floor(difficulty / 3),
-                    });
-                }
-                monster.isHostile = true;
+                const monsterData = this.getRandomMonster(floor);
+                const monster = new Actor(x, y, monsterData.char, 'tile-monster', monsterData.name, {
+                    maxHp: monsterData.hp,
+                    defense: monsterData.defense,
+                    power: monsterData.power,
+                    isHostile: true,
+                    detectionRange: monsterData.detection,
+                    xpValue: monsterData.xp,
+                    goldValue: monsterData.gold,
+                    strength: monsterData.strength,
+                    weakness: monsterData.weakness
+                });
+                monster.ai = 'hostile';
                 this.gameMap.addEntity(monster);
             }
         }
