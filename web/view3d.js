@@ -135,10 +135,10 @@ class ASCII3DRenderer {
         }
     }
 
-    // 좌측 대각선 벽 (정면보다 약간 어둡게)
+    // 좌측 대각선 벽 (정면보다 확실히 어둡게)
     drawLeftWall(buffer, prevVp, vp, depth, isDoor) {
-        const bright = Math.max(50, 115 - depth * 18);  // 적당히 어둡게
-        const wallChar = depth <= 2 ? '▓' : '▒';  // 보이는 문자 사용
+        const bright = Math.max(45, 95 - depth * 15);  // 측면은 어둡게
+        const wallChar = depth <= 2 ? '▒' : '░';  // 어두운 문자
 
         const prevL = Math.floor(prevVp.l * this.width);
         const prevT = Math.floor(prevVp.t * this.height);
@@ -192,10 +192,10 @@ class ASCII3DRenderer {
         }
     }
 
-    // 우측 대각선 벽 (정면보다 약간 어둡게)
+    // 우측 대각선 벽 (정면보다 확실히 어둡게)
     drawRightWall(buffer, prevVp, vp, depth, isDoor) {
-        const bright = Math.max(50, 115 - depth * 18);  // 적당히 어둡게
-        const wallChar = depth <= 2 ? '▓' : '▒';  // 보이는 문자 사용
+        const bright = Math.max(45, 95 - depth * 15);  // 측면은 어둡게
+        const wallChar = depth <= 2 ? '▒' : '░';  // 어두운 문자
 
         const prevR = Math.floor(prevVp.r * this.width);
         const prevT = Math.floor(prevVp.t * this.height);
@@ -246,9 +246,9 @@ class ASCII3DRenderer {
         }
     }
 
-    // 정면 벽
+    // 정면 벽 (밝게)
     drawFrontWall(buffer, vp, depth, isDoor) {
-        const bright = Math.max(60, 150 - depth * 30);
+        const bright = Math.max(80, 170 - depth * 25);  // 정면은 밝게
         const wallChar = depth <= 1 ? '█' : (depth <= 2 ? '▓' : '▒');
 
         const left = Math.floor(vp.l * this.width);
