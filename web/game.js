@@ -1429,6 +1429,69 @@ class Game {
         document.addEventListener('keydown', (e) => this.handleKeyDown(e));
         this.setupMobileControls();
         this.setupMapZoom();
+        this.setupMapDrag();
+    }
+
+    setupMapDrag() {
+        const mapDisplay = document.getElementById('map-display');
+        let isDragging = false;
+        let startX, startY, scrollLeft, scrollTop;
+
+        // 마우스 이벤트
+        mapDisplay.addEventListener('mousedown', (e) => {
+            isDragging = true;
+            mapDisplay.style.cursor = 'grabbing';
+            startX = e.pageX - mapDisplay.offsetLeft;
+            startY = e.pageY - mapDisplay.offsetTop;
+            scrollLeft = mapDisplay.scrollLeft;
+            scrollTop = mapDisplay.scrollTop;
+        });
+
+        mapDisplay.addEventListener('mouseleave', () => {
+            isDragging = false;
+            mapDisplay.style.cursor = 'grab';
+        });
+
+        mapDisplay.addEventListener('mouseup', () => {
+            isDragging = false;
+            mapDisplay.style.cursor = 'grab';
+        });
+
+        mapDisplay.addEventListener('mousemove', (e) => {
+            if (!isDragging) return;
+            e.preventDefault();
+            const x = e.pageX - mapDisplay.offsetLeft;
+            const y = e.pageY - mapDisplay.offsetTop;
+            const walkX = (x - startX) * 1.5;
+            const walkY = (y - startY) * 1.5;
+            mapDisplay.scrollLeft = scrollLeft - walkX;
+            mapDisplay.scrollTop = scrollTop - walkY;
+        });
+
+        // 터치 이벤트
+        mapDisplay.addEventListener('touchstart', (e) => {
+            if (e.touches.length === 1) {
+                isDragging = true;
+                startX = e.touches[0].pageX - mapDisplay.offsetLeft;
+                startY = e.touches[0].pageY - mapDisplay.offsetTop;
+                scrollLeft = mapDisplay.scrollLeft;
+                scrollTop = mapDisplay.scrollTop;
+            }
+        }, { passive: true });
+
+        mapDisplay.addEventListener('touchend', () => {
+            isDragging = false;
+        });
+
+        mapDisplay.addEventListener('touchmove', (e) => {
+            if (!isDragging || e.touches.length !== 1) return;
+            const x = e.touches[0].pageX - mapDisplay.offsetLeft;
+            const y = e.touches[0].pageY - mapDisplay.offsetTop;
+            const walkX = (x - startX) * 1.5;
+            const walkY = (y - startY) * 1.5;
+            mapDisplay.scrollLeft = scrollLeft - walkX;
+            mapDisplay.scrollTop = scrollTop - walkY;
+        }, { passive: true });
     }
 
     setupMapZoom() {

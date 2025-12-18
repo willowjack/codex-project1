@@ -782,19 +782,24 @@ body {
 
 /* 반응형 - 모바일 세로 화면 */
 @media (max-width: 768px) {
+    body {
+        align-items: flex-start;
+    }
+
     #game-container {
         border-radius: 0;
         border: none;
         max-width: 100%;
         min-height: 100vh;
-        height: auto;
+        height: 100vh;
+        overflow: hidden;
     }
 
     /* 모바일에서 세로 레이아웃 */
     #game-screen {
         flex-direction: column;
-        height: auto;
-        min-height: 100vh;
+        height: 100vh;
+        overflow: hidden;
     }
 
     /* 좌측 패널 (3D 뷰) - 상단 배치 */
@@ -802,31 +807,152 @@ body {
         width: 100%;
         min-width: 100%;
         border-right: none;
-        border-bottom: 2px solid #333;
+        border-bottom: 1px solid #333;
         order: 1;
+        flex-shrink: 0;
+        height: auto;
+    }
+
+    /* 3D 뷰를 가로로 넓게, 세로 컴팩트하게 */
+    #view3d-container {
+        height: 100px;
+        min-height: 100px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
+
+    #view3d-display {
+        font-size: 5px;
+        line-height: 1.0;
+        text-align: center;
+        width: 100%;
+    }
+
+    /* 나침반, 미니상태 숨김 (공간 절약) */
+    #compass-container,
+    #mini-status {
+        display: none;
+    }
+
+    /* 뷰 헤더 컴팩트하게 */
+    .view-header {
+        padding: 2px 8px;
+        font-size: 10px;
     }
 
     /* 우측 패널 (던전맵 + UI) - 중간 배치 */
     #right-panel {
         width: 100%;
-        min-height: 250px;
         order: 2;
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        overflow: hidden;
+        min-height: 0;
     }
 
-    /* 모바일 컨트롤을 맨 아래로 */
+    #view-container {
+        flex: 1;
+        min-height: 0;
+        overflow: hidden;
+    }
+
+    /* 던전맵 컨테이너 - 드래그 가능 */
+    #map-container {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        overflow: hidden;
+    }
+
+    #map-display {
+        flex: 1;
+        font-size: 12px;
+        letter-spacing: 1px;
+        overflow: auto;
+        cursor: grab;
+        user-select: none;
+        -webkit-overflow-scrolling: touch;
+        text-align: left;
+        padding: 10px;
+    }
+
+    #map-display:active {
+        cursor: grabbing;
+    }
+
+    /* 모바일에서 줌 버튼 */
+    .zoom-btn {
+        width: 28px;
+        height: 28px;
+        font-size: 18px;
+    }
+
+    #zoom-level {
+        font-size: 11px;
+        min-width: 40px;
+    }
+
+    /* UI 패널 컴팩트하게 */
+    #ui-panel {
+        padding: 5px 8px;
+        flex-shrink: 0;
+    }
+
+    #status-bar {
+        flex-direction: row;
+        flex-wrap: wrap;
+        gap: 8px;
+        margin-bottom: 5px;
+    }
+
+    .stat {
+        gap: 4px;
+    }
+
+    .stat-label {
+        width: auto;
+        font-size: 11px;
+    }
+
+    .bar-container {
+        width: 60px;
+        height: 10px;
+    }
+
+    #status-bar span {
+        font-size: 10px;
+    }
+
+    #info-bar {
+        display: none; /* 공간 절약 */
+    }
+
+    #message-log {
+        height: 35px;
+        font-size: 11px;
+        padding: 3px 5px;
+    }
+
+    .title-art {
+        font-size: 5px;
+    }
+
+    /* 모바일 컨트롤 - 하단 고정 */
     #mobile-controls {
         order: 3;
         position: fixed;
         bottom: 0;
         left: 0;
         right: 0;
-        background-color: #0d0d0d;
+        background-color: rgba(13, 13, 13, 0.95);
         border-top: 2px solid #444;
         z-index: 100;
         display: flex;
         flex-direction: column;
-        gap: 15px;
-        padding: 15px;
+        gap: 8px;
+        padding: 8px;
     }
 
     /* 이동버튼이 위, 단축키버튼이 아래 */
@@ -840,120 +966,78 @@ body {
 
     /* 컨트롤 영역 높이만큼 하단 여백 */
     #game-screen {
-        padding-bottom: 220px;
-    }
-
-    /* 던전맵 중앙 정렬 */
-    #map-container {
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-    }
-
-    #map-display {
-        font-size: 14px;
-        letter-spacing: 1px;
-        text-align: center;
-        overflow: auto;
-        max-height: 40vh;
-    }
-
-    /* 모바일에서 줌 버튼 크게 */
-    .zoom-btn {
-        width: 32px;
-        height: 32px;
-        font-size: 20px;
-    }
-
-    #zoom-level {
-        font-size: 12px;
-        min-width: 45px;
-    }
-
-    .title-art {
-        font-size: 5px;
-    }
-
-    #status-bar {
-        flex-direction: column;
-        gap: 5px;
-    }
-
-    .bar-container {
-        width: 80px;
-    }
-
-    #info-bar {
-        flex-wrap: wrap;
-        gap: 8px;
-    }
-
-    /* 모바일 컨트롤 - 이동 버튼 3배 크게 */
-    #mobile-controls {
-        padding: 15px;
-        gap: 20px;
+        padding-bottom: 180px;
     }
 
     .move-row {
-        gap: 6px;
+        gap: 4px;
     }
 
     .move-btn {
-        width: 70px;
-        height: 70px;
-        font-size: 32px;
-        border-radius: 8px;
-        border-width: 3px;
-    }
-
-    /* 단축키 버튼도 정사각형으로 크게 */
-    #action-controls {
-        gap: 10px;
-    }
-
-    .action-btn {
-        width: 50px;
-        height: 50px;
-        font-size: 18px;
+        width: 52px;
+        height: 52px;
+        font-size: 24px;
         border-radius: 6px;
         border-width: 2px;
     }
 
-    /* 3D 뷰 높이 조정 */
-    #view3d-container {
-        min-height: 150px;
+    /* 단축키 버튼 */
+    #action-controls {
+        gap: 6px;
     }
 
-    #view3d-display {
-        font-size: 6px;
+    .action-btn {
+        width: 38px;
+        height: 38px;
+        font-size: 14px;
+        border-radius: 4px;
     }
 }
 
 /* 더 작은 화면 (폰) */
 @media (max-width: 480px) {
     .move-btn {
-        width: 60px;
-        height: 60px;
-        font-size: 28px;
+        width: 46px;
+        height: 46px;
+        font-size: 22px;
     }
 
     .action-btn {
-        width: 45px;
-        height: 45px;
-        font-size: 16px;
+        width: 34px;
+        height: 34px;
+        font-size: 13px;
     }
 
     #map-display {
-        font-size: 12px;
+        font-size: 10px;
     }
 
     #view3d-display {
-        font-size: 5px;
+        font-size: 4px;
     }
 
     .zoom-btn {
-        width: 36px;
-        height: 36px;
-        font-size: 22px;
+        width: 26px;
+        height: 26px;
+        font-size: 16px;
     }
+
+    #game-screen {
+        padding-bottom: 150px;
+    }
+
+    #mobile-controls {
+        gap: 6px;
+        padding: 6px;
+    }
+}
+
+/* 플레이어 깜빡임 애니메이션 */
+@keyframes playerBlink {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.4; }
+}
+
+.tile-player {
+    animation: playerBlink 1s ease-in-out infinite;
 }
