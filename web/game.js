@@ -1157,22 +1157,25 @@ class Game {
                 let colorClass = 'tile-unexplored';
 
                 if (visible) {
-                    // 엔티티 체크
-                    const entity = this.gameMap.getActorAt(x, y);
-                    const items = this.gameMap.getItemsAt(x, y);
-
-                    if (entity === this.player) {
+                    // 플레이어 먼저 체크 (직접 위치 비교)
+                    if (x === this.player.x && y === this.player.y) {
                         char = '@';
                         colorClass = 'tile-player';
-                    } else if (entity) {
-                        char = entity.char;
-                        colorClass = entity.isNPC ? 'tile-npc' : 'tile-monster';
-                    } else if (items.length > 0) {
-                        char = items[0].char;
-                        colorClass = items[0].color;
                     } else {
-                        char = tile.char;
-                        colorClass = tile.walkable ? 'tile-floor' : 'tile-wall-visible';
+                        // 다른 엔티티 체크
+                        const entity = this.gameMap.getActorAt(x, y);
+                        const items = this.gameMap.getItemsAt(x, y);
+
+                        if (entity && entity !== this.player) {
+                            char = entity.char;
+                            colorClass = entity.isNPC ? 'tile-npc' : 'tile-monster';
+                        } else if (items.length > 0) {
+                            char = items[0].char;
+                            colorClass = items[0].color;
+                        } else {
+                            char = tile.char;
+                            colorClass = tile.walkable ? 'tile-floor' : 'tile-wall-visible';
+                        }
                     }
                 } else if (explored) {
                     char = tile.char;
