@@ -891,7 +891,11 @@ ${pattern.map(row => `            "${row}"`).join(',\n')}
 
         // 전체 패턴 초기화
         function resetAllPatterns() {
-            if (!confirm('모든 패턴을 원래대로 초기화하시겠습니까?\n\n저장하지 않은 모든 변경사항이 사라집니다.')) {
+            if (!confirm('⚠️ 경고!\n\n모든 패턴을 원래대로 초기화하시겠습니까?\n저장하지 않은 모든 변경사항이 사라집니다.')) {
+                return;
+            }
+
+            if (!confirm('⚠️ 정말로 초기화하시겠습니까?\n\n이 작업은 되돌릴 수 없습니다!')) {
                 return;
             }
 
