@@ -135,10 +135,10 @@ class ASCII3DRenderer {
         }
     }
 
-    // 좌측 대각선 벽 (정면보다 어둡게)
+    // 좌측 대각선 벽 (정면보다 약간 어둡게)
     drawLeftWall(buffer, prevVp, vp, depth, isDoor) {
-        const bright = Math.max(35, 100 - depth * 20);  // 측면은 더 어둡게
-        const wallChar = depth <= 2 ? '▒' : '░';  // 더 연한 문자 사용
+        const bright = Math.max(50, 115 - depth * 18);  // 적당히 어둡게
+        const wallChar = depth <= 2 ? '▓' : '▒';  // 보이는 문자 사용
 
         const prevL = Math.floor(prevVp.l * this.width);
         const prevT = Math.floor(prevVp.t * this.height);
@@ -161,18 +161,18 @@ class ASCII3DRenderer {
                 if (y < 0 || y >= this.height || x < 0) continue;
 
                 let char = wallChar;
-                let r = bright - 15, g = bright - 20, b = bright - 10;  // 전체적으로 어둡게
+                let r = bright - 10, g = bright - 15, b = bright;  // 약간 어둡고 푸른 톤
 
-                // 수평 줄무늬 장식 (측면은 어두운 노란색)
+                // 수평 줄무늬 장식 (측면은 살짝 어두운 노란색)
                 if ((y === prevT + 2 || y === prevB - 3) && x < rightEdge - 1) {
                     char = '─';
-                    r = 130; g = 115; b = 35;  // 어두운 노란색
+                    r = 150; g = 135; b = 45;  // 약간 어두운 노란색
                 }
 
                 // 대각선 가장자리 (밝은 테두리)
                 if (x === rightEdge - 1) {
                     char = y < this.height/2 ? '╲' : '╱';
-                    r = bright + 30; g = bright + 25; b = bright + 35;
+                    r = bright + 35; g = bright + 30; b = bright + 40;
                 }
 
                 // 문
@@ -180,10 +180,10 @@ class ASCII3DRenderer {
                     const doorTop = prevT + 3;
                     const doorBottom = prevB - 2;
                     if (y > doorTop && y < doorBottom) {
-                        char = '░';
-                        r = Math.floor(bright * 0.4);
-                        g = Math.floor(bright * 0.25);
-                        b = Math.floor(bright * 0.15);
+                        char = '▒';
+                        r = Math.floor(bright * 0.5);
+                        g = Math.floor(bright * 0.35);
+                        b = Math.floor(bright * 0.2);
                     }
                 }
 
@@ -192,10 +192,10 @@ class ASCII3DRenderer {
         }
     }
 
-    // 우측 대각선 벽 (정면보다 어둡게)
+    // 우측 대각선 벽 (정면보다 약간 어둡게)
     drawRightWall(buffer, prevVp, vp, depth, isDoor) {
-        const bright = Math.max(35, 100 - depth * 20);  // 측면은 더 어둡게
-        const wallChar = depth <= 2 ? '▒' : '░';  // 더 연한 문자 사용
+        const bright = Math.max(50, 115 - depth * 18);  // 적당히 어둡게
+        const wallChar = depth <= 2 ? '▓' : '▒';  // 보이는 문자 사용
 
         const prevR = Math.floor(prevVp.r * this.width);
         const prevT = Math.floor(prevVp.t * this.height);
@@ -215,18 +215,18 @@ class ASCII3DRenderer {
                 if (y < 0 || y >= this.height || x < 0) continue;
 
                 let char = wallChar;
-                let r = bright - 15, g = bright - 20, b = bright - 10;  // 전체적으로 어둡게
+                let r = bright - 10, g = bright - 15, b = bright;  // 약간 어둡고 푸른 톤
 
-                // 수평 줄무늬 장식 (측면은 어두운 노란색)
+                // 수평 줄무늬 장식 (측면은 살짝 어두운 노란색)
                 if ((y === prevT + 2 || y === prevB - 3) && x > leftEdge) {
                     char = '─';
-                    r = 130; g = 115; b = 35;  // 어두운 노란색
+                    r = 150; g = 135; b = 45;  // 약간 어두운 노란색
                 }
 
                 // 대각선 가장자리 (밝은 테두리)
                 if (x === leftEdge) {
                     char = y < this.height/2 ? '╱' : '╲';
-                    r = bright + 30; g = bright + 25; b = bright + 35;
+                    r = bright + 35; g = bright + 30; b = bright + 40;
                 }
 
                 // 문
@@ -234,10 +234,10 @@ class ASCII3DRenderer {
                     const doorTop = prevT + 3;
                     const doorBottom = prevB - 2;
                     if (y > doorTop && y < doorBottom) {
-                        char = '░';
-                        r = Math.floor(bright * 0.4);
-                        g = Math.floor(bright * 0.25);
-                        b = Math.floor(bright * 0.15);
+                        char = '▒';
+                        r = Math.floor(bright * 0.5);
+                        g = Math.floor(bright * 0.35);
+                        b = Math.floor(bright * 0.2);
                     }
                 }
 
