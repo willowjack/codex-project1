@@ -290,6 +290,14 @@ body {
     letter-spacing: 2px;
     white-space: pre;
     font-family: 'Courier New', monospace;
+    overflow: auto;
+    cursor: grab;
+    user-select: none;
+    -webkit-user-select: none;
+}
+
+#map-display:active {
+    cursor: grabbing;
 }
 
 /* 타일 색상 클래스 */
