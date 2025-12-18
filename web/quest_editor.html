@@ -19,6 +19,50 @@
             padding: 20px;
         }
 
+        /* 네비게이션 바 */
+        .nav-bar {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-bottom: 20px;
+            padding: 15px;
+            background: #16213e;
+            border-radius: 10px;
+            border: 1px solid #0f3460;
+        }
+
+        .nav-btn {
+            padding: 10px 20px;
+            background: #0f3460;
+            border: 2px solid transparent;
+            border-radius: 5px;
+            color: #eee;
+            cursor: pointer;
+            font-family: inherit;
+            font-size: 14px;
+            text-decoration: none;
+            transition: all 0.2s;
+        }
+
+        .nav-btn:hover {
+            background: #1a4a7a;
+            transform: translateY(-2px);
+        }
+
+        .nav-btn.active {
+            border-color: #ffd700;
+            background: #1a4a7a;
+            color: #ffd700;
+        }
+
+        .nav-btn.game-btn {
+            background: #2d5016;
+        }
+
+        .nav-btn.game-btn:hover {
+            background: #3d6a1e;
+        }
+
         h1 {
             text-align: center;
             color: #ffd700;
@@ -330,6 +374,13 @@
     </style>
 </head>
 <body>
+    <!-- 네비게이션 바 -->
+    <div class="nav-bar">
+        <a href="pattern_editor.html" class="nav-btn">🎨 몬스터 아트 에디터</a>
+        <a href="quest_editor.html" class="nav-btn active">📜 퀘스트 에디터</a>
+        <a href="index.html" class="nav-btn game-btn">🎮 게임으로</a>
+    </div>
+
     <h1>📜 퀘스트 에디터</h1>
 
     <div class="container">
