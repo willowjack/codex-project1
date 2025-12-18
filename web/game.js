@@ -2302,6 +2302,32 @@ class Game {
                 break;
 
             case 'q':
+                // 좌회전
+                if (this.renderer3D) {
+                    this.renderer3D.rotateLeft();
+                    this.updatePlayerDirectionFromFacing();
+                    this.render3D();
+                    this.renderMap();
+                    const facingL = this.renderer3D.getFacing();
+                    const dirNamesL = { 'N': '북', 'S': '남', 'E': '동', 'W': '서', 'NE': '북동', 'NW': '북서', 'SE': '남동', 'SW': '남서' };
+                    this.addMessage(`${dirNamesL[facingL]}쪽을 바라봤다.`, 'system');
+                }
+                break;
+
+            case 'e':
+                // 우회전
+                if (this.renderer3D) {
+                    this.renderer3D.rotateRight();
+                    this.updatePlayerDirectionFromFacing();
+                    this.render3D();
+                    this.renderMap();
+                    const facingR = this.renderer3D.getFacing();
+                    const dirNamesR = { 'N': '북', 'S': '남', 'E': '동', 'W': '서', 'NE': '북동', 'NW': '북서', 'SE': '남동', 'SW': '남서' };
+                    this.addMessage(`${dirNamesR[facingR]}쪽을 바라봤다.`, 'system');
+                }
+                break;
+
+            case 'j':
                 // 퀘스트
                 this.showQuestLog();
                 break;
