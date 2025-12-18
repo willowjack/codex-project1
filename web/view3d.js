@@ -8,12 +8,56 @@ class ASCII3DRenderer {
         this.fov = Math.PI / 3;  // 시야각 (60도)
         this.maxDepth = 16;      // 최대 렌더링 거리
 
-        // 거리에 따른 벽 문자 (가까울수록 진하게)
-        this.wallShades = ['█', '▓', '▒', '░', '·', ' '];
+        // 거리에 따른 벽 문자 셋 (가까울수록 진하게) - 벽돌 느낌
+        this.wallShadesSets = {
+            wall: {
+                close:  ['█', '▓', '▒', '░', '∙', ' '],   // 기본 벽
+                medium: ['▓', '▒', '░', '∙', '·', ' '],
+                far:    ['░', '∙', '·', ' ', ' ', ' ']
+            },
+            brick: {
+                close:  ['▓', '▒', '░', '∙', '·', ' '],    // 벽돌 벽
+                pattern: ['▀', '▄', '█', '▓', '▒', '░']
+            },
+            door: {
+                close:  ['▓', '▒', '░', '∙', '·', ' '],    // 문
+                frame:  ['║', '│', '¦', ':', '·', ' '],
+                panel:  ['▓', '▒', '░', '·', ' ', ' ']
+            }
+        };
 
-        // 바닥/천장 문자
-        this.floorChar = '.';
-        this.ceilingChar = ' ';
+        // 구조적인 벽 텍스처 패턴 (수직선 강조)
+        this.wallPatterns = {
+            stone: {
+                chars: ['█', '▓', '▒', '░'],
+                detail: ['┃', '│', '¦', ':']
+            },
+            brick: {
+                chars: ['▄', '▀', '█', '▓'],
+                detail: ['═', '─', '─', '·']
+            }
+        };
+
+        // 문 텍스처 (세로 패널 느낌)
+        this.doorPatterns = {
+            frame:  ['╔', '║', '╚', '═', '╗', '║', '╝'],
+            panel:  ['▓', '▒', '░'],
+            handle: ['●', '○', '•']
+        };
+
+        // 바닥 패턴 (거리에 따라)
+        this.floorPatterns = {
+            close:  ['▓', '▒', '░', '·'],
+            medium: ['░', '·', '.', ' '],
+            far:    ['.', '·', ' ', ' ']
+        };
+
+        // 천장 패턴
+        this.ceilingPatterns = {
+            close:  ['░', '·', ' ', ' '],
+            medium: ['·', ' ', ' ', ' '],
+            far:    [' ', ' ', ' ', ' ']
+        };
 
         // 플레이어 방향 (라디안)
         this.playerAngle = 0;
@@ -230,16 +274,19 @@ class ASCII3DRenderer {
             for (let y = 0; y < this.height; y++) {
                 if (y < ceiling) {
                     // 천장
-                    column.push({ char: this.ceilingChar, color: '#111' });
+                    const ceilingShade = this.getCeilingShade(y, this.height, x);
+                    const ceilingColor = this.getCeilingColor(y, this.height);
+                    column.push({ char: ceilingShade, color: ceilingColor });
                 } else if (y >= ceiling && y < floor) {
                     // 벽
-                    const shade = this.getWallShade(correctedDistance, wallType);
+                    const shade = this.getWallShade(correctedDistance, wallType, x, y);
                     const color = this.getWallColor(correctedDistance, wallType);
                     column.push({ char: shade, color: color });
                 } else {
                     // 바닥
-                    const floorShade = this.getFloorShade(y, this.height);
-                    column.push({ char: floorShade, color: '#333' });
+                    const floorShade = this.getFloorShade(y, this.height, x);
+                    const floorColor = this.getFloorColor(y, this.height);
+                    column.push({ char: floorShade, color: floorColor });
                 }
             }
             buffer.push(column);
@@ -289,13 +336,106 @@ class ASCII3DRenderer {
         return { distance, hitWall, wallType };
     }
 
-    // 거리에 따른 벽 문자 선택
-    getWallShade(distance, wallType) {
-        const shadeIndex = Math.min(
-            Math.floor(distance / this.maxDepth * this.wallShades.length),
-            this.wallShades.length - 1
-        );
-        return this.wallShades[shadeIndex];
+    // 거리에 따른 벽 문자 선택 (텍스처 포함)
+    getWallShade(distance, wallType, screenX = 0, screenY = 0) {
+        const distRatio = distance / this.maxDepth;
+
+        // 거리 구간 결정
+        let distLevel;
+        if (distRatio < 0.25) distLevel = 'close';
+        else if (distRatio < 0.5) distLevel = 'medium';
+        else distLevel = 'far';
+
+        // 벽 타입별 처리
+        if (wallType === 'door') {
+            return this.getDoorShade(distance, screenX, screenY);
+        } else if (wallType === 'boundary') {
+            // 경계는 어둡게
+            const shades = ['░', '∙', '·', ' ', ' ', ' '];
+            const idx = Math.min(Math.floor(distRatio * shades.length), shades.length - 1);
+            return shades[idx];
+        } else {
+            // 일반 벽 - 벽돌/석재 텍스처
+            return this.getStoneWallShade(distance, screenX, screenY);
+        }
+    }
+
+    // 석재/벽돌 벽 셰이딩 (텍스처 효과)
+    getStoneWallShade(distance, screenX, screenY) {
+        const distRatio = distance / this.maxDepth;
+
+        // 기본 셰이드 레벨
+        const shadeLevel = Math.min(Math.floor(distRatio * 6), 5);
+
+        // 벽돌 패턴 효과 (가로줄)
+        const brickRow = screenY % 3 === 0;
+        const brickCol = (screenX + (screenY % 6 < 3 ? 0 : 2)) % 4 === 0;
+
+        // 수직 그루브 효과
+        const verticalGroove = screenX % 8 === 0;
+
+        if (distRatio < 0.2) {
+            // 매우 가까움 - 디테일한 텍스처
+            if (verticalGroove) return '┃';
+            if (brickRow) return '═';
+            if (brickCol) return '▓';
+            return '█';
+        } else if (distRatio < 0.35) {
+            // 가까움
+            if (verticalGroove) return '│';
+            if (brickRow) return '─';
+            return '▓';
+        } else if (distRatio < 0.5) {
+            // 중간
+            if (verticalGroove) return '¦';
+            return '▒';
+        } else if (distRatio < 0.65) {
+            // 멀리
+            return '░';
+        } else if (distRatio < 0.8) {
+            // 매우 멀리
+            return '∙';
+        } else {
+            return '·';
+        }
+    }
+
+    // 문 셰이딩 (패널 효과)
+    getDoorShade(distance, screenX, screenY) {
+        const distRatio = distance / this.maxDepth;
+
+        // 문틀 효과 (좌우 가장자리)
+        const isFrame = (screenX % 12 < 2) || (screenX % 12 > 9);
+
+        // 손잡이 위치 (중앙 부근)
+        const isHandle = (screenX % 12 === 9) && (screenY % 10 === 5);
+
+        // 패널 줄 효과
+        const panelLine = screenY % 4 === 0;
+
+        if (isHandle && distRatio < 0.4) {
+            return '●';  // 문 손잡이
+        }
+
+        if (distRatio < 0.2) {
+            // 매우 가까움
+            if (isFrame) return '║';
+            if (panelLine) return '═';
+            return '▓';
+        } else if (distRatio < 0.35) {
+            // 가까움
+            if (isFrame) return '│';
+            if (panelLine) return '─';
+            return '▒';
+        } else if (distRatio < 0.5) {
+            // 중간
+            if (isFrame) return '¦';
+            return '░';
+        } else if (distRatio < 0.7) {
+            return '∙';
+        } else {
+            return '·';
+        }
     }
 
     // 거리에 따른 벽 색상
@@ -321,12 +461,78 @@ class ASCII3DRenderer {
         return `rgb(${r},${g},${b})`;
     }
 
-    // 바닥 셰이딩
-    getFloorShade(y, height) {
+    // 바닥 셰이딩 (타일 패턴)
+    getFloorShade(y, height, screenX = 0) {
         const distanceFromCenter = (y - height / 2) / (height / 2);
-        if (distanceFromCenter > 0.8) return '░';
-        if (distanceFromCenter > 0.6) return '·';
-        return '.';
+
+        // 타일 패턴 효과
+        const tilePattern = (screenX + y) % 4 === 0;
+        const tileGrout = screenX % 6 === 0 || y % 3 === 0;
+
+        if (distanceFromCenter < 0.55) {
+            // 가까운 바닥 (높은 디테일)
+            if (tileGrout) return '∙';
+            if (tilePattern) return '░';
+            return '▒';
+        } else if (distanceFromCenter < 0.7) {
+            // 중간 바닥
+            if (tileGrout) return '·';
+            if (tilePattern) return '∙';
+            return '░';
+        } else if (distanceFromCenter < 0.85) {
+            // 먼 바닥
+            if (tilePattern) return '·';
+            return '∙';
+        } else {
+            // 매우 먼 바닥
+            return '·';
+        }
+    }
+
+    // 천장 셰이딩
+    getCeilingShade(y, height, screenX = 0) {
+        const distanceFromCenter = (height / 2 - y) / (height / 2);
+
+        // 천장 패턴 (어두운 그림자 효과)
+        const shadowPattern = (screenX + y) % 8 === 0;
+
+        if (distanceFromCenter < 0.3) {
+            // 가까운 천장
+            if (shadowPattern) return '·';
+            return '░';
+        } else if (distanceFromCenter < 0.6) {
+            // 중간 천장
+            if (shadowPattern) return ' ';
+            return '·';
+        } else {
+            // 먼 천장 (어두움)
+            return ' ';
+        }
+    }
+
+    // 천장 색상 (거리에 따른 어두움)
+    getCeilingColor(y, height) {
+        const distanceFromCenter = (height / 2 - y) / (height / 2);
+        const brightness = Math.max(0.1, 0.4 - distanceFromCenter * 0.3);
+
+        const r = Math.floor(40 * brightness);
+        const g = Math.floor(45 * brightness);
+        const b = Math.floor(55 * brightness);
+
+        return `rgb(${r},${g},${b})`;
+    }
+
+    // 바닥 색상 (거리에 따른 그라데이션)
+    getFloorColor(y, height) {
+        const distanceFromCenter = (y - height / 2) / (height / 2);
+        const brightness = Math.max(0.2, 0.7 - distanceFromCenter * 0.4);
+
+        // 돌바닥 색상 (약간 갈색/회색 톤)
+        const r = Math.floor(80 * brightness);
+        const g = Math.floor(70 * brightness);
+        const b = Math.floor(60 * brightness);
+
+        return `rgb(${r},${g},${b})`;
     }
 
     // 엔티티(몬스터, NPC, 아이템) 렌더링 - 확대된 ASCII 아트 사용
