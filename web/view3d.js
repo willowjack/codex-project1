@@ -62,15 +62,15 @@ class ASCII3DRenderer {
     }
 
     rotateLeft() {
-        const order = ['N', 'NW', 'W', 'SW', 'S', 'SE', 'E', 'NE'];
+        const order = ['N', 'W', 'S', 'E'];
         const idx = order.indexOf(this.facing);
-        this.facing = order[(idx + 1) % 8];
+        this.facing = order[(idx + 1) % 4];
     }
 
     rotateRight() {
-        const order = ['N', 'NE', 'E', 'SE', 'S', 'SW', 'W', 'NW'];
+        const order = ['N', 'E', 'S', 'W'];
         const idx = order.indexOf(this.facing);
-        this.facing = order[(idx + 1) % 8];
+        this.facing = order[(idx + 1) % 4];
     }
 
     getFacing() {
