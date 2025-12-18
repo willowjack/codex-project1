@@ -1,0 +1,914 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>몬스터 ASCII 아트 에디터</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Consolas', 'Courier New', monospace;
+            background-color: #1a1a2e;
+            color: #eee;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        h1 {
+            text-align: center;
+            color: #00ff88;
+            margin-bottom: 20px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: 300px 1fr 300px;
+            gap: 20px;
+        }
+
+        .panel {
+            background: #16213e;
+            border-radius: 10px;
+            padding: 15px;
+            border: 1px solid #0f3460;
+        }
+
+        .panel h2 {
+            color: #00ff88;
+            margin-bottom: 15px;
+            font-size: 16px;
+            border-bottom: 1px solid #0f3460;
+            padding-bottom: 10px;
+        }
+
+        /* 몬스터 선택 */
+        .monster-select {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .monster-btn {
+            padding: 10px;
+            background: #0f3460;
+            border: 2px solid transparent;
+            border-radius: 5px;
+            color: #eee;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-family: inherit;
+            font-size: 14px;
+        }
+
+        .monster-btn:hover {
+            background: #1a4a7a;
+        }
+
+        .monster-btn.active {
+            border-color: #00ff88;
+            background: #1a4a7a;
+        }
+
+        .monster-btn .char {
+            font-size: 20px;
+            width: 30px;
+            text-align: center;
+        }
+
+        /* 크기 선택 */
+        .scale-select {
+            display: flex;
+            gap: 5px;
+            margin-bottom: 15px;
+        }
+
+        .scale-btn {
+            flex: 1;
+            padding: 8px;
+            background: #0f3460;
+            border: 2px solid transparent;
+            border-radius: 5px;
+            color: #eee;
+            cursor: pointer;
+            font-family: inherit;
+        }
+
+        .scale-btn:hover {
+            background: #1a4a7a;
+        }
+
+        .scale-btn.active {
+            border-color: #00ff88;
+        }
+
+        /* 에디터 그리드 */
+        .editor-area {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .grid-container {
+            background: #000;
+            padding: 10px;
+            border-radius: 10px;
+            display: inline-block;
+        }
+
+        .grid {
+            display: grid;
+            gap: 1px;
+            background: #333;
+        }
+
+        .grid-cell {
+            width: 40px;
+            height: 40px;
+            background: #000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 28px;
+            cursor: pointer;
+            transition: background 0.1s;
+            user-select: none;
+        }
+
+        .grid-cell:hover {
+            background: #222;
+        }
+
+        .grid-cell.selected {
+            background: #003300;
+        }
+
+        /* 팔레트 */
+        .palette-section {
+            margin-bottom: 15px;
+        }
+
+        .palette-section h3 {
+            font-size: 12px;
+            color: #888;
+            margin-bottom: 5px;
+        }
+
+        .palette {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 3px;
+        }
+
+        .palette-char {
+            width: 32px;
+            height: 32px;
+            background: #0f3460;
+            border: 2px solid transparent;
+            border-radius: 3px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            cursor: pointer;
+            color: #fff;
+        }
+
+        .palette-char:hover {
+            background: #1a4a7a;
+        }
+
+        .palette-char.active {
+            border-color: #00ff88;
+            background: #1a4a7a;
+        }
+
+        /* 미리보기 */
+        .preview-section {
+            margin-top: 20px;
+        }
+
+        .preview-box {
+            background: #000;
+            padding: 20px;
+            border-radius: 10px;
+            font-size: 18px;
+            line-height: 1.2;
+            white-space: pre;
+            text-align: center;
+            min-height: 200px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .preview-all {
+            display: flex;
+            gap: 20px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .preview-item {
+            text-align: center;
+        }
+
+        .preview-item .label {
+            font-size: 12px;
+            color: #888;
+            margin-bottom: 5px;
+        }
+
+        /* 버튼 */
+        .btn-group {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 10px 20px;
+            background: #0f3460;
+            border: none;
+            border-radius: 5px;
+            color: #eee;
+            cursor: pointer;
+            font-family: inherit;
+            font-size: 14px;
+        }
+
+        .btn:hover {
+            background: #1a4a7a;
+        }
+
+        .btn-primary {
+            background: #00aa55;
+        }
+
+        .btn-primary:hover {
+            background: #00cc66;
+        }
+
+        .btn-danger {
+            background: #aa3333;
+        }
+
+        .btn-danger:hover {
+            background: #cc4444;
+        }
+
+        /* 색상 선택 */
+        .color-picker {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        .color-picker input {
+            width: 50px;
+            height: 30px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        .color-picker span {
+            font-size: 14px;
+        }
+
+        /* 코드 출력 */
+        .code-output {
+            background: #000;
+            padding: 15px;
+            border-radius: 10px;
+            font-size: 12px;
+            white-space: pre-wrap;
+            word-break: break-all;
+            max-height: 300px;
+            overflow-y: auto;
+            margin-top: 10px;
+        }
+
+        /* 사이즈 입력 */
+        .size-inputs {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        .size-input {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+
+        .size-input label {
+            font-size: 12px;
+            color: #888;
+        }
+
+        .size-input input {
+            padding: 8px;
+            background: #0f3460;
+            border: 1px solid #1a4a7a;
+            border-radius: 5px;
+            color: #eee;
+            font-family: inherit;
+            width: 100%;
+        }
+
+        /* 새 몬스터 추가 */
+        .new-monster {
+            margin-top: 15px;
+            padding-top: 15px;
+            border-top: 1px solid #0f3460;
+        }
+
+        .new-monster input {
+            width: 100%;
+            padding: 8px;
+            background: #0f3460;
+            border: 1px solid #1a4a7a;
+            border-radius: 5px;
+            color: #eee;
+            font-family: inherit;
+            margin-bottom: 10px;
+        }
+
+        /* 도움말 */
+        .help-text {
+            font-size: 12px;
+            color: #888;
+            margin-top: 10px;
+            line-height: 1.5;
+        }
+
+        /* 툴바 */
+        .toolbar {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+            flex-wrap: wrap;
+        }
+
+        .tool-btn {
+            padding: 8px 15px;
+            background: #0f3460;
+            border: 2px solid transparent;
+            border-radius: 5px;
+            color: #eee;
+            cursor: pointer;
+            font-family: inherit;
+            font-size: 12px;
+        }
+
+        .tool-btn:hover {
+            background: #1a4a7a;
+        }
+
+        .tool-btn.active {
+            border-color: #00ff88;
+        }
+    </style>
+</head>
+<body>
+    <h1>🎨 몬스터 ASCII 아트 에디터</h1>
+
+    <div class="container">
+        <!-- 왼쪽: 몬스터 선택 -->
+        <div class="panel">
+            <h2>📋 몬스터 선택</h2>
+            <div class="monster-select" id="monsterList"></div>
+
+            <div class="new-monster">
+                <h3 style="font-size: 14px; margin-bottom: 10px;">➕ 새 몬스터 추가</h3>
+                <input type="text" id="newMonsterChar" placeholder="문자 (예: k)" maxlength="1">
+                <input type="text" id="newMonsterName" placeholder="이름 (예: 코볼트)">
+                <button class="btn btn-primary" onclick="addNewMonster()">추가</button>
+            </div>
+        </div>
+
+        <!-- 중앙: 에디터 -->
+        <div class="panel">
+            <h2>✏️ 패턴 에디터</h2>
+
+            <div class="scale-select" id="scaleSelect"></div>
+
+            <div class="toolbar">
+                <button class="tool-btn active" id="toolDraw" onclick="setTool('draw')">🖌️ 그리기</button>
+                <button class="tool-btn" id="toolErase" onclick="setTool('erase')">🧹 지우기</button>
+                <button class="tool-btn" id="toolFill" onclick="setTool('fill')">🪣 채우기</button>
+                <button class="tool-btn" onclick="clearGrid()">🗑️ 전체 지우기</button>
+                <button class="tool-btn" onclick="flipHorizontal()">↔️ 좌우 반전</button>
+            </div>
+
+            <div class="editor-area">
+                <div class="grid-container">
+                    <div class="grid" id="grid"></div>
+                </div>
+            </div>
+
+            <div class="preview-section">
+                <h3 style="margin-bottom: 10px;">👁️ 모든 크기 미리보기</h3>
+                <div class="preview-box">
+                    <div class="preview-all" id="previewAll"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 오른쪽: 팔레트 및 설정 -->
+        <div class="panel">
+            <h2>🎨 문자 팔레트</h2>
+
+            <div class="palette-section">
+                <h3>채움 블록</h3>
+                <div class="palette" id="paletteBlocks"></div>
+            </div>
+
+            <div class="palette-section">
+                <h3>반 블록</h3>
+                <div class="palette" id="paletteHalf"></div>
+            </div>
+
+            <div class="palette-section">
+                <h3>삼각형</h3>
+                <div class="palette" id="paletteTriangles"></div>
+            </div>
+
+            <div class="palette-section">
+                <h3>눈/원</h3>
+                <div class="palette" id="paletteEyes"></div>
+            </div>
+
+            <div class="palette-section">
+                <h3>도형</h3>
+                <div class="palette" id="paletteShapes"></div>
+            </div>
+
+            <div class="palette-section">
+                <h3>기타</h3>
+                <div class="palette" id="paletteMisc"></div>
+            </div>
+
+            <h2 style="margin-top: 20px;">⚙️ 설정</h2>
+
+            <div class="color-picker">
+                <input type="color" id="monsterColor" value="#ff0000">
+                <span>몬스터 색상</span>
+            </div>
+
+            <div class="size-inputs">
+                <div class="size-input">
+                    <label>높이 배율</label>
+                    <input type="number" id="sizeHeight" value="1.0" step="0.1" min="0.1" max="3.0">
+                </div>
+                <div class="size-input">
+                    <label>너비 배율</label>
+                    <input type="number" id="sizeWidth" value="1.0" step="0.1" min="0.1" max="3.0">
+                </div>
+                <div class="size-input">
+                    <label>무게</label>
+                    <input type="number" id="sizeWeight" value="1.0" step="0.1" min="0.1" max="10.0">
+                </div>
+            </div>
+
+            <div class="btn-group">
+                <button class="btn btn-primary" onclick="savePattern()">💾 저장</button>
+                <button class="btn" onclick="exportCode()">📋 코드 복사</button>
+                <button class="btn" onclick="exportAllCode()">📄 전체 내보내기</button>
+            </div>
+
+            <div class="code-output" id="codeOutput" style="display: none;"></div>
+
+            <div class="help-text">
+                <strong>사용법:</strong><br>
+                1. 왼쪽에서 몬스터 선택<br>
+                2. 크기 단계 선택 (5=가까움, 1=멀리)<br>
+                3. 팔레트에서 문자 선택<br>
+                4. 그리드에 클릭하여 그리기<br>
+                5. 저장 버튼으로 적용
+            </div>
+        </div>
+    </div>
+
+    <script src="monster_patterns.js"></script>
+    <script>
+        // 현재 상태
+        let currentMonster = 'g';
+        let currentScale = 5;
+        let currentChar = '█';
+        let currentTool = 'draw';
+        let patterns = JSON.parse(JSON.stringify(MONSTER_PATTERNS));
+        let isMouseDown = false;
+
+        // 그리드 크기 (스케일별)
+        const GRID_SIZES = {
+            5: { cols: 7, rows: 7 },
+            4: { cols: 5, rows: 5 },
+            3: { cols: 3, rows: 3 },
+            2: { cols: 2, rows: 2 },
+            1: { cols: 1, rows: 1 }
+        };
+
+        // 초기화
+        function init() {
+            renderMonsterList();
+            renderScaleSelect();
+            renderPalettes();
+            renderGrid();
+            updatePreview();
+
+            // 색상 변경 이벤트
+            document.getElementById('monsterColor').addEventListener('change', (e) => {
+                patterns[currentMonster].color = e.target.value;
+                updatePreview();
+            });
+
+            // 사이즈 변경 이벤트
+            ['sizeHeight', 'sizeWidth', 'sizeWeight'].forEach(id => {
+                document.getElementById(id).addEventListener('change', updateSize);
+            });
+
+            // 마우스 이벤트
+            document.addEventListener('mouseup', () => isMouseDown = false);
+        }
+
+        // 몬스터 목록 렌더링
+        function renderMonsterList() {
+            const container = document.getElementById('monsterList');
+            container.innerHTML = '';
+
+            for (const [char, data] of Object.entries(patterns)) {
+                if (char === 'default') continue;
+
+                const btn = document.createElement('button');
+                btn.className = `monster-btn ${char === currentMonster ? 'active' : ''}`;
+                btn.innerHTML = `
+                    <span class="char" style="color: ${data.color}">${char}</span>
+                    <span>${data.name}</span>
+                `;
+                btn.onclick = () => selectMonster(char);
+                container.appendChild(btn);
+            }
+        }
+
+        // 크기 선택 렌더링
+        function renderScaleSelect() {
+            const container = document.getElementById('scaleSelect');
+            container.innerHTML = '';
+
+            const labels = { 5: '매우 가까움', 4: '가까움', 3: '보통', 2: '멀리', 1: '매우 멀리' };
+
+            for (let i = 5; i >= 1; i--) {
+                const btn = document.createElement('button');
+                btn.className = `scale-btn ${i === currentScale ? 'active' : ''}`;
+                btn.textContent = `${i}: ${labels[i]}`;
+                btn.onclick = () => selectScale(i);
+                container.appendChild(btn);
+            }
+        }
+
+        // 팔레트 렌더링
+        function renderPalettes() {
+            const sections = {
+                'paletteBlocks': ASCII_PALETTE.blocks,
+                'paletteHalf': ASCII_PALETTE.half,
+                'paletteTriangles': ASCII_PALETTE.triangles,
+                'paletteEyes': ASCII_PALETTE.eyes,
+                'paletteShapes': ASCII_PALETTE.shapes,
+                'paletteMisc': ASCII_PALETTE.misc
+            };
+
+            for (const [id, chars] of Object.entries(sections)) {
+                const container = document.getElementById(id);
+                container.innerHTML = '';
+
+                for (const char of chars) {
+                    const btn = document.createElement('button');
+                    btn.className = `palette-char ${char === currentChar ? 'active' : ''}`;
+                    btn.textContent = char;
+                    btn.onclick = () => selectChar(char);
+                    container.appendChild(btn);
+                }
+            }
+        }
+
+        // 그리드 렌더링
+        function renderGrid() {
+            const container = document.getElementById('grid');
+            const size = GRID_SIZES[currentScale];
+            const pattern = patterns[currentMonster]?.patterns?.[currentScale] || [];
+
+            container.style.gridTemplateColumns = `repeat(${size.cols}, 40px)`;
+            container.innerHTML = '';
+
+            for (let y = 0; y < size.rows; y++) {
+                for (let x = 0; x < size.cols; x++) {
+                    const cell = document.createElement('div');
+                    cell.className = 'grid-cell';
+                    cell.dataset.x = x;
+                    cell.dataset.y = y;
+
+                    // 현재 패턴에서 문자 가져오기
+                    const char = pattern[y]?.[x] || ' ';
+                    cell.textContent = char;
+                    cell.style.color = patterns[currentMonster]?.color || '#fff';
+
+                    // 이벤트
+                    cell.onmousedown = (e) => {
+                        isMouseDown = true;
+                        handleCellClick(x, y, e);
+                    };
+                    cell.onmouseenter = (e) => {
+                        if (isMouseDown) handleCellClick(x, y, e);
+                    };
+
+                    container.appendChild(cell);
+                }
+            }
+        }
+
+        // 셀 클릭 처리
+        function handleCellClick(x, y, e) {
+            e.preventDefault();
+
+            const size = GRID_SIZES[currentScale];
+            let pattern = patterns[currentMonster].patterns[currentScale];
+
+            // 패턴 배열 초기화 (없으면)
+            if (!pattern || !Array.isArray(pattern)) {
+                pattern = [];
+                for (let i = 0; i < size.rows; i++) {
+                    pattern.push(' '.repeat(size.cols));
+                }
+                patterns[currentMonster].patterns[currentScale] = pattern;
+            }
+
+            // 행을 배열로 변환, 수정, 다시 문자열로
+            let row = pattern[y].split('');
+
+            if (currentTool === 'draw') {
+                row[x] = currentChar;
+            } else if (currentTool === 'erase') {
+                row[x] = ' ';
+            } else if (currentTool === 'fill') {
+                fillArea(x, y, currentChar);
+                renderGrid();
+                updatePreview();
+                return;
+            }
+
+            pattern[y] = row.join('');
+            patterns[currentMonster].patterns[currentScale] = pattern;
+
+            renderGrid();
+            updatePreview();
+        }
+
+        // 영역 채우기
+        function fillArea(startX, startY, newChar) {
+            const size = GRID_SIZES[currentScale];
+            let pattern = patterns[currentMonster].patterns[currentScale];
+            const targetChar = pattern[startY]?.[startX] || ' ';
+
+            if (targetChar === newChar) return;
+
+            const stack = [[startX, startY]];
+            const visited = new Set();
+
+            while (stack.length > 0) {
+                const [x, y] = stack.pop();
+                const key = `${x},${y}`;
+
+                if (visited.has(key)) continue;
+                if (x < 0 || x >= size.cols || y < 0 || y >= size.rows) continue;
+
+                const currentCell = pattern[y]?.[x] || ' ';
+                if (currentCell !== targetChar) continue;
+
+                visited.add(key);
+
+                let row = pattern[y].split('');
+                row[x] = newChar;
+                pattern[y] = row.join('');
+
+                stack.push([x + 1, y], [x - 1, y], [x, y + 1], [x, y - 1]);
+            }
+
+            patterns[currentMonster].patterns[currentScale] = pattern;
+        }
+
+        // 몬스터 선택
+        function selectMonster(char) {
+            currentMonster = char;
+            renderMonsterList();
+            renderGrid();
+            updatePreview();
+            updateSettingsUI();
+        }
+
+        // 크기 선택
+        function selectScale(scale) {
+            currentScale = scale;
+            renderScaleSelect();
+            renderGrid();
+        }
+
+        // 문자 선택
+        function selectChar(char) {
+            currentChar = char;
+            renderPalettes();
+        }
+
+        // 도구 선택
+        function setTool(tool) {
+            currentTool = tool;
+            document.querySelectorAll('.tool-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            document.getElementById('tool' + tool.charAt(0).toUpperCase() + tool.slice(1)).classList.add('active');
+        }
+
+        // 그리드 지우기
+        function clearGrid() {
+            const size = GRID_SIZES[currentScale];
+            const pattern = [];
+            for (let i = 0; i < size.rows; i++) {
+                pattern.push(' '.repeat(size.cols));
+            }
+            patterns[currentMonster].patterns[currentScale] = pattern;
+            renderGrid();
+            updatePreview();
+        }
+
+        // 좌우 반전
+        function flipHorizontal() {
+            let pattern = patterns[currentMonster].patterns[currentScale];
+            if (!pattern) return;
+
+            patterns[currentMonster].patterns[currentScale] = pattern.map(row =>
+                row.split('').reverse().join('')
+            );
+            renderGrid();
+            updatePreview();
+        }
+
+        // 설정 UI 업데이트
+        function updateSettingsUI() {
+            const data = patterns[currentMonster];
+            document.getElementById('monsterColor').value = data.color || '#ffffff';
+            document.getElementById('sizeHeight').value = data.size?.height || 1.0;
+            document.getElementById('sizeWidth').value = data.size?.width || 1.0;
+            document.getElementById('sizeWeight').value = data.size?.weight || 1.0;
+        }
+
+        // 사이즈 업데이트
+        function updateSize() {
+            patterns[currentMonster].size = {
+                height: parseFloat(document.getElementById('sizeHeight').value) || 1.0,
+                width: parseFloat(document.getElementById('sizeWidth').value) || 1.0,
+                weight: parseFloat(document.getElementById('sizeWeight').value) || 1.0
+            };
+        }
+
+        // 미리보기 업데이트
+        function updatePreview() {
+            const container = document.getElementById('previewAll');
+            container.innerHTML = '';
+
+            const color = patterns[currentMonster]?.color || '#fff';
+
+            for (let scale = 5; scale >= 1; scale--) {
+                const pattern = patterns[currentMonster]?.patterns?.[scale] || ['?'];
+
+                const item = document.createElement('div');
+                item.className = 'preview-item';
+                item.innerHTML = `
+                    <div class="label">크기 ${scale}</div>
+                    <pre style="color: ${color}; line-height: 1.2;">${pattern.join('\n')}</pre>
+                `;
+                container.appendChild(item);
+            }
+        }
+
+        // 새 몬스터 추가
+        function addNewMonster() {
+            const char = document.getElementById('newMonsterChar').value.trim();
+            const name = document.getElementById('newMonsterName').value.trim();
+
+            if (!char || !name) {
+                alert('문자와 이름을 모두 입력하세요.');
+                return;
+            }
+
+            if (patterns[char]) {
+                alert('이미 존재하는 문자입니다.');
+                return;
+            }
+
+            // 기본 패턴 복사
+            patterns[char] = {
+                name: name,
+                color: '#ff0000',
+                size: { height: 1.0, width: 1.0, weight: 1.0 },
+                patterns: JSON.parse(JSON.stringify(patterns['default'].patterns))
+            };
+
+            // 기본 패턴에서 ? 를 새 문자로 교체
+            for (let scale = 1; scale <= 5; scale++) {
+                patterns[char].patterns[scale] = patterns[char].patterns[scale].map(
+                    row => row.replace(/\?/g, char)
+                );
+            }
+
+            document.getElementById('newMonsterChar').value = '';
+            document.getElementById('newMonsterName').value = '';
+
+            renderMonsterList();
+            selectMonster(char);
+        }
+
+        // 패턴 저장 (로컬)
+        function savePattern() {
+            localStorage.setItem('monster_patterns', JSON.stringify(patterns));
+            alert('패턴이 저장되었습니다!\n\n게임에 적용하려면 "전체 내보내기"를 눌러\nmonster_patterns.js 파일을 업데이트하세요.');
+        }
+
+        // 단일 몬스터 코드 복사
+        function exportCode() {
+            const char = currentMonster;
+            const data = patterns[char];
+
+            const code = `'${char}': {
+    name: '${data.name}',
+    color: '${data.color}',
+    size: { height: ${data.size.height}, width: ${data.size.width}, weight: ${data.size.weight} },
+    patterns: {
+${Object.entries(data.patterns).map(([scale, pattern]) => `        ${scale}: [
+${pattern.map(row => `            "${row}"`).join(',\n')}
+        ]`).join(',\n')}
+    }
+}`;
+
+            document.getElementById('codeOutput').style.display = 'block';
+            document.getElementById('codeOutput').textContent = code;
+
+            navigator.clipboard.writeText(code).then(() => {
+                alert('코드가 클립보드에 복사되었습니다!');
+            });
+        }
+
+        // 전체 코드 내보내기
+        function exportAllCode() {
+            let code = `const MONSTER_PATTERNS = {\n`;
+
+            for (const [char, data] of Object.entries(patterns)) {
+                code += `    '${char}': {
+        name: '${data.name}',
+        color: '${data.color}',
+        size: { height: ${data.size.height}, width: ${data.size.width}, weight: ${data.size.weight} },
+        patterns: {
+${Object.entries(data.patterns).map(([scale, pattern]) => `            ${scale}: [
+${pattern.map(row => `                "${row}"`).join(',\n')}
+            ]`).join(',\n')}
+        }
+    },\n`;
+            }
+
+            code += `};\n\nwindow.MONSTER_PATTERNS = MONSTER_PATTERNS;`;
+
+            document.getElementById('codeOutput').style.display = 'block';
+            document.getElementById('codeOutput').textContent = code;
+
+            navigator.clipboard.writeText(code).then(() => {
+                alert('전체 코드가 클립보드에 복사되었습니다!\n\nmonster_patterns.js 파일에 붙여넣으세요.');
+            });
+        }
+
+        // 페이지 로드 시 저장된 패턴 불러오기
+        window.onload = () => {
+            const saved = localStorage.getItem('monster_patterns');
+            if (saved) {
+                try {
+                    patterns = JSON.parse(saved);
+                } catch (e) {
+                    console.error('저장된 패턴 로드 실패:', e);
+                }
+            }
+            init();
+        };
+    </script>
+</body>
+</html>

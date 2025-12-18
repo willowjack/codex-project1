@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ASCII Roguelike Survival</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div id="game-container">
+        <!-- 타이틀 화면 -->
+        <div id="title-screen" class="screen">
+            <div class="title-art">
+<pre>
+    _    ____   ____ ___ ___
+   / \  / ___| / ___|_ _|_ _|
+  / _ \ \___ \| |    | | | |
+ / ___ \ ___) | |___ | | | |
+/_/   \_\____/ \____|___|___|
+
+ ____                        _ _ _
+|  _ \ ___   __ _ _   _  ___| (_) | _____
+| |_) / _ \ / _` | | | |/ _ \ | | |/ / _ \
+|  _ < (_) | (_| | |_| |  __/ | |   <  __/
+|_| \_\___/ \__, |\__,_|\___|_|_|_|\_\___|
+            |___/
+  ____                  _            _
+ / ___| _   _ _ ____   _(_)_   ____ _| |
+ \___ \| | | | '__\ \ / / \ \ / / _` | |
+  ___) | |_| | |   \ V /| |\ V / (_| | |
+ |____/ \__,_|_|    \_/ |_| \_/ \__,_|_|
+</pre>
+            </div>
+            <div class="menu">
+                <button onclick="game.newGame()">새 게임 시작</button>
+                <button onclick="game.loadGame()">불러오기</button>
+                <button onclick="game.showHelp()">도움말</button>
+            </div>
+            <div class="version">v1.0 - Nethack + Unreal World Style</div>
+        </div>
+
+        <!-- 게임 화면 -->
+        <div id="game-screen" class="screen hidden">
+            <div id="view-container">
+                <!-- 3D 뷰 (1인칭 시점) -->
+                <div id="view3d-container">
+                    <div class="view-header">
+                        <span class="view-title">[ 1인칭 뷰 ]</span>
+                        <span id="compass-display"></span>
+                    </div>
+                    <pre id="view3d-display"></pre>
+                </div>
+                <!-- 2D 맵 -->
+                <div id="map-container">
+                    <div class="view-header">
+                        <span class="view-title">[ 던전 맵 ]</span>
+                        <button id="toggle-view-btn" onclick="game.toggleView()">뷰 전환 (V)</button>
+                    </div>
+                    <pre id="map-display"></pre>
+                </div>
+            </div>
+            <div id="ui-panel">
+                <div id="status-bar">
+                    <div class="stat">
+                        <span class="stat-label">HP:</span>
+                        <div class="bar-container">
+                            <div id="hp-bar" class="bar hp"></div>
+                        </div>
+                        <span id="hp-text">30/30</span>
+                    </div>
+                    <div class="stat">
+                        <span class="stat-label">포만:</span>
+                        <div class="bar-container">
+                            <div id="hunger-bar" class="bar hunger"></div>
+                        </div>
+                        <span id="hunger-text">100%</span>
+                    </div>
+                    <div class="stat">
+                        <span class="stat-label">수분:</span>
+                        <div class="bar-container">
+                            <div id="thirst-bar" class="bar thirst"></div>
+                        </div>
+                        <span id="thirst-text">100%</span>
+                    </div>
+                </div>
+                <div id="info-bar">
+                    <span id="time-display">Day 1, 08:00 (아침)</span>
+                    <span id="turn-display">Turn: 0</span>
+                    <span id="gold-display">Gold: 100</span>
+                    <span id="position-display">(0, 0)</span>
+                </div>
+                <div id="message-log"></div>
+            </div>
+        </div>
+
+        <!-- 인벤토리 모달 -->
+        <div id="inventory-modal" class="modal hidden">
+            <div class="modal-content">
+                <h2>인벤토리</h2>
+                <div class="modal-help">[a-z] 사용 | [Shift+a-z] 버리기 | [ESC] 닫기</div>
+                <div id="inventory-list"></div>
+            </div>
+        </div>
+
+        <!-- 상점 모달 -->
+        <div id="shop-modal" class="modal hidden">
+            <div class="modal-content">
+                <h2 id="shop-title">상점</h2>
+                <div class="modal-help">[b] 구매 | [s] 판매 | [ESC] 닫기</div>
+                <div id="shop-inventory"></div>
+            </div>
+        </div>
+
+        <!-- 대화 모달 -->
+        <div id="dialogue-modal" class="modal hidden">
+            <div class="modal-content">
+                <h2 id="dialogue-npc-name">NPC</h2>
+                <div id="dialogue-text"></div>
+                <div id="dialogue-options"></div>
+            </div>
+        </div>
+
+        <!-- 퀘스트 모달 -->
+        <div id="quest-modal" class="modal hidden">
+            <div class="modal-content">
+                <h2>퀘스트 목록</h2>
+                <div id="quest-list"></div>
+            </div>
+        </div>
+
+        <!-- 종교 모달 -->
+        <div id="religion-modal" class="modal hidden">
+            <div class="modal-content">
+                <h2>신앙</h2>
+                <div id="religion-info"></div>
+            </div>
+        </div>
+
+        <!-- 도움말 모달 -->
+        <div id="help-modal" class="modal hidden">
+            <div class="modal-content">
+                <h2>조작법</h2>
+                <div class="help-content">
+                    <h3>이동</h3>
+                    <p>방향키 또는 Numpad: 상하좌우 이동</p>
+                    <p>7/9/1/3 또는 y/u/b/n: 대각선 이동</p>
+
+                    <h3>행동</h3>
+                    <p><kbd>g</kbd> 또는 <kbd>,</kbd> : 아이템 줍기</p>
+                    <p><kbd>i</kbd> : 인벤토리</p>
+                    <p><kbd>.</kbd> 또는 <kbd>5</kbd> : 대기</p>
+                    <p><kbd>r</kbd> : 휴식</p>
+                    <p><kbd>t</kbd> : NPC와 대화</p>
+                    <p><kbd>p</kbd> : 기도</p>
+                    <p><kbd>q</kbd> : 퀘스트 목록</p>
+
+                    <h3>시스템</h3>
+                    <p><kbd>S</kbd> : 저장</p>
+                    <p><kbd>L</kbd> : 불러오기</p>
+                    <p><kbd>v</kbd> : 뷰 전환 (3D/2D/분할)</p>
+                    <p><kbd>?</kbd> : 도움말</p>
+                    <p><kbd>ESC</kbd> : 창 닫기</p>
+
+                    <h3>심볼</h3>
+                    <pre>
+@ = 당신          g = 고블린        o = 오크
+% = 음식/시체     ! = 물약          > = 계단
+. = 바닥          # = 벽            ~ = 물
+@ = NPC (노랑)    * = 모닥불        T = 나무
+                    </pre>
+                </div>
+                <button onclick="game.closeModal()">닫기 (ESC)</button>
+            </div>
+        </div>
+
+        <!-- 게임 오버 -->
+        <div id="gameover-screen" class="screen hidden">
+            <div class="gameover-text">
+                <h1>*** 당신은 죽었다 ***</h1>
+                <p id="death-reason"></p>
+                <div class="stats">
+                    <p>생존 일수: <span id="final-days">0</span></p>
+                    <p>총 턴: <span id="final-turns">0</span></p>
+                    <p>처치한 적: <span id="final-kills">0</span></p>
+                </div>
+                <button onclick="game.newGame()">다시 시작</button>
+                <button onclick="game.showTitle()">타이틀로</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="weapons.js"></script>
+    <script src="monster_patterns.js"></script>
+    <script src="view3d.js"></script>
+    <script src="game.js"></script>
+</body>
+</html>
