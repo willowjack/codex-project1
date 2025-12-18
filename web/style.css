@@ -289,7 +289,7 @@ body {
     padding: 5px;
     letter-spacing: 2px;
     white-space: pre;
-    font-family: 'Courier New', monospace;
+    font-family: 'Consolas', 'DejaVu Sans Mono', 'Lucida Console', 'Courier New', monospace;
     overflow: auto;
     cursor: grab;
     user-select: none;

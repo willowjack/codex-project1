@@ -521,14 +521,14 @@ class Game {
 
         // 방향별 플레이어 화살표 (북=위, 남=아래, 동=오른쪽, 서=왼쪽)
         this.directionArrows = {
-            '0,-1': '▲',   // 북 (위)
-            '0,1': '▼',    // 남 (아래)
-            '1,0': '▶',    // 동 (오른쪽)
-            '-1,0': '◀',   // 서 (왼쪽)
-            '1,-1': '◥',   // 북동
-            '-1,-1': '◤',  // 북서
-            '1,1': '◢',    // 남동
-            '-1,1': '◣',   // 남서
+            '0,-1': '^',   // 북 (위)
+            '0,1': 'v',    // 남 (아래)
+            '1,0': '>',    // 동 (오른쪽)
+            '-1,0': '<',   // 서 (왼쪽)
+            '1,-1': '/',   // 북동
+            '-1,-1': '\\', // 북서
+            '1,1': '\\',   // 남동
+            '-1,1': '/',   // 남서
         };
 
         this.setupEventListeners();
@@ -1216,7 +1216,7 @@ class Game {
 
     getPlayerArrow() {
         const key = `${this.playerDirection.dx},${this.playerDirection.dy}`;
-        return this.directionArrows[key] || '▲';
+        return this.directionArrows[key] || '^';
     }
 
     renderMap() {
