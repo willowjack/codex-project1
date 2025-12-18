@@ -360,43 +360,24 @@ class ASCII3DRenderer {
         }
     }
 
-    // 석재/벽돌 벽 셰이딩 (텍스처 효과)
+    // 석재/벽돌 벽 셰이딩 (단순하고 일관된 벽돌 패턴)
     getStoneWallShade(distance, screenX, screenY) {
         const distRatio = distance / this.maxDepth;
 
-        // 기본 셰이드 레벨
-        const shadeLevel = Math.min(Math.floor(distRatio * 6), 5);
-
-        // 벽돌 패턴 효과 (가로줄)
-        const brickRow = screenY % 3 === 0;
-        const brickCol = (screenX + (screenY % 6 < 3 ? 0 : 2)) % 4 === 0;
-
-        // 수직 그루브 효과
-        const verticalGroove = screenX % 8 === 0;
-
-        if (distRatio < 0.2) {
-            // 매우 가까움 - 디테일한 텍스처
-            if (verticalGroove) return '┃';
-            if (brickRow) return '═';
-            if (brickCol) return '▓';
-            return '█';
-        } else if (distRatio < 0.35) {
-            // 가까움
-            if (verticalGroove) return '│';
-            if (brickRow) return '─';
-            return '▓';
-        } else if (distRatio < 0.5) {
-            // 중간
-            if (verticalGroove) return '¦';
-            return '▒';
-        } else if (distRatio < 0.65) {
-            // 멀리
-            return '░';
-        } else if (distRatio < 0.8) {
-            // 매우 멀리
-            return '∙';
+        // 단순한 거리 기반 셰이딩 - 벽돌 쌓은 느낌
+        // 가까울수록 진하고, 멀수록 연하게
+        if (distRatio < 0.15) {
+            return '█';  // 매우 가까움 - 꽉 찬 벽돌
+        } else if (distRatio < 0.3) {
+            return '▓';  // 가까움 - 진한 벽돌
+        } else if (distRatio < 0.45) {
+            return '▒';  // 중간 - 보통 벽돌
+        } else if (distRatio < 0.6) {
+            return '░';  // 멀리 - 연한 벽돌
+        } else if (distRatio < 0.75) {
+            return '∙';  // 매우 멀리 - 점
         } else {
-            return '·';
+            return '·';  // 가장 멀리 - 작은 점
         }
     }
 
