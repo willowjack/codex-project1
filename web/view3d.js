@@ -44,6 +44,22 @@ class ASCII3DRenderer {
         else if (dy < 0) this.facing = 'N';
     }
 
+    rotateLeft() {
+        const order = ['N', 'W', 'S', 'E'];
+        const idx = order.indexOf(this.facing);
+        this.facing = order[(idx + 1) % 4];
+    }
+
+    rotateRight() {
+        const order = ['N', 'E', 'S', 'W'];
+        const idx = order.indexOf(this.facing);
+        this.facing = order[(idx + 1) % 4];
+    }
+
+    getFacing() {
+        return this.facing;
+    }
+
     // 메인 렌더링
     render(gameMap, playerX, playerY, entities = []) {
         const buffer = this.createBuffer();

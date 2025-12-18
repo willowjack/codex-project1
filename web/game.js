@@ -1181,6 +1181,34 @@ class Game {
         }
 
         display.innerHTML = html;
+
+        // 플레이어 위치로 자동 스크롤 (수동 드래그 중이 아닐 때만)
+        if (!this.isMapDragging) {
+            this.scrollMapToPlayer();
+        }
+    }
+
+    scrollMapToPlayer() {
+        const display = document.getElementById('map-display');
+        if (!display || !this.player) return;
+
+        // 글자 크기 계산 (대략적인 값)
+        const computedStyle = window.getComputedStyle(display);
+        const fontSize = parseFloat(computedStyle.fontSize);
+        const letterSpacing = parseFloat(computedStyle.letterSpacing) || 0;
+        const lineHeight = fontSize * 1.1;
+        const charWidth = fontSize * 0.6 + letterSpacing;
+
+        // 플레이어 위치 (픽셀)
+        const playerPixelX = this.player.x * charWidth;
+        const playerPixelY = this.player.y * lineHeight;
+
+        // 뷰포트 중앙에 플레이어가 오도록 스크롤
+        const scrollX = playerPixelX - display.clientWidth / 2 + charWidth / 2;
+        const scrollY = playerPixelY - display.clientHeight / 2 + lineHeight / 2;
+
+        display.scrollLeft = Math.max(0, scrollX);
+        display.scrollTop = Math.max(0, scrollY);
     }
 
     render3D() {
@@ -1430,16 +1458,58 @@ class Game {
         this.setupMobileControls();
         this.setupMapZoom();
         this.setupMapDrag();
+        this.setupRotateButtons();
+    }
+
+    setupRotateButtons() {
+        const rotateLeftBtn = document.getElementById('rotate-left-btn');
+        const rotateRightBtn = document.getElementById('rotate-right-btn');
+
+        if (rotateLeftBtn) {
+            rotateLeftBtn.addEventListener('click', (e) => {
+                e.preventDefault();
+                if (this.gameState === 'playing' && this.renderer3D) {
+                    this.renderer3D.rotateLeft();
+                    this.render3D();
+                    const facing = this.renderer3D.getFacing();
+                    const dirNames = { 'N': '북', 'S': '남', 'E': '동', 'W': '서' };
+                    this.addMessage(`${dirNames[facing]}쪽을 바라봤다.`, 'system');
+                }
+            });
+            rotateLeftBtn.addEventListener('touchstart', (e) => {
+                e.preventDefault();
+                rotateLeftBtn.click();
+            });
+        }
+
+        if (rotateRightBtn) {
+            rotateRightBtn.addEventListener('click', (e) => {
+                e.preventDefault();
+                if (this.gameState === 'playing' && this.renderer3D) {
+                    this.renderer3D.rotateRight();
+                    this.render3D();
+                    const facing = this.renderer3D.getFacing();
+                    const dirNames = { 'N': '북', 'S': '남', 'E': '동', 'W': '서' };
+                    this.addMessage(`${dirNames[facing]}쪽을 바라봤다.`, 'system');
+                }
+            });
+            rotateRightBtn.addEventListener('touchstart', (e) => {
+                e.preventDefault();
+                rotateRightBtn.click();
+            });
+        }
     }
 
     setupMapDrag() {
         const mapDisplay = document.getElementById('map-display');
         let isDragging = false;
         let startX, startY, scrollLeft, scrollTop;
+        let dragTimeout = null;
 
         // 마우스 이벤트
         mapDisplay.addEventListener('mousedown', (e) => {
             isDragging = true;
+            this.isMapDragging = true;
             mapDisplay.style.cursor = 'grabbing';
             startX = e.pageX - mapDisplay.offsetLeft;
             startY = e.pageY - mapDisplay.offsetTop;
@@ -1455,6 +1525,11 @@ class Game {
         mapDisplay.addEventListener('mouseup', () => {
             isDragging = false;
             mapDisplay.style.cursor = 'grab';
+            // 3초 후 자동 스크롤 다시 활성화
+            clearTimeout(dragTimeout);
+            dragTimeout = setTimeout(() => {
+                this.isMapDragging = false;
+            }, 3000);
         });
 
         mapDisplay.addEventListener('mousemove', (e) => {
@@ -1472,6 +1547,7 @@ class Game {
         mapDisplay.addEventListener('touchstart', (e) => {
             if (e.touches.length === 1) {
                 isDragging = true;
+                this.isMapDragging = true;
                 startX = e.touches[0].pageX - mapDisplay.offsetLeft;
                 startY = e.touches[0].pageY - mapDisplay.offsetTop;
                 scrollLeft = mapDisplay.scrollLeft;
@@ -1481,6 +1557,11 @@ class Game {
 
         mapDisplay.addEventListener('touchend', () => {
             isDragging = false;
+            // 3초 후 자동 스크롤 다시 활성화
+            clearTimeout(dragTimeout);
+            dragTimeout = setTimeout(() => {
+                this.isMapDragging = false;
+            }, 3000);
         });
 
         mapDisplay.addEventListener('touchmove', (e) => {

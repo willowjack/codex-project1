@@ -61,23 +61,32 @@
 
                 <!-- 모바일 컨트롤 -->
                 <div id="mobile-controls">
-                    <!-- 이동 버튼 (큰 버튼) -->
-                    <div id="move-controls">
-                        <div class="move-row">
-                            <button class="move-btn" data-dir="nw">↖</button>
-                            <button class="move-btn" data-dir="n">↑</button>
-                            <button class="move-btn" data-dir="ne">↗</button>
+                    <!-- 이동 + 회전 컨트롤 -->
+                    <div id="control-row">
+                        <!-- 좌회전 버튼 -->
+                        <button class="rotate-btn" id="rotate-left-btn" title="좌회전">↶</button>
+
+                        <!-- 이동 버튼 (큰 버튼) -->
+                        <div id="move-controls">
+                            <div class="move-row">
+                                <button class="move-btn" data-dir="nw">↖</button>
+                                <button class="move-btn" data-dir="n">↑</button>
+                                <button class="move-btn" data-dir="ne">↗</button>
+                            </div>
+                            <div class="move-row">
+                                <button class="move-btn" data-dir="w">←</button>
+                                <button class="move-btn move-wait" data-dir="wait">·</button>
+                                <button class="move-btn" data-dir="e">→</button>
+                            </div>
+                            <div class="move-row">
+                                <button class="move-btn" data-dir="sw">↙</button>
+                                <button class="move-btn" data-dir="s">↓</button>
+                                <button class="move-btn" data-dir="se">↘</button>
+                            </div>
                         </div>
-                        <div class="move-row">
-                            <button class="move-btn" data-dir="w">←</button>
-                            <button class="move-btn move-wait" data-dir="wait">·</button>
-                            <button class="move-btn" data-dir="e">→</button>
-                        </div>
-                        <div class="move-row">
-                            <button class="move-btn" data-dir="sw">↙</button>
-                            <button class="move-btn" data-dir="s">↓</button>
-                            <button class="move-btn" data-dir="se">↘</button>
-                        </div>
+
+                        <!-- 우회전 버튼 -->
+                        <button class="rotate-btn" id="rotate-right-btn" title="우회전">↷</button>
                     </div>
 
                     <!-- 단축키 버튼 (작은 버튼) -->
