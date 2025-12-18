@@ -160,19 +160,23 @@ class ASCII3DRenderer {
             for (let x = leftEdge; x < rightEdge && x < this.width; x++) {
                 if (y < 0 || y >= this.height || x < 0) continue;
 
+                // x 위치에 따른 밝기 그라데이션 (안쪽=밝음, 바깥쪽=어두움)
+                const xRatio = (x - leftEdge) / Math.max(1, rightEdge - leftEdge);
+                const localBright = bright - 25 + (xRatio * 35);  // 바깥쪽 어둡게, 안쪽 밝게
+
                 let char = wallChar;
-                let r = bright - 10, g = bright - 15, b = bright;  // 약간 어둡고 푸른 톤
+                let r = localBright - 10, g = localBright - 15, b = localBright;
 
                 // 수평 줄무늬 장식 (측면은 살짝 어두운 노란색)
                 if ((y === prevT + 2 || y === prevB - 3) && x < rightEdge - 1) {
                     char = '─';
-                    r = 150; g = 135; b = 45;  // 약간 어두운 노란색
+                    r = 120 + xRatio * 40; g = 105 + xRatio * 35; b = 35;
                 }
 
                 // 대각선 가장자리 (밝은 테두리)
                 if (x === rightEdge - 1) {
                     char = y < this.height/2 ? '╲' : '╱';
-                    r = bright + 35; g = bright + 30; b = bright + 40;
+                    r = bright + 45; g = bright + 40; b = bright + 50;
                 }
 
                 // 문
@@ -214,19 +218,23 @@ class ASCII3DRenderer {
             for (let x = leftEdge; x < rightEdge && x < this.width; x++) {
                 if (y < 0 || y >= this.height || x < 0) continue;
 
+                // x 위치에 따른 밝기 그라데이션 (안쪽=밝음, 바깥쪽=어두움)
+                const xRatio = (rightEdge - x) / Math.max(1, rightEdge - leftEdge);
+                const localBright = bright - 25 + (xRatio * 35);  // 바깥쪽 어둡게, 안쪽 밝게
+
                 let char = wallChar;
-                let r = bright - 10, g = bright - 15, b = bright;  // 약간 어둡고 푸른 톤
+                let r = localBright - 10, g = localBright - 15, b = localBright;
 
                 // 수평 줄무늬 장식 (측면은 살짝 어두운 노란색)
                 if ((y === prevT + 2 || y === prevB - 3) && x > leftEdge) {
                     char = '─';
-                    r = 150; g = 135; b = 45;  // 약간 어두운 노란색
+                    r = 120 + xRatio * 40; g = 105 + xRatio * 35; b = 35;
                 }
 
                 // 대각선 가장자리 (밝은 테두리)
                 if (x === leftEdge) {
                     char = y < this.height/2 ? '╱' : '╲';
-                    r = bright + 35; g = bright + 30; b = bright + 40;
+                    r = bright + 45; g = bright + 40; b = bright + 50;
                 }
 
                 // 문
