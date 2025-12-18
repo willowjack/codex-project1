@@ -8,15 +8,27 @@ class ASCII3DRenderer {
         this.maxDepth = 4;
 
         this.facing = 'N';
+        // 8방향 벡터 (북=위, 남=아래, 동=오른쪽, 서=왼쪽)
+        const sqrt2 = 0.707; // 1/sqrt(2) 대각선 정규화
         this.directions = {
-            'N': { dx: 0, dy: -1 }, 'S': { dx: 0, dy: 1 },
-            'E': { dx: 1, dy: 0 }, 'W': { dx: -1, dy: 0 }
+            'N': { dx: 0, dy: -1 },
+            'S': { dx: 0, dy: 1 },
+            'E': { dx: 1, dy: 0 },
+            'W': { dx: -1, dy: 0 },
+            'NE': { dx: sqrt2, dy: -sqrt2 },
+            'NW': { dx: -sqrt2, dy: -sqrt2 },
+            'SE': { dx: sqrt2, dy: sqrt2 },
+            'SW': { dx: -sqrt2, dy: sqrt2 }
         };
         this.sideVectors = {
             'N': { left: { dx: -1, dy: 0 }, right: { dx: 1, dy: 0 } },
             'S': { left: { dx: 1, dy: 0 }, right: { dx: -1, dy: 0 } },
             'E': { left: { dx: 0, dy: -1 }, right: { dx: 0, dy: 1 } },
-            'W': { left: { dx: 0, dy: 1 }, right: { dx: 0, dy: -1 } }
+            'W': { left: { dx: 0, dy: 1 }, right: { dx: 0, dy: -1 } },
+            'NE': { left: { dx: -sqrt2, dy: -sqrt2 }, right: { dx: sqrt2, dy: sqrt2 } },
+            'NW': { left: { dx: -sqrt2, dy: sqrt2 }, right: { dx: sqrt2, dy: -sqrt2 } },
+            'SE': { left: { dx: sqrt2, dy: -sqrt2 }, right: { dx: -sqrt2, dy: sqrt2 } },
+            'SW': { left: { dx: sqrt2, dy: sqrt2 }, right: { dx: -sqrt2, dy: -sqrt2 } }
         };
 
         // 깊이별 뷰포트 영역 정의 (left, right, top, bottom 비율)
@@ -38,22 +50,27 @@ class ASCII3DRenderer {
     }
 
     setAngleFromMovement(dx, dy) {
-        if (dx > 0) this.facing = 'E';
-        else if (dx < 0) this.facing = 'W';
-        else if (dy > 0) this.facing = 'S';
-        else if (dy < 0) this.facing = 'N';
+        // 8방향 지원 (북=위, 남=아래, 동=오른쪽, 서=왼쪽)
+        if (dx === 0 && dy < 0) this.facing = 'N';
+        else if (dx === 0 && dy > 0) this.facing = 'S';
+        else if (dx > 0 && dy === 0) this.facing = 'E';
+        else if (dx < 0 && dy === 0) this.facing = 'W';
+        else if (dx > 0 && dy < 0) this.facing = 'NE';
+        else if (dx < 0 && dy < 0) this.facing = 'NW';
+        else if (dx > 0 && dy > 0) this.facing = 'SE';
+        else if (dx < 0 && dy > 0) this.facing = 'SW';
     }
 
     rotateLeft() {
-        const order = ['N', 'W', 'S', 'E'];
+        const order = ['N', 'NW', 'W', 'SW', 'S', 'SE', 'E', 'NE'];
         const idx = order.indexOf(this.facing);
-        this.facing = order[(idx + 1) % 4];
+        this.facing = order[(idx + 1) % 8];
     }
 
     rotateRight() {
-        const order = ['N', 'E', 'S', 'W'];
+        const order = ['N', 'NE', 'E', 'SE', 'S', 'SW', 'W', 'NW'];
         const idx = order.indexOf(this.facing);
-        this.facing = order[(idx + 1) % 4];
+        this.facing = order[(idx + 1) % 8];
     }
 
     getFacing() {
@@ -543,7 +560,10 @@ class ASCII3DRenderer {
     }
 
     renderMinimap(gameMap, playerX, playerY, radius = 5) {
-        const dirChars = { 'N': '▲', 'S': '▼', 'E': '▶', 'W': '◀' };
+        const dirChars = {
+            'N': '▲', 'S': '▼', 'E': '▶', 'W': '◀',
+            'NE': '◥', 'NW': '◤', 'SE': '◢', 'SW': '◣'
+        };
         const lines = [];
         for (let dy = -radius; dy <= radius; dy++) {
             let line = '';
@@ -564,7 +584,17 @@ class ASCII3DRenderer {
     }
 
     get playerAngle() {
-        const angles = { 'N': -Math.PI/2, 'S': Math.PI/2, 'E': 0, 'W': Math.PI };
+        // 8방향 각도 (라디안)
+        const angles = {
+            'N': -Math.PI/2,      // 북 (위)
+            'S': Math.PI/2,       // 남 (아래)
+            'E': 0,               // 동 (오른쪽)
+            'W': Math.PI,         // 서 (왼쪽)
+            'NE': -Math.PI/4,     // 북동
+            'NW': -3*Math.PI/4,   // 북서
+            'SE': Math.PI/4,      // 남동
+            'SW': 3*Math.PI/4,    // 남서
+        };
         return angles[this.facing] || 0;
     }
 }

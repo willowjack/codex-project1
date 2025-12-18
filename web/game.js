@@ -516,8 +516,20 @@ class Game {
         // 3D 렌더러
         this.renderer3D = new ASCII3DRenderer(50, 18);
         this.compass = new Compass();
-        this.playerDirection = { dx: 0, dy: -1 }; // 초기 방향: 북쪽
+        this.playerDirection = { dx: 0, dy: -1 }; // 초기 방향: 북쪽 (위)
         this.viewMode = 'both'; // 'both', '3d-only', '2d-only'
+
+        // 방향별 플레이어 화살표 (북=위, 남=아래, 동=오른쪽, 서=왼쪽)
+        this.directionArrows = {
+            '0,-1': '▲',   // 북 (위)
+            '0,1': '▼',    // 남 (아래)
+            '1,0': '▶',    // 동 (오른쪽)
+            '-1,0': '◀',   // 서 (왼쪽)
+            '1,-1': '◥',   // 북동
+            '-1,-1': '◤',  // 북서
+            '1,1': '◢',    // 남동
+            '-1,1': '◣',   // 남서
+        };
 
         this.setupEventListeners();
     }
@@ -1202,6 +1214,11 @@ class Game {
         this.renderUI();
     }
 
+    getPlayerArrow() {
+        const key = `${this.playerDirection.dx},${this.playerDirection.dy}`;
+        return this.directionArrows[key] || '▲';
+    }
+
     renderMap() {
         const display = document.getElementById('map-display');
         let html = '';
@@ -1218,7 +1235,7 @@ class Game {
                 if (visible) {
                     // 플레이어 먼저 체크 (직접 위치 비교)
                     if (x === this.player.x && y === this.player.y) {
-                        char = '@';
+                        char = this.getPlayerArrow();
                         colorClass = 'tile-player';
                     } else {
                         // 다른 엔티티 체크
@@ -1361,13 +1378,18 @@ class Game {
         );
         display.innerHTML = html;
 
-        // 나침반 업데이트
-        const angle = this.renderer3D.playerAngle;
+        // 나침반 업데이트 (플레이어 방향 기반)
+        const { dx, dy } = this.playerDirection;
         let direction;
-        if (angle > -Math.PI/4 && angle <= Math.PI/4) direction = 'E';
-        else if (angle > Math.PI/4 && angle <= 3*Math.PI/4) direction = 'S';
-        else if (angle > -3*Math.PI/4 && angle <= -Math.PI/4) direction = 'N';
-        else direction = 'W';
+        if (dx === 0 && dy === -1) direction = 'N';       // 북 (위)
+        else if (dx === 0 && dy === 1) direction = 'S';   // 남 (아래)
+        else if (dx === 1 && dy === 0) direction = 'E';   // 동 (오른쪽)
+        else if (dx === -1 && dy === 0) direction = 'W';  // 서 (왼쪽)
+        else if (dx === 1 && dy === -1) direction = 'NE'; // 북동
+        else if (dx === -1 && dy === -1) direction = 'NW'; // 북서
+        else if (dx === 1 && dy === 1) direction = 'SE';  // 남동
+        else if (dx === -1 && dy === 1) direction = 'SW'; // 남서
+        else direction = 'N';
         compassDisplay.textContent = `[${direction}]`;
     }
 
