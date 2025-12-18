@@ -488,8 +488,19 @@
                 <button class="btn btn-primary" onclick="savePattern()">💾 저장</button>
                 <button class="btn" onclick="exportCode()">📋 코드 복사</button>
                 <button class="btn" onclick="exportAllCode()">📄 전체 내보내기</button>
+                <button class="btn" onclick="toggleImportArea()">📥 코드 가져오기</button>
                 <button class="btn btn-danger" onclick="resetCurrentMonster()">🔄 현재 몬스터 복원</button>
                 <button class="btn btn-danger" onclick="resetAllPatterns()">⚠️ 전체 초기화</button>
+            </div>
+
+            <div id="importArea" style="display: none; margin-top: 10px;">
+                <textarea id="importCode" placeholder="여기에 코드를 붙여넣으세요..."
+                    style="width: 100%; height: 150px; background: #000; color: #0f0; border: 1px solid #0f3460;
+                    border-radius: 5px; padding: 10px; font-family: monospace; font-size: 12px; resize: vertical;"></textarea>
+                <div style="display: flex; gap: 10px; margin-top: 10px;">
+                    <button class="btn btn-primary" onclick="importCode()">✅ 가져오기</button>
+                    <button class="btn" onclick="toggleImportArea()">취소</button>
+                </div>
             </div>
 
             <div class="code-output" id="codeOutput" style="display: none;"></div>
@@ -906,6 +917,83 @@ ${pattern.map(row => `            "${row}"`).join(',\n')}
             updatePreview();
             updateSettingsUI();
             alert('모든 패턴이 초기화되었습니다.');
+        }
+
+        // 코드 가져오기 영역 토글
+        function toggleImportArea() {
+            const area = document.getElementById('importArea');
+            area.style.display = area.style.display === 'none' ? 'block' : 'none';
+            if (area.style.display === 'block') {
+                document.getElementById('importCode').value = '';
+                document.getElementById('importCode').focus();
+            }
+        }
+
+        // 코드 가져오기
+        function importCode() {
+            const code = document.getElementById('importCode').value.trim();
+
+            if (!code) {
+                alert('코드를 입력해주세요.');
+                return;
+            }
+
+            try {
+                let parsedData;
+
+                // const MONSTER_PATTERNS = { ... } 형식 처리
+                if (code.includes('MONSTER_PATTERNS')) {
+                    // MONSTER_PATTERNS 객체 추출
+                    const match = code.match(/(?:const|let|var)?\s*(?:MONSTER_PATTERNS|window\.MONSTER_PATTERNS)\s*=\s*(\{[\s\S]*\});?/);
+                    if (match) {
+                        parsedData = eval('(' + match[1] + ')');
+                    } else {
+                        throw new Error('MONSTER_PATTERNS 형식을 파싱할 수 없습니다.');
+                    }
+                }
+                // 단일 몬스터 형식: 'g': { ... }
+                else if (code.match(/^['"].\s*['"]:\s*\{/)) {
+                    parsedData = eval('({' + code + '})');
+                }
+                // 객체 형식: { 'g': { ... } }
+                else if (code.startsWith('{')) {
+                    parsedData = eval('(' + code + ')');
+                }
+                else {
+                    throw new Error('인식할 수 없는 코드 형식입니다.');
+                }
+
+                // 유효성 검사
+                if (typeof parsedData !== 'object' || parsedData === null) {
+                    throw new Error('유효한 패턴 데이터가 아닙니다.');
+                }
+
+                // 패턴 병합
+                let importedCount = 0;
+                for (const [char, data] of Object.entries(parsedData)) {
+                    if (data.name && data.patterns) {
+                        patterns[char] = data;
+                        importedCount++;
+                    }
+                }
+
+                if (importedCount === 0) {
+                    throw new Error('가져올 수 있는 패턴이 없습니다.');
+                }
+
+                // UI 업데이트
+                renderMonsterList();
+                renderGrid();
+                updatePreview();
+                updateSettingsUI();
+                toggleImportArea();
+
+                alert(`${importedCount}개의 몬스터 패턴을 가져왔습니다!`);
+
+            } catch (e) {
+                alert('코드 파싱 오류:\n' + e.message + '\n\n올바른 형식의 코드를 붙여넣어주세요.');
+                console.error('Import error:', e);
+            }
         }
 
         // 전체 코드 내보내기
