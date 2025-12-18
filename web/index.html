@@ -41,55 +41,69 @@
 
         <!-- 게임 화면 -->
         <div id="game-screen" class="screen hidden">
-            <div id="view-container">
-                <!-- 3D 뷰 (1인칭 시점) -->
+            <!-- 좌측 패널: 3D 뷰 (30%) -->
+            <div id="left-panel">
+                <div class="view-header">
+                    <span class="view-title">[ 1인칭 뷰 ]</span>
+                    <button id="toggle-view-btn" onclick="game.toggleView()">V</button>
+                </div>
                 <div id="view3d-container">
-                    <div class="view-header">
-                        <span class="view-title">[ 1인칭 뷰 ]</span>
-                        <span id="compass-display"></span>
-                    </div>
                     <pre id="view3d-display"></pre>
                 </div>
-                <!-- 2D 맵 -->
-                <div id="map-container">
-                    <div class="view-header">
-                        <span class="view-title">[ 던전 맵 ]</span>
-                        <button id="toggle-view-btn" onclick="game.toggleView()">뷰 전환 (V)</button>
-                    </div>
-                    <pre id="map-display"></pre>
+                <div id="compass-container">
+                    <pre id="compass-display"></pre>
+                    <span id="mini-direction"></span>
+                </div>
+                <div id="mini-status">
+                    <span class="mini-hp">HP: <span id="mini-hp-text">30/30</span></span> |
+                    <span class="mini-pos">위치: <span id="mini-pos-text">(0,0)</span></span>
                 </div>
             </div>
-            <div id="ui-panel">
-                <div id="status-bar">
-                    <div class="stat">
-                        <span class="stat-label">HP:</span>
-                        <div class="bar-container">
-                            <div id="hp-bar" class="bar hp"></div>
+
+            <!-- 우측 패널: 던전맵 + UI (70%) -->
+            <div id="right-panel">
+                <div id="view-container">
+                    <!-- 2D 맵 -->
+                    <div id="map-container">
+                        <div class="view-header">
+                            <span class="view-title">[ 던전 맵 ]</span>
+                            <span id="floor-display">Floor 1</span>
                         </div>
-                        <span id="hp-text">30/30</span>
-                    </div>
-                    <div class="stat">
-                        <span class="stat-label">포만:</span>
-                        <div class="bar-container">
-                            <div id="hunger-bar" class="bar hunger"></div>
-                        </div>
-                        <span id="hunger-text">100%</span>
-                    </div>
-                    <div class="stat">
-                        <span class="stat-label">수분:</span>
-                        <div class="bar-container">
-                            <div id="thirst-bar" class="bar thirst"></div>
-                        </div>
-                        <span id="thirst-text">100%</span>
+                        <pre id="map-display"></pre>
                     </div>
                 </div>
-                <div id="info-bar">
-                    <span id="time-display">Day 1, 08:00 (아침)</span>
-                    <span id="turn-display">Turn: 0</span>
-                    <span id="gold-display">Gold: 100</span>
-                    <span id="position-display">(0, 0)</span>
+                <div id="ui-panel">
+                    <div id="status-bar">
+                        <div class="stat">
+                            <span class="stat-label">HP:</span>
+                            <div class="bar-container">
+                                <div id="hp-bar" class="bar hp"></div>
+                            </div>
+                            <span id="hp-text">30/30</span>
+                        </div>
+                        <div class="stat">
+                            <span class="stat-label">포만:</span>
+                            <div class="bar-container">
+                                <div id="hunger-bar" class="bar hunger"></div>
+                            </div>
+                            <span id="hunger-text">100%</span>
+                        </div>
+                        <div class="stat">
+                            <span class="stat-label">수분:</span>
+                            <div class="bar-container">
+                                <div id="thirst-bar" class="bar thirst"></div>
+                            </div>
+                            <span id="thirst-text">100%</span>
+                        </div>
+                    </div>
+                    <div id="info-bar">
+                        <span id="time-display">Day 1, 08:00 (아침)</span>
+                        <span id="turn-display">Turn: 0</span>
+                        <span id="gold-display">Gold: 100</span>
+                        <span id="position-display">(0, 0)</span>
+                    </div>
+                    <div id="message-log"></div>
                 </div>
-                <div id="message-log"></div>
             </div>
         </div>
 

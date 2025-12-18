@@ -1,71 +1,451 @@
-// ASCII 3D Raycasting Renderer
-// Wolfenstein 3D 스타일의 1인칭 ASCII 렌더링
+// ASCII 3D Dungeon Crawler Renderer
+// Eye of the Beholder / Dungeon Master 스타일
 
 class ASCII3DRenderer {
-    constructor(width = 60, height = 20) {
-        this.width = width;      // 3D 뷰 너비 (문자 수)
-        this.height = height;    // 3D 뷰 높이 (문자 수)
-        this.fov = Math.PI / 3;  // 시야각 (60도)
-        this.maxDepth = 16;      // 최대 렌더링 거리
+    constructor(width = 50, height = 20) {
+        this.width = width;
+        this.height = height;
+        this.maxDepth = 4;
 
-        // 거리에 따른 벽 문자 (가까울수록 진하게)
-        this.wallShades = ['█', '▓', '▒', '░', '·', ' '];
-
-        // 바닥/천장 문자
-        this.floorChar = '.';
-        this.ceilingChar = ' ';
-
-        // 플레이어 방향 (라디안)
-        this.playerAngle = 0;
-
-        // 방향키에 따른 각도 매핑
-        this.directionAngles = {
-            'up': -Math.PI / 2,      // 북쪽
-            'down': Math.PI / 2,     // 남쪽
-            'left': Math.PI,         // 서쪽
-            'right': 0,              // 동쪽
-            'up-left': -3 * Math.PI / 4,
-            'up-right': -Math.PI / 4,
-            'down-left': 3 * Math.PI / 4,
-            'down-right': Math.PI / 4,
+        this.facing = 'N';
+        this.directions = {
+            'N': { dx: 0, dy: -1 }, 'S': { dx: 0, dy: 1 },
+            'E': { dx: 1, dy: 0 }, 'W': { dx: -1, dy: 0 }
+        };
+        this.sideVectors = {
+            'N': { left: { dx: -1, dy: 0 }, right: { dx: 1, dy: 0 } },
+            'S': { left: { dx: 1, dy: 0 }, right: { dx: -1, dy: 0 } },
+            'E': { left: { dx: 0, dy: -1 }, right: { dx: 0, dy: 1 } },
+            'W': { left: { dx: 0, dy: 1 }, right: { dx: 0, dy: -1 } }
         };
 
-        // 기본 엔티티 크기 설정 (나중에 몬스터별로 커스터마이징 가능)
-        this.defaultEntitySize = {
-            height: 1.0,   // 기본 높이 배율
-            width: 1.0,    // 기본 너비 배율
-            weight: 1.0    // 기본 무게 (미래 사용)
+        // 깊이별 뷰포트 영역 정의 (left, right, top, bottom 비율)
+        this.viewports = {
+            0: { l: 0.0, r: 1.0, t: 0.0, b: 1.0 },
+            1: { l: 0.15, r: 0.85, t: 0.15, b: 0.85 },
+            2: { l: 0.28, r: 0.72, t: 0.28, b: 0.72 },
+            3: { l: 0.38, r: 0.62, t: 0.38, b: 0.62 },
+            4: { l: 0.45, r: 0.55, t: 0.45, b: 0.55 }
         };
 
-        // ASCII 확대 패턴 정의 (외부 파일 또는 기본값 사용)
+        this.defaultEntitySize = { height: 1.0, width: 1.0, weight: 1.0 };
         this.asciiScalePatterns = this.initAsciiPatterns();
     }
 
-    // ASCII 문자 확대 패턴 초기화
-    // monster_patterns.js 파일이 로드되어 있으면 해당 패턴 사용
-    initAsciiPatterns() {
-        // 외부 패턴 파일이 로드되어 있는지 확인
-        if (typeof MONSTER_PATTERNS !== 'undefined') {
-            console.log('외부 몬스터 패턴 파일 로드됨');
-            return this.convertExternalPatterns(MONSTER_PATTERNS);
+    setPlayerDirection(direction) {
+        const dirMap = { 'up': 'N', 'down': 'S', 'left': 'W', 'right': 'E', 'N': 'N', 'S': 'S', 'E': 'E', 'W': 'W' };
+        if (dirMap[direction]) this.facing = dirMap[direction];
+    }
+
+    setAngleFromMovement(dx, dy) {
+        if (dx > 0) this.facing = 'E';
+        else if (dx < 0) this.facing = 'W';
+        else if (dy > 0) this.facing = 'S';
+        else if (dy < 0) this.facing = 'N';
+    }
+
+    // 메인 렌더링
+    render(gameMap, playerX, playerY, entities = []) {
+        const buffer = this.createBuffer();
+
+        // 1. 배경 (어두운 중앙)
+        this.drawBackground(buffer);
+
+        // 2. 뒤에서부터 앞으로 벽 그리기
+        for (let depth = this.maxDepth; depth >= 1; depth--) {
+            this.drawDepthLayer(buffer, gameMap, playerX, playerY, depth);
         }
 
-        // 기본 내장 패턴 (외부 파일이 없을 때 사용)
-        console.log('기본 내장 패턴 사용');
+        // 3. 엔티티
+        this.drawEntities(buffer, gameMap, playerX, playerY, entities);
+
+        return buffer;
+    }
+
+    createBuffer() {
+        const buffer = [];
+        for (let y = 0; y < this.height; y++) {
+            buffer[y] = [];
+            for (let x = 0; x < this.width; x++) {
+                buffer[y][x] = { char: ' ', color: '#111' };
+            }
+        }
+        return buffer;
+    }
+
+    // 배경 그리기 (천장/바닥 그라데이션)
+    drawBackground(buffer) {
+        const midY = this.height / 2;
+
+        for (let y = 0; y < this.height; y++) {
+            for (let x = 0; x < this.width; x++) {
+                const distFromMid = Math.abs(y - midY) / midY;
+
+                if (y < midY) {
+                    // 천장 - 위쪽이 밝고 중앙으로 갈수록 어두움
+                    const bright = Math.floor(40 + distFromMid * 30);
+                    const char = distFromMid > 0.6 ? '░' : (distFromMid > 0.3 ? '·' : ' ');
+                    buffer[y][x] = { char, color: `rgb(${bright-10},${bright-5},${bright})` };
+                } else {
+                    // 바닥 - 아래쪽이 밝고 중앙으로 갈수록 어두움
+                    const bright = Math.floor(50 + distFromMid * 40);
+                    const char = distFromMid > 0.6 ? '░' : (distFromMid > 0.3 ? '·' : ' ');
+                    buffer[y][x] = { char, color: `rgb(${bright},${bright-15},${bright-25})` };
+                }
+            }
+        }
+    }
+
+    // 특정 깊이의 레이어 그리기
+    drawDepthLayer(buffer, gameMap, playerX, playerY, depth) {
+        const dir = this.directions[this.facing];
+        const side = this.sideVectors[this.facing];
+
+        const checkX = Math.floor(playerX) + dir.dx * depth;
+        const checkY = Math.floor(playerY) + dir.dy * depth;
+
+        const leftX = checkX + side.left.dx;
+        const leftY = checkY + side.left.dy;
+        const rightX = checkX + side.right.dx;
+        const rightY = checkY + side.right.dy;
+
+        const vp = this.viewports[depth];
+        const prevVp = this.viewports[depth - 1];
+
+        const hasFront = this.isWall(gameMap, checkX, checkY);
+        const hasLeft = this.isWall(gameMap, leftX, leftY);
+        const hasRight = this.isWall(gameMap, rightX, rightY);
+        const isFrontDoor = this.isDoor(gameMap, checkX, checkY);
+        const isLeftDoor = this.isDoor(gameMap, leftX, leftY);
+        const isRightDoor = this.isDoor(gameMap, rightX, rightY);
+
+        // 좌측 벽 (대각선)
+        if (hasLeft) {
+            this.drawLeftWall(buffer, prevVp, vp, depth, isLeftDoor);
+        }
+
+        // 우측 벽 (대각선)
+        if (hasRight) {
+            this.drawRightWall(buffer, prevVp, vp, depth, isRightDoor);
+        }
+
+        // 정면 벽
+        if (hasFront) {
+            this.drawFrontWall(buffer, vp, depth, isFrontDoor);
+        }
+    }
+
+    // 좌측 대각선 벽 (정면보다 확실히 어둡게)
+    drawLeftWall(buffer, prevVp, vp, depth, isDoor) {
+        const bright = Math.max(45, 95 - depth * 15);  // 측면은 어둡게
+        const wallChar = depth <= 2 ? '▒' : '░';  // 어두운 문자
+
+        const prevL = Math.floor(prevVp.l * this.width);
+        const prevT = Math.floor(prevVp.t * this.height);
+        const prevB = Math.floor(prevVp.b * this.height);
+
+        const curL = Math.floor(vp.l * this.width);
+        const curT = Math.floor(vp.t * this.height);
+        const curB = Math.floor(vp.b * this.height);
+
+        // 벽면 채우기 (사다리꼴)
+        for (let y = prevT; y < prevB; y++) {
+            // Y 위치에 따른 X 범위 (선형 보간)
+            const t = (y - prevT) / (prevB - prevT);
+            const leftEdge = prevL;
+            const rightEdge = Math.floor(prevL + (curL - prevL) * (y < this.height/2 ?
+                (this.height/2 - y) / (this.height/2 - prevT) :
+                (y - this.height/2) / (prevB - this.height/2)));
+
+            for (let x = leftEdge; x < rightEdge && x < this.width; x++) {
+                if (y < 0 || y >= this.height || x < 0) continue;
+
+                // x 위치에 따른 밝기 그라데이션 (안쪽=밝음, 바깥쪽=어두움)
+                const xRatio = (x - leftEdge) / Math.max(1, rightEdge - leftEdge);
+                const localBright = bright - 25 + (xRatio * 35);  // 바깥쪽 어둡게, 안쪽 밝게
+
+                let char = wallChar;
+                let r = localBright - 10, g = localBright - 15, b = localBright;
+
+                // 수평 줄무늬 장식 (측면은 살짝 어두운 노란색)
+                if ((y === prevT + 2 || y === prevB - 3) && x < rightEdge - 1) {
+                    char = '─';
+                    r = 120 + xRatio * 40; g = 105 + xRatio * 35; b = 35;
+                }
+
+                // 대각선 가장자리 (밝은 테두리)
+                if (x === rightEdge - 1) {
+                    char = y < this.height/2 ? '╲' : '╱';
+                    r = bright + 45; g = bright + 40; b = bright + 50;
+                }
+
+                // 문
+                if (isDoor && x > leftEdge + 1 && x < rightEdge - 2) {
+                    const doorTop = prevT + 3;
+                    const doorBottom = prevB - 2;
+                    if (y > doorTop && y < doorBottom) {
+                        char = '▒';
+                        r = Math.floor(bright * 0.5);
+                        g = Math.floor(bright * 0.35);
+                        b = Math.floor(bright * 0.2);
+                    }
+                }
+
+                buffer[y][x] = { char, color: `rgb(${r},${g},${b})` };
+            }
+        }
+    }
+
+    // 우측 대각선 벽 (정면보다 확실히 어둡게)
+    drawRightWall(buffer, prevVp, vp, depth, isDoor) {
+        const bright = Math.max(45, 95 - depth * 15);  // 측면은 어둡게
+        const wallChar = depth <= 2 ? '▒' : '░';  // 어두운 문자
+
+        const prevR = Math.floor(prevVp.r * this.width);
+        const prevT = Math.floor(prevVp.t * this.height);
+        const prevB = Math.floor(prevVp.b * this.height);
+
+        const curR = Math.floor(vp.r * this.width);
+        const curT = Math.floor(vp.t * this.height);
+        const curB = Math.floor(vp.b * this.height);
+
+        for (let y = prevT; y < prevB; y++) {
+            const leftEdge = Math.floor(prevR - (prevR - curR) * (y < this.height/2 ?
+                (this.height/2 - y) / (this.height/2 - prevT) :
+                (y - this.height/2) / (prevB - this.height/2)));
+            const rightEdge = prevR;
+
+            for (let x = leftEdge; x < rightEdge && x < this.width; x++) {
+                if (y < 0 || y >= this.height || x < 0) continue;
+
+                // x 위치에 따른 밝기 그라데이션 (안쪽=밝음, 바깥쪽=어두움)
+                const xRatio = (rightEdge - x) / Math.max(1, rightEdge - leftEdge);
+                const localBright = bright - 25 + (xRatio * 35);  // 바깥쪽 어둡게, 안쪽 밝게
+
+                let char = wallChar;
+                let r = localBright - 10, g = localBright - 15, b = localBright;
+
+                // 수평 줄무늬 장식 (측면은 살짝 어두운 노란색)
+                if ((y === prevT + 2 || y === prevB - 3) && x > leftEdge) {
+                    char = '─';
+                    r = 120 + xRatio * 40; g = 105 + xRatio * 35; b = 35;
+                }
+
+                // 대각선 가장자리 (밝은 테두리)
+                if (x === leftEdge) {
+                    char = y < this.height/2 ? '╱' : '╲';
+                    r = bright + 45; g = bright + 40; b = bright + 50;
+                }
+
+                // 문
+                if (isDoor && x > leftEdge + 2 && x < rightEdge - 1) {
+                    const doorTop = prevT + 3;
+                    const doorBottom = prevB - 2;
+                    if (y > doorTop && y < doorBottom) {
+                        char = '▒';
+                        r = Math.floor(bright * 0.5);
+                        g = Math.floor(bright * 0.35);
+                        b = Math.floor(bright * 0.2);
+                    }
+                }
+
+                buffer[y][x] = { char, color: `rgb(${r},${g},${b})` };
+            }
+        }
+    }
+
+    // 정면 벽 (밝게)
+    drawFrontWall(buffer, vp, depth, isDoor) {
+        const bright = Math.max(80, 170 - depth * 25);  // 정면은 밝게
+        const wallChar = depth <= 1 ? '█' : (depth <= 2 ? '▓' : '▒');
+
+        const left = Math.floor(vp.l * this.width);
+        const right = Math.floor(vp.r * this.width);
+        const top = Math.floor(vp.t * this.height);
+        const bottom = Math.floor(vp.b * this.height);
+
+        for (let y = top; y < bottom && y < this.height; y++) {
+            for (let x = left; x < right && x < this.width; x++) {
+                if (y < 0 || x < 0) continue;
+
+                let char = wallChar;
+                let r = bright, g = bright, b = bright + 15;
+
+                // 테두리
+                const isTop = y === top;
+                const isBottom = y === bottom - 1;
+                const isLeft = x === left;
+                const isRight = x === right - 1;
+
+                if (isTop || isBottom) {
+                    char = '═';
+                    r += 30; g += 30; b += 30;
+                } else if (isLeft || isRight) {
+                    char = '║';
+                    r += 30; g += 30; b += 30;
+                }
+
+                // 수평 줄무늬 장식
+                if (!isTop && !isBottom && (y === top + 2 || y === bottom - 3)) {
+                    char = '─';
+                    r = 180; g = 160; b = 50;
+                }
+
+                // 문
+                if (isDoor && !isTop && !isBottom && !isLeft && !isRight) {
+                    const doorWidth = Math.floor((right - left) * 0.5);
+                    const doorStart = left + Math.floor((right - left - doorWidth) / 2);
+                    const doorEnd = doorStart + doorWidth;
+                    const doorTop = top + 2;
+
+                    if (x >= doorStart && x < doorEnd && y > doorTop) {
+                        char = depth <= 2 ? '▒' : '░';
+                        r = Math.floor(bright * 0.5);
+                        g = Math.floor(bright * 0.35);
+                        b = Math.floor(bright * 0.2);
+
+                        // 문틀
+                        if (x === doorStart || x === doorEnd - 1) {
+                            char = '│';
+                            r = 100; g = 70; b = 40;
+                        }
+                        if (y === doorTop + 1) {
+                            char = '─';
+                            r = 100; g = 70; b = 40;
+                        }
+
+                        // 손잡이
+                        const handleX = doorEnd - 2;
+                        const handleY = Math.floor((top + bottom) / 2);
+                        if (x === handleX && y === handleY && depth <= 2) {
+                            char = '●';
+                            r = 200; g = 180; b = 60;
+                        }
+                    }
+                }
+
+                buffer[y][x] = { char, color: `rgb(${r},${g},${b})` };
+            }
+        }
+    }
+
+    // 벽/문 체크
+    isWall(gameMap, x, y) {
+        if (y < 0 || y >= gameMap.length || x < 0 || x >= gameMap[0].length) return true;
+        const tile = gameMap[y][x];
+        return tile === '#' || tile === '+';
+    }
+
+    isDoor(gameMap, x, y) {
+        if (y < 0 || y >= gameMap.length || x < 0 || x >= gameMap[0].length) return false;
+        return gameMap[y][x] === '+';
+    }
+
+    // 엔티티 그리기
+    drawEntities(buffer, gameMap, playerX, playerY, entities) {
+        const dir = this.directions[this.facing];
+        const side = this.sideVectors[this.facing];
+        const visibleEntities = [];
+
+        for (const entity of entities) {
+            const relX = entity.x - playerX;
+            const relY = entity.y - playerY;
+            const forwardDist = relX * dir.dx + relY * dir.dy;
+            const sideDist = relX * side.right.dx + relY * side.right.dy;
+
+            if (forwardDist > 0 && forwardDist <= this.maxDepth) {
+                visibleEntities.push({ ...entity, depth: Math.floor(forwardDist), sideDist });
+            }
+        }
+
+        visibleEntities.sort((a, b) => b.depth - a.depth);
+
+        for (const entity of visibleEntities) {
+            this.drawEntity(buffer, entity);
+        }
+    }
+
+    drawEntity(buffer, entity) {
+        const depth = entity.depth;
+        const vp = this.viewports[depth];
+
+        const midY = Math.floor(this.height / 2);
+        const midX = Math.floor(this.width / 2);
+
+        const viewWidth = (vp.r - vp.l) * this.width;
+        const sideOffset = Math.floor(entity.sideDist * viewWidth * 0.4);
+        const entityCenterX = midX + sideOffset;
+
+        const scaleLevel = depth <= 1 ? 5 : (depth <= 2 ? 4 : (depth <= 3 ? 3 : 2));
+        const pattern = this.getEntityPattern(entity.char || '?', scaleLevel);
+
+        if (!pattern) return;
+
+        const startY = midY - Math.floor(pattern.length / 2);
+        const startX = entityCenterX - Math.floor(pattern[0].length / 2);
+
+        const brightness = Math.max(0.4, 1 - depth * 0.2);
+        const baseColor = entity.color || '#ff6666';
+
+        for (let py = 0; py < pattern.length; py++) {
+            for (let px = 0; px < pattern[py].length; px++) {
+                const bufY = startY + py;
+                const bufX = startX + px;
+                if (bufY < 0 || bufY >= this.height || bufX < 0 || bufX >= this.width) continue;
+
+                const char = pattern[py][px];
+                if (char && char !== ' ') {
+                    buffer[bufY][bufX] = { char, color: this.dimColor(baseColor, brightness) };
+                }
+            }
+        }
+    }
+
+    dimColor(color, brightness) {
+        if (!color.startsWith('#')) return color;
+        const hex = color.slice(1);
+        let r, g, b;
+        if (hex.length === 3) {
+            r = parseInt(hex[0] + hex[0], 16);
+            g = parseInt(hex[1] + hex[1], 16);
+            b = parseInt(hex[2] + hex[2], 16);
+        } else {
+            r = parseInt(hex.slice(0, 2), 16);
+            g = parseInt(hex.slice(2, 4), 16);
+            b = parseInt(hex.slice(4, 6), 16);
+        }
+        return `rgb(${Math.floor(r * brightness)},${Math.floor(g * brightness)},${Math.floor(b * brightness)})`;
+    }
+
+    // HTML 렌더링
+    renderToHTML(gameMap, playerX, playerY, entities = []) {
+        const lines = this.render(gameMap, playerX, playerY, entities);
+        let html = '';
+        for (const line of lines) {
+            for (const cell of line) {
+                html += `<span style="color:${cell.color}">${cell.char}</span>`;
+            }
+            html += '\n';
+        }
+        return html;
+    }
+
+    // 패턴 관련
+    initAsciiPatterns() {
+        if (typeof MONSTER_PATTERNS !== 'undefined') {
+            return this.convertExternalPatterns(MONSTER_PATTERNS);
+        }
         return this.getDefaultPatterns();
     }
 
-    // 외부 패턴 형식을 내부 형식으로 변환
     convertExternalPatterns(externalPatterns) {
         const patterns = {};
         for (const [char, data] of Object.entries(externalPatterns)) {
             patterns[char] = data.patterns;
-            // 크기 정보도 저장
             if (data.size) {
                 if (!this.entitySizes) this.entitySizes = {};
                 this.entitySizes[char] = data.size;
             }
-            // 색상 정보도 저장
             if (data.color) {
                 if (!this.entityColors) this.entityColors = {};
                 this.entityColors[char] = data.color;
@@ -74,23 +454,19 @@ class ASCII3DRenderer {
         return patterns;
     }
 
-    // 외부 패턴에서 엔티티 크기 가져오기
     getEntitySize(char) {
-        if (this.entitySizes && this.entitySizes[char]) {
-            return this.entitySizes[char];
-        }
-        return this.defaultEntitySize;
+        return (this.entitySizes && this.entitySizes[char]) || this.defaultEntitySize;
     }
 
-    // 외부 패턴에서 엔티티 색상 가져오기
     getEntityColor(char) {
-        if (this.entityColors && this.entityColors[char]) {
-            return this.entityColors[char];
-        }
-        return '#ff0000';
+        return (this.entityColors && this.entityColors[char]) || '#ff0000';
     }
 
-    // 기본 내장 패턴
+    getEntityPattern(char, scaleLevel) {
+        const patterns = this.asciiScalePatterns[char] || this.asciiScalePatterns['default'];
+        return patterns ? (patterns[scaleLevel] || patterns[1]) : null;
+    }
+
     getDefaultPatterns() {
         return {
             'g': {
@@ -107,34 +483,6 @@ class ASCII3DRenderer {
                 2: ["██", "▀▀"],
                 1: ["o"]
             },
-            'T': {
-                5: ["▄▄███▄▄", "██◕█◕██", " ██▀██ ", "▄█████▄", "███T███", "██▀ ▀██", "▀▀   ▀▀"],
-                4: ["▄███▄", "█◕█◕█", " ███ ", "██T██", "▀▀ ▀▀"],
-                3: ["███", "█T█", "▀▀▀"],
-                2: ["██", "▀▀"],
-                1: ["T"]
-            },
-            'r': {
-                5: ["       ", "  ▄▄   ", " ◕ ◕▄  ", "  ▀▀▀▀~", "   r   ", "       ", "       "],
-                4: ["     ", " ▄▄  ", "◕◕▀▀~", "     ", "     "],
-                3: ["   ", "▄r~", "   "],
-                2: ["r~", "  "],
-                1: ["r"]
-            },
-            'w': {
-                5: [" ▲   ▲ ", "██▄▄▄██", "█ ◕ ◕ █", " █▀▀▀█ ", "▄█████▄", "██ w ██", "▀▀   ▀▀"],
-                4: ["▲   ▲", "█▄▄▄█", " ███ ", "█ w █", "▀   ▀"],
-                3: ["▲ ▲", "█w█", "▀ ▀"],
-                2: ["▲▲", "▀▀"],
-                1: ["w"]
-            },
-            '@': {
-                5: ["  ▄▄▄  ", " █   █ ", " █◕ ◕█ ", "  ▀█▀  ", " ▄███▄ ", " █ @ █ ", " ▀   ▀ "],
-                4: [" ▄▄▄ ", " █◕█ ", "  █  ", " █@█ ", " ▀ ▀ "],
-                3: [" ▄ ", "█@█", " ▀ "],
-                2: ["@@", "▀▀"],
-                1: ["@"]
-            },
             'default': {
                 5: ["  ▄▄▄  ", " █???█ ", " █   █ ", "  ███  ", " █   █ ", " █ ? █ ", " ▀   ▀ "],
                 4: [" ▄▄▄ ", " █?█ ", "  █  ", " █?█ ", " ▀ ▀ "],
@@ -145,13 +493,10 @@ class ASCII3DRenderer {
         };
     }
 
-    // 패턴 동적 업데이트 (에디터에서 사용)
     updatePatterns(newPatterns) {
         this.asciiScalePatterns = this.convertExternalPatterns(newPatterns);
-        console.log('패턴 업데이트 완료');
     }
 
-    // 새 몬스터 패턴 추가
     addMonsterPattern(char, patternData) {
         this.asciiScalePatterns[char] = patternData.patterns;
         if (patternData.size) {
@@ -162,374 +507,19 @@ class ASCII3DRenderer {
             if (!this.entityColors) this.entityColors = {};
             this.entityColors[char] = patternData.color;
         }
-        console.log(`몬스터 패턴 추가: ${char}`);
     }
 
-    // 거리와 엔티티 크기에 따른 스케일 레벨 계산
-    getScaleLevel(distance, entitySize = null) {
-        const size = entitySize || this.defaultEntitySize;
-        const sizeMultiplier = size.height || 1.0;
-
-        // 거리에 따른 기본 스케일 (크기 배율 적용)
-        const adjustedDist = distance / sizeMultiplier;
-
-        if (adjustedDist < 2) return 5;      // 매우 가까움
-        if (adjustedDist < 4) return 4;      // 가까움
-        if (adjustedDist < 6) return 3;      // 보통
-        if (adjustedDist < 10) return 2;     // 멀리
-        return 1;                             // 매우 멀리
-    }
-
-    // 엔티티의 ASCII 패턴 가져오기
-    getEntityPattern(char, scaleLevel) {
-        const patterns = this.asciiScalePatterns[char] || this.asciiScalePatterns['default'];
-        return patterns[scaleLevel] || patterns[1];
-    }
-
-    // 플레이어 방향 설정
-    setPlayerDirection(direction) {
-        if (this.directionAngles[direction] !== undefined) {
-            this.playerAngle = this.directionAngles[direction];
-        }
-    }
-
-    // 마지막 이동 방향으로 각도 설정
-    setAngleFromMovement(dx, dy) {
-        if (dx !== 0 || dy !== 0) {
-            this.playerAngle = Math.atan2(dy, dx);
-        }
-    }
-
-    // 레이캐스팅으로 3D 뷰 렌더링
-    render(gameMap, playerX, playerY, entities = []) {
-        const buffer = [];
-        const depthBuffer = new Array(this.width).fill(this.maxDepth);
-
-        // 각 열에 대해 레이 캐스팅
-        for (let x = 0; x < this.width; x++) {
-            // 현재 열의 레이 각도 계산
-            const rayAngle = (this.playerAngle - this.fov / 2) +
-                            (x / this.width) * this.fov;
-
-            // 레이캐스팅으로 벽까지 거리 계산
-            const { distance, hitWall, wallType } = this.castRay(
-                gameMap, playerX, playerY, rayAngle
-            );
-
-            depthBuffer[x] = distance;
-
-            // 어안 렌즈 효과 보정
-            const correctedDistance = distance * Math.cos(rayAngle - this.playerAngle);
-
-            // 천장과 바닥 계산
-            const ceiling = Math.floor(this.height / 2 - this.height / correctedDistance);
-            const floor = this.height - ceiling;
-
-            // 이 열의 각 행 렌더링
-            const column = [];
-            for (let y = 0; y < this.height; y++) {
-                if (y < ceiling) {
-                    // 천장
-                    column.push({ char: this.ceilingChar, color: '#111' });
-                } else if (y >= ceiling && y < floor) {
-                    // 벽
-                    const shade = this.getWallShade(correctedDistance, wallType);
-                    const color = this.getWallColor(correctedDistance, wallType);
-                    column.push({ char: shade, color: color });
-                } else {
-                    // 바닥
-                    const floorShade = this.getFloorShade(y, this.height);
-                    column.push({ char: floorShade, color: '#333' });
-                }
-            }
-            buffer.push(column);
-        }
-
-        // 엔티티 렌더링 (스프라이트)
-        this.renderEntities(buffer, depthBuffer, gameMap, playerX, playerY, entities);
-
-        return this.bufferToString(buffer);
-    }
-
-    // 레이 캐스팅
-    castRay(gameMap, startX, startY, angle) {
-        const rayDirX = Math.cos(angle);
-        const rayDirY = Math.sin(angle);
-
-        let rayX = startX + 0.5;
-        let rayY = startY + 0.5;
-
-        const stepSize = 0.1;
-        let distance = 0;
-        let hitWall = false;
-        let wallType = 'wall';
-
-        while (!hitWall && distance < this.maxDepth) {
-            rayX += rayDirX * stepSize;
-            rayY += rayDirY * stepSize;
-            distance += stepSize;
-
-            const mapX = Math.floor(rayX);
-            const mapY = Math.floor(rayY);
-
-            // 맵 범위 체크
-            if (mapX < 0 || mapX >= gameMap[0].length ||
-                mapY < 0 || mapY >= gameMap.length) {
-                hitWall = true;
-                wallType = 'boundary';
-            } else {
-                const tile = gameMap[mapY][mapX];
-                if (tile === '#' || tile === '+') {
-                    hitWall = true;
-                    wallType = tile === '+' ? 'door' : 'wall';
-                }
-            }
-        }
-
-        return { distance, hitWall, wallType };
-    }
-
-    // 거리에 따른 벽 문자 선택
-    getWallShade(distance, wallType) {
-        const shadeIndex = Math.min(
-            Math.floor(distance / this.maxDepth * this.wallShades.length),
-            this.wallShades.length - 1
-        );
-        return this.wallShades[shadeIndex];
-    }
-
-    // 거리에 따른 벽 색상
-    getWallColor(distance, wallType) {
-        const brightness = Math.max(0, 1 - distance / this.maxDepth);
-
-        let baseColor;
-        switch (wallType) {
-            case 'door':
-                baseColor = { r: 139, g: 90, b: 43 };  // 갈색 문
-                break;
-            case 'boundary':
-                baseColor = { r: 50, g: 50, b: 70 };   // 어두운 경계
-                break;
-            default:
-                baseColor = { r: 100, g: 100, b: 120 }; // 회색 벽
-        }
-
-        const r = Math.floor(baseColor.r * brightness);
-        const g = Math.floor(baseColor.g * brightness);
-        const b = Math.floor(baseColor.b * brightness);
-
-        return `rgb(${r},${g},${b})`;
-    }
-
-    // 바닥 셰이딩
-    getFloorShade(y, height) {
-        const distanceFromCenter = (y - height / 2) / (height / 2);
-        if (distanceFromCenter > 0.8) return '░';
-        if (distanceFromCenter > 0.6) return '·';
-        return '.';
-    }
-
-    // 엔티티(몬스터, NPC, 아이템) 렌더링 - 확대된 ASCII 아트 사용
-    renderEntities(buffer, depthBuffer, gameMap, playerX, playerY, entities) {
-        // 플레이어로부터의 거리로 정렬 (먼 것부터)
-        const sortedEntities = entities
-            .map(e => ({
-                ...e,
-                dist: Math.sqrt(
-                    Math.pow(e.x - playerX, 2) +
-                    Math.pow(e.y - playerY, 2)
-                )
-            }))
-            .filter(e => e.dist > 0.5 && e.dist < this.maxDepth)
-            .sort((a, b) => b.dist - a.dist);
-
-        for (const entity of sortedEntities) {
-            // 엔티티 방향 계산
-            const dx = entity.x - playerX;
-            const dy = entity.y - playerY;
-            const entityAngle = Math.atan2(dy, dx);
-
-            // 플레이어 시야 내에 있는지 확인
-            let angleDiff = entityAngle - this.playerAngle;
-
-            // 각도 정규화
-            while (angleDiff > Math.PI) angleDiff -= 2 * Math.PI;
-            while (angleDiff < -Math.PI) angleDiff += 2 * Math.PI;
-
-            // 시야각 내에 있는지 확인
-            if (Math.abs(angleDiff) < this.fov / 2) {
-                // 화면 X 좌표 계산
-                const screenX = Math.floor(
-                    (angleDiff / this.fov + 0.5) * this.width
-                );
-
-                if (screenX >= 0 && screenX < this.width) {
-                    // 깊이 버퍼 체크 (벽 뒤에 있으면 그리지 않음)
-                    if (entity.dist < depthBuffer[screenX]) {
-                        // 엔티티 크기 정보 가져오기 (있으면 사용, 없으면 기본값)
-                        const entitySize = entity.size || this.defaultEntitySize;
-
-                        // 스케일 레벨 계산
-                        const scaleLevel = this.getScaleLevel(entity.dist, entitySize);
-
-                        // 엔티티의 원본 ASCII 문자 가져오기
-                        const entityChar = entity.char || '?';
-
-                        // 확대된 ASCII 패턴 가져오기
-                        const pattern = this.getEntityPattern(entityChar, scaleLevel);
-
-                        // 패턴 크기
-                        const patternHeight = pattern.length;
-                        const patternWidth = pattern[0].length;
-
-                        // 화면 중앙에 패턴 배치
-                        const centerY = Math.floor(this.height / 2);
-                        const startY = centerY - Math.floor(patternHeight / 2);
-                        const startX = screenX - Math.floor(patternWidth / 2);
-
-                        // 너비 배율 적용
-                        const widthMultiplier = entitySize.width || 1.0;
-                        const adjustedPatternWidth = Math.floor(patternWidth * widthMultiplier);
-
-                        // 패턴을 버퍼에 그리기
-                        for (let py = 0; py < patternHeight; py++) {
-                            const bufferY = startY + py;
-                            if (bufferY < 0 || bufferY >= this.height) continue;
-
-                            for (let px = 0; px < patternWidth; px++) {
-                                // 너비 배율에 따른 X 위치 조정
-                                const bufferX = startX + Math.floor(px * widthMultiplier);
-                                if (bufferX < 0 || bufferX >= this.width) continue;
-
-                                // 깊이 버퍼 확인 (벽 뒤에 있으면 그리지 않음)
-                                if (entity.dist >= depthBuffer[bufferX]) continue;
-
-                                const char = pattern[py][px];
-                                if (char && char !== ' ') {
-                                    // 색상 결정 (거리에 따라 어두워짐)
-                                    const brightness = Math.max(0.3, 1 - entity.dist / this.maxDepth);
-                                    const baseColor = entity.color || '#ff0000';
-                                    const dimmedColor = this.dimColor(baseColor, brightness);
-
-                                    buffer[bufferX][bufferY] = {
-                                        char: char,
-                                        color: dimmedColor
-                                    };
-
-                                    // 너비 배율이 1보다 크면 추가 열도 채우기
-                                    if (widthMultiplier > 1) {
-                                        for (let wx = 1; wx < widthMultiplier; wx++) {
-                                            const extraX = bufferX + wx;
-                                            if (extraX >= 0 && extraX < this.width &&
-                                                entity.dist < depthBuffer[extraX]) {
-                                                buffer[extraX][bufferY] = {
-                                                    char: char,
-                                                    color: dimmedColor
-                                                };
-                                            }
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        }
-    }
-
-    // 색상을 어둡게 조절
-    dimColor(color, brightness) {
-        // hex 색상을 RGB로 변환
-        let r, g, b;
-        if (color.startsWith('#')) {
-            const hex = color.slice(1);
-            if (hex.length === 3) {
-                r = parseInt(hex[0] + hex[0], 16);
-                g = parseInt(hex[1] + hex[1], 16);
-                b = parseInt(hex[2] + hex[2], 16);
-            } else {
-                r = parseInt(hex.slice(0, 2), 16);
-                g = parseInt(hex.slice(2, 4), 16);
-                b = parseInt(hex.slice(4, 6), 16);
-            }
-        } else if (color.startsWith('rgb')) {
-            const match = color.match(/\d+/g);
-            if (match) {
-                [r, g, b] = match.map(Number);
-            } else {
-                return color;
-            }
-        } else {
-            return color;
-        }
-
-        // 밝기 적용
-        r = Math.floor(r * brightness);
-        g = Math.floor(g * brightness);
-        b = Math.floor(b * brightness);
-
-        return `rgb(${r},${g},${b})`;
-    }
-
-    // 버퍼를 문자열로 변환
-    bufferToString(buffer) {
-        const lines = [];
-        for (let y = 0; y < this.height; y++) {
-            let line = '';
-            let coloredLine = [];
-            for (let x = 0; x < this.width; x++) {
-                const cell = buffer[x][y];
-                coloredLine.push(cell);
-            }
-            lines.push(coloredLine);
-        }
-        return lines;
-    }
-
-    // HTML로 렌더링
-    renderToHTML(gameMap, playerX, playerY, entities = []) {
-        const lines = this.render(gameMap, playerX, playerY, entities);
-        let html = '';
-
-        for (const line of lines) {
-            for (const cell of line) {
-                html += `<span style="color:${cell.color}">${cell.char}</span>`;
-            }
-            html += '\n';
-        }
-
-        return html;
-    }
-
-    // 미니맵 생성 (플레이어 시야 방향 표시)
     renderMinimap(gameMap, playerX, playerY, radius = 5) {
+        const dirChars = { 'N': '▲', 'S': '▼', 'E': '▶', 'W': '◀' };
         const lines = [];
-        const dirChars = {
-            'up': '▲',
-            'down': '▼',
-            'left': '◀',
-            'right': '▶'
-        };
-
-        // 각도로부터 방향 결정
-        let direction;
-        const angle = this.playerAngle;
-        if (angle > -Math.PI/4 && angle <= Math.PI/4) direction = '▶';
-        else if (angle > Math.PI/4 && angle <= 3*Math.PI/4) direction = '▼';
-        else if (angle > -3*Math.PI/4 && angle <= -Math.PI/4) direction = '▲';
-        else direction = '◀';
-
         for (let dy = -radius; dy <= radius; dy++) {
             let line = '';
             for (let dx = -radius; dx <= radius; dx++) {
                 const mapX = Math.floor(playerX) + dx;
                 const mapY = Math.floor(playerY) + dy;
-
                 if (dx === 0 && dy === 0) {
-                    line += direction;  // 플레이어 위치와 방향
-                } else if (mapX >= 0 && mapX < gameMap[0].length &&
-                          mapY >= 0 && mapY < gameMap.length) {
+                    line += dirChars[this.facing];
+                } else if (mapX >= 0 && mapX < gameMap[0].length && mapY >= 0 && mapY < gameMap.length) {
                     line += gameMap[mapY][mapX];
                 } else {
                     line += ' ';
@@ -537,34 +527,27 @@ class ASCII3DRenderer {
             }
             lines.push(line);
         }
-
         return lines.join('\n');
+    }
+
+    get playerAngle() {
+        const angles = { 'N': -Math.PI/2, 'S': Math.PI/2, 'E': 0, 'W': Math.PI };
+        return angles[this.facing] || 0;
     }
 }
 
-// 컴퍼스 (나침반) 렌더링
 class Compass {
     constructor() {
         this.directions = ['N', 'NE', 'E', 'SE', 'S', 'SW', 'W', 'NW'];
     }
-
     render(angle) {
-        // 각도를 8방향 인덱스로 변환
-        let normalized = angle + Math.PI / 2;  // 북쪽이 0이 되도록 조정
+        let normalized = angle + Math.PI / 2;
         while (normalized < 0) normalized += 2 * Math.PI;
         while (normalized >= 2 * Math.PI) normalized -= 2 * Math.PI;
-
         const index = Math.round(normalized / (Math.PI / 4)) % 8;
-        const facing = this.directions[index];
-
-        return `
-    N
-  W + E  [${facing}]
-    S
-        `.trim();
+        return `    N\n  W + E  [${this.directions[index]}]\n    S`;
     }
 }
 
-// 전역으로 내보내기
 window.ASCII3DRenderer = ASCII3DRenderer;
 window.Compass = Compass;

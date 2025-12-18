@@ -97,34 +97,53 @@ body {
    ============================================ */
 #game-screen {
     display: flex;
-    flex-direction: column;
+    flex-direction: row;  /* 가로 배치로 변경 */
     height: 600px;
 }
 
-/* 뷰 컨테이너 - 3D와 2D 맵을 나란히 표시 */
+/* 좌측 3D 뷰 패널 (30%) */
+#left-panel {
+    width: 30%;
+    min-width: 200px;
+    display: flex;
+    flex-direction: column;
+    background-color: #000;
+    border-right: 2px solid #333;
+}
+
+/* 우측 메인 패널 (70%) */
+#right-panel {
+    width: 70%;
+    display: flex;
+    flex-direction: column;
+    background-color: #0a0a0a;
+}
+
+/* 뷰 컨테이너 - 우측 상단 (던전맵) */
 #view-container {
     flex: 1;
     display: flex;
-    gap: 2px;
+    flex-direction: column;
     overflow: hidden;
     background-color: #000;
 }
 
-/* 뷰 전환 모드 */
-#view-container.view-3d-only #map-container {
+/* 뷰 전환 모드 - 3D 전용일 때 좌측 패널 확장 */
+#game-screen.view-3d-only #left-panel {
+    width: 50%;
+}
+
+#game-screen.view-3d-only #right-panel {
+    width: 50%;
+}
+
+/* 뷰 전환 모드 - 2D 전용일 때 좌측 패널 숨김 */
+#game-screen.view-2d-only #left-panel {
     display: none;
 }
 
-#view-container.view-3d-only #view3d-container {
-    flex: 1;
-}
-
-#view-container.view-2d-only #view3d-container {
-    display: none;
-}
-
-#view-container.view-2d-only #map-container {
-    flex: 1;
+#game-screen.view-2d-only #right-panel {
+    width: 100%;
 }
 
 /* 뷰 헤더 */
@@ -159,18 +178,18 @@ body {
     color: #fff;
 }
 
-/* 3D 뷰 컨테이너 */
+/* 3D 뷰 컨테이너 (좌측 패널 내부) */
 #view3d-container {
     flex: 1;
     display: flex;
     flex-direction: column;
     background-color: #000;
-    border-right: 1px solid #333;
+    overflow: hidden;
 }
 
 #view3d-display {
     flex: 1;
-    font-size: 11px;
+    font-size: 8px;
     line-height: 1.0;
     letter-spacing: 0px;
     white-space: pre;
@@ -180,11 +199,38 @@ body {
     color: #888;
 }
 
-/* 나침반 표시 */
+/* 나침반 표시 (좌측 하단) */
+#compass-container {
+    padding: 5px 10px;
+    background-color: #111;
+    border-top: 1px solid #333;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
 #compass-display {
     color: #ffcc00;
     font-size: 10px;
-    padding: 0 5px;
+    font-family: 'Courier New', monospace;
+    white-space: pre;
+}
+
+/* 좌측 패널 미니 상태바 */
+#mini-status {
+    padding: 5px 10px;
+    background-color: #1a1a1a;
+    border-top: 1px solid #333;
+    font-size: 10px;
+    color: #888;
+}
+
+#mini-status .mini-hp {
+    color: #00ff00;
+}
+
+#mini-status .mini-pos {
+    color: #ffcc00;
 }
 
 /* 2D 맵 컨테이너 */
