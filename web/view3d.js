@@ -392,12 +392,29 @@ class ASCII3DRenderer {
         const sideOffset = Math.floor(entity.sideDist * viewWidth * 0.4);
         const entityCenterX = midX + sideOffset;
 
-        const scaleLevel = depth <= 1 ? 5 : (depth <= 2 ? 4 : (depth <= 3 ? 3 : 2));
+        // 바닥 아이템/시체는 더 작게, 바닥 쪽에 렌더링
+        const isFloor = entity.isFloor;
+        let scaleLevel;
+        if (isFloor) {
+            // 바닥 아이템은 항상 작게
+            scaleLevel = depth <= 1 ? 3 : (depth <= 2 ? 2 : 1);
+        } else {
+            scaleLevel = depth <= 1 ? 5 : (depth <= 2 ? 4 : (depth <= 3 ? 3 : 2));
+        }
+
         const pattern = this.getEntityPattern(entity.char || '?', scaleLevel);
 
         if (!pattern) return;
 
-        const startY = midY - Math.floor(pattern.length / 2);
+        // 바닥 아이템은 화면 아래쪽(바닥)에 표시
+        let startY;
+        if (isFloor) {
+            // 바닥 쪽에 표시 (뷰포트 하단)
+            const floorY = Math.floor(vp.b * this.height) - pattern.length - 1;
+            startY = Math.max(midY, floorY);
+        } else {
+            startY = midY - Math.floor(pattern.length / 2);
+        }
         const startX = entityCenterX - Math.floor(pattern[0].length / 2);
 
         const brightness = Math.max(0.4, 1 - depth * 0.2);

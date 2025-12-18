@@ -1237,9 +1237,44 @@ class Game {
 
         // 시야 내의 엔티티 목록 생성
         const entities = [];
+
+        // 바닥에 있는 아이템 먼저 추가 (가장 뒤에 렌더링)
+        for (const item of this.gameMap.items) {
+            if (!this.gameMap.visible[item.x][item.y]) continue;
+
+            entities.push({
+                x: item.x,
+                y: item.y,
+                char: item.char || '!',
+                type: 'item',
+                color: item.color ? this.getColorFromClass(item.color) : '#88f',
+                isFloor: true,  // 바닥에 있는 아이템 표시
+            });
+        }
+
+        // 시체 추가 (죽은 엔티티)
         for (const entity of this.gameMap.entities) {
             if (entity === this.player) continue;
             if (!this.gameMap.visible[entity.x][entity.y]) continue;
+
+            if (!entity.isAlive && !entity.isNPC) {
+                // 시체
+                entities.push({
+                    x: entity.x,
+                    y: entity.y,
+                    char: '%',  // 시체 문자
+                    type: 'corpse',
+                    color: '#840',  // 어두운 빨간색
+                    isFloor: true,
+                });
+            }
+        }
+
+        // 살아있는 엔티티 추가
+        for (const entity of this.gameMap.entities) {
+            if (entity === this.player) continue;
+            if (!this.gameMap.visible[entity.x][entity.y]) continue;
+            if (!entity.isAlive) continue;
 
             let type = 'monster';
             let color = '#f00';
@@ -1247,27 +1282,14 @@ class Game {
             if (entity.isNPC) {
                 type = 'npc';
                 color = '#ff0';
-            } else if (!entity.isAlive) {
-                continue;
             }
 
             entities.push({
                 x: entity.x,
                 y: entity.y,
+                char: entity.char,
                 type: type,
                 color: color,
-            });
-        }
-
-        // 아이템 추가
-        for (const item of this.gameMap.items) {
-            if (!this.gameMap.visible[item.x][item.y]) continue;
-
-            entities.push({
-                x: item.x,
-                y: item.y,
-                type: 'item',
-                color: '#88f',
             });
         }
 
@@ -1288,6 +1310,23 @@ class Game {
         else if (angle > -3*Math.PI/4 && angle <= -Math.PI/4) direction = 'N';
         else direction = 'W';
         compassDisplay.textContent = `[${direction}]`;
+    }
+
+    // CSS 클래스에서 색상 추출
+    getColorFromClass(colorClass) {
+        const colorMap = {
+            'tile-food': '#0f0',
+            'tile-potion': '#f0f',
+            'tile-item': '#88f',
+            'tile-weapon': '#c0c0c0',
+            'tile-armor': '#a0a0a0',
+            'tile-gold': '#ffd700',
+            'tile-scroll': '#ffa500',
+            'tile-ring': '#00ffff',
+            'tile-wand': '#ff69b4',
+            'tile-stairs': '#fff',
+        };
+        return colorMap[colorClass] || '#88f';
     }
 
     toggleView() {

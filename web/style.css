@@ -856,17 +856,17 @@ body {
         height: auto;
     }
 
-    /* 3D 뷰를 가로로 넓게, 세로 컴팩트하게 */
+    /* 3D 뷰를 가로로 넓게, 세로 좀 더 크게 */
     #view3d-container {
-        height: 100px;
-        min-height: 100px;
+        height: 140px;
+        min-height: 140px;
         display: flex;
         justify-content: center;
         align-items: center;
     }
 
     #view3d-display {
-        font-size: 5px;
+        font-size: 6px;
         line-height: 1.0;
         text-align: center;
         width: 100%;
@@ -1053,9 +1053,6 @@ body {
         background-color: #600 !important;
         font-weight: bold !important;
         text-shadow: none !important;
-        border: 1px solid #ff0;
-        padding: 0 1px;
-        margin: 0 -1px;
     }
 }
 
@@ -1088,7 +1085,12 @@ body {
     }
 
     #view3d-display {
-        font-size: 4px;
+        font-size: 5px;
+    }
+
+    #view3d-container {
+        height: 120px;
+        min-height: 120px;
     }
 
     .zoom-btn {
@@ -1112,8 +1114,5 @@ body {
         background-color: #600 !important;
         font-weight: bold !important;
         text-shadow: none !important;
-        border: 1px solid #ff0;
-        padding: 0 1px;
-        margin: 0 -1px;
     }
 }
