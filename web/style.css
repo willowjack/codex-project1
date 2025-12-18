@@ -294,10 +294,11 @@ body {
 
 /* 타일 색상 클래스 */
 .tile-player {
-    color: #ffff00;
+    color: #ffff00 !important;
     font-weight: bold;
-    background-color: #333;
+    background-color: #333 !important;
     text-shadow: 0 0 5px #ff0;
+    display: inline-block;
 }
 .tile-floor { color: #666666; }
 .tile-wall { color: #8b7355; }
@@ -1045,6 +1046,17 @@ body {
         font-size: 14px;
         border-radius: 4px;
     }
+
+    /* 모바일에서 플레이어 가시성 강화 */
+    .tile-player {
+        color: #ff0 !important;
+        background-color: #600 !important;
+        font-weight: bold !important;
+        text-shadow: none !important;
+        border: 1px solid #ff0;
+        padding: 0 1px;
+        margin: 0 -1px;
+    }
 }
 
 /* 더 작은 화면 (폰) */
@@ -1093,6 +1105,15 @@ body {
         gap: 6px;
         padding: 6px;
     }
-}
 
-/* 플레이어 스타일은 상단에서 정의됨 */
+    /* 작은 화면에서 플레이어 가시성 더 강화 */
+    .tile-player {
+        color: #ff0 !important;
+        background-color: #600 !important;
+        font-weight: bold !important;
+        text-shadow: none !important;
+        border: 1px solid #ff0;
+        padding: 0 1px;
+        margin: 0 -1px;
+    }
+}
