@@ -727,9 +727,10 @@ class Game {
     placeEntities(room) {
         const floor = this.currentFloor || 1;
 
-        // 몬스터 배치 (층이 높을수록 더 많은 몬스터)
-        const baseMonsters = Math.min(CONFIG.MAX_MONSTERS_PER_ROOM, 1 + Math.floor(floor / 4));
-        const numMonsters = randomInt(0, baseMonsters);
+        // 몬스터 배치 (기본 1-2마리, 층이 높을수록 증가)
+        const minMonsters = 1; // 최소 1마리 보장
+        const maxMonsters = Math.min(CONFIG.MAX_MONSTERS_PER_ROOM, 2 + Math.floor(floor / 3));
+        const numMonsters = randomInt(minMonsters, maxMonsters);
 
         for (let i = 0; i < numMonsters; i++) {
             const x = randomInt(room.x1 + 1, room.x2 - 1);
@@ -2202,8 +2203,10 @@ class Game {
     placeEntitiesForFloor(room, difficulty) {
         const floor = this.currentFloor || 1;
 
-        // 난이도에 따라 몬스터 수 증가
-        const numMonsters = randomInt(0, CONFIG.MAX_MONSTERS_PER_ROOM + Math.floor(difficulty / 2));
+        // 난이도에 따라 몬스터 수 증가 (최소 1마리 보장)
+        const minMonsters = 1;
+        const maxMonsters = CONFIG.MAX_MONSTERS_PER_ROOM + Math.floor(difficulty / 2);
+        const numMonsters = randomInt(minMonsters, maxMonsters);
         for (let i = 0; i < numMonsters; i++) {
             const x = randomInt(room.x1 + 1, room.x2 - 1);
             const y = randomInt(room.y1 + 1, room.y2 - 1);
