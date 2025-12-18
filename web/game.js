@@ -15,6 +15,7 @@ const CONFIG = {
     ROOM_MAX_SIZE: 10,
     MAX_MONSTERS_PER_ROOM: 2,
     MAX_ITEMS_PER_ROOM: 2,
+    MAX_FLOORS: 10, // 최대 층 수
 };
 
 // ============================================================================
@@ -584,6 +585,7 @@ class Game {
         this.turnCount = 0;
         this.hour = 8;
         this.day = 1;
+        this.currentFloor = 1; // 현재 층
         this.gameState = 'playing';
         this.messageLog = [];
 
@@ -1443,6 +1445,12 @@ class Game {
         document.getElementById('gold-display').textContent = `Gold: ${this.player.gold}`;
         document.getElementById('position-display').textContent = `(${this.player.x}, ${this.player.y})`;
 
+        // 층 표시
+        const floorDisplay = document.getElementById('floor-display');
+        if (floorDisplay) {
+            floorDisplay.textContent = `Floor: ${this.currentFloor || 1}/${CONFIG.MAX_FLOORS}`;
+        }
+
         // 메시지 로그
         this.renderMessages();
     }
@@ -1817,34 +1825,166 @@ class Game {
 
         const tile = this.gameMap.tiles[this.player.x][this.player.y];
         if (tile.char === '>') {
+            // 최대 층 도달 체크
+            if (this.currentFloor >= CONFIG.MAX_FLOORS) {
+                this.addMessage('=== 축하합니다! 던전의 최하층에 도달했습니다! ===', 'important');
+                this.addMessage('당신은 전설적인 모험가로 기록될 것입니다!', 'system');
+                this.addMessage(`최종 기록: ${this.day}일차, ${this.turnCount}턴, ${this.player.gold}골드`, 'system');
+                this.gameState = 'victory';
+                this.showVictoryScreen();
+                return;
+            }
+
             this.currentFloor++;
             this.addMessage(`${this.currentFloor}층으로 내려간다...`, 'system');
+
+            if (this.currentFloor === CONFIG.MAX_FLOORS) {
+                this.addMessage('이곳이 던전의 최하층인 것 같다...', 'important');
+            }
+
             this.generateNewFloor();
         } else {
             this.addMessage('여기에는 계단이 없다.', 'system');
         }
     }
 
+    showVictoryScreen() {
+        const content = `
+            <h2>🏆 승리! 🏆</h2>
+            <p>축하합니다! 던전 ${CONFIG.MAX_FLOORS}층을 정복했습니다!</p>
+            <hr>
+            <p><strong>최종 기록:</strong></p>
+            <p>생존 일수: ${this.day}일</p>
+            <p>총 턴 수: ${this.turnCount}</p>
+            <p>획득 골드: ${this.player.gold}G</p>
+            <p>최종 레벨: ${this.player.level || 1}</p>
+            <hr>
+            <p>새 게임을 시작하려면 [N]을 누르세요.</p>
+        `;
+        this.showModal('victory', content);
+    }
+
     generateNewFloor() {
-        const { map, rooms } = generateDungeon(
-            CONFIG.MAP_WIDTH,
-            CONFIG.MAP_HEIGHT,
-            CONFIG.MAX_ROOMS,
-            CONFIG.ROOM_MIN_SIZE,
-            CONFIG.ROOM_MAX_SIZE
-        );
+        // 층 난이도 증가: 더 깊은 층일수록 더 많은 몬스터
+        const floorDifficulty = Math.min(this.currentFloor, 5);
+
+        // 던전 생성 (실패 시 재시도)
+        let map, rooms;
+        let attempts = 0;
+        do {
+            const result = generateDungeon(
+                CONFIG.MAP_WIDTH,
+                CONFIG.MAP_HEIGHT,
+                CONFIG.MAX_ROOMS,
+                CONFIG.ROOM_MIN_SIZE,
+                CONFIG.ROOM_MAX_SIZE
+            );
+            map = result.map;
+            rooms = result.rooms;
+            attempts++;
+        } while (rooms.length < 3 && attempts < 10); // 최소 3개 방 생성 보장
+
         this.gameMap = map;
 
         // 플레이어를 첫 번째 방에 배치
-        const [startX, startY] = getRoomCenter(rooms[0]);
-        this.player.x = startX;
-        this.player.y = startY;
+        if (rooms.length > 0) {
+            const [startX, startY] = roomCenter(rooms[0]);
+            this.player.x = startX;
+            this.player.y = startY;
+        } else {
+            // 비상용: 빈 공간 찾기
+            for (let x = 1; x < CONFIG.MAP_WIDTH - 1; x++) {
+                for (let y = 1; y < CONFIG.MAP_HEIGHT - 1; y++) {
+                    if (map.tiles[x][y].walkable) {
+                        this.player.x = x;
+                        this.player.y = y;
+                        break;
+                    }
+                }
+                if (this.player.x !== 0) break;
+            }
+        }
 
-        // 몬스터와 아이템 생성
-        this.spawnEntities(rooms);
+        this.gameMap.addEntity(this.player);
 
-        this.computeFOV();
+        // 몬스터와 아이템 생성 (층에 따라 난이도 증가)
+        for (let i = 1; i < rooms.length; i++) {
+            this.placeEntitiesForFloor(rooms[i], floorDifficulty);
+        }
+
+        this.updateFOV();
         this.render();
+    }
+
+    placeEntitiesForFloor(room, difficulty) {
+        // 난이도에 따라 몬스터 수 증가
+        const numMonsters = randomInt(0, CONFIG.MAX_MONSTERS_PER_ROOM + Math.floor(difficulty / 2));
+        for (let i = 0; i < numMonsters; i++) {
+            const x = randomInt(room.x1 + 1, room.x2 - 1);
+            const y = randomInt(room.y1 + 1, room.y2 - 1);
+
+            if (!this.gameMap.isBlocked(x, y)) {
+                let monster;
+                const roll = Math.random();
+
+                // 층이 깊을수록 강한 몬스터 출현 확률 증가
+                if (roll < 0.3 + (difficulty * 0.05)) {
+                    // 강한 몬스터
+                    if (difficulty >= 3 && Math.random() < 0.3) {
+                        monster = new Actor(x, y, 'O', 'tile-monster', '오크', {
+                            maxHp: 20 + difficulty * 3,
+                            defense: 2 + Math.floor(difficulty / 2),
+                            power: 6 + difficulty,
+                        });
+                    } else {
+                        monster = new Actor(x, y, 'g', 'tile-monster', '고블린', {
+                            maxHp: 12 + difficulty * 2,
+                            defense: 1,
+                            power: 4 + Math.floor(difficulty / 2),
+                        });
+                    }
+                } else {
+                    monster = new Actor(x, y, 'r', 'tile-monster', '쥐', {
+                        maxHp: 5 + difficulty,
+                        defense: 0,
+                        power: 2 + Math.floor(difficulty / 3),
+                    });
+                }
+                monster.isHostile = true;
+                this.gameMap.addEntity(monster);
+            }
+        }
+
+        // 아이템 배치
+        const numItems = randomInt(0, CONFIG.MAX_ITEMS_PER_ROOM);
+        for (let i = 0; i < numItems; i++) {
+            const x = randomInt(room.x1 + 1, room.x2 - 1);
+            const y = randomInt(room.y1 + 1, room.y2 - 1);
+
+            if (!this.gameMap.isBlocked(x, y)) {
+                let item;
+                const roll = Math.random();
+                if (roll < 0.5) {
+                    // 음식
+                    item = new Item(x, y, '!', 'tile-food', '말린 고기', {
+                        consumable: true,
+                        nutrition: 50,
+                    });
+                } else if (roll < 0.8) {
+                    // 물약
+                    item = new Item(x, y, '¡', 'tile-potion', '치료 물약', {
+                        consumable: true,
+                        healAmount: 20 + difficulty * 5,
+                    });
+                } else {
+                    // 골드
+                    item = new Item(x, y, '*', 'tile-item', '금화', {
+                        gold: 10 + difficulty * 5,
+                    });
+                }
+                this.gameMap.addEntity(item);
+            }
+        }
     }
 
     handleKeyDown(e) {

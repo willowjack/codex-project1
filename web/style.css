@@ -375,6 +375,7 @@ body {
 
 #time-display { color: #ffcc66; }
 #gold-display { color: #ffd700; }
+#floor-display { color: #88ccff; }
 
 #message-log {
     height: 60px;
