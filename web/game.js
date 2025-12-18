@@ -1427,6 +1427,131 @@ class Game {
 
     setupEventListeners() {
         document.addEventListener('keydown', (e) => this.handleKeyDown(e));
+        this.setupMobileControls();
+    }
+
+    setupMobileControls() {
+        // 방향 매핑
+        const directions = {
+            'n': [0, -1], 's': [0, 1], 'w': [-1, 0], 'e': [1, 0],
+            'nw': [-1, -1], 'ne': [1, -1], 'sw': [-1, 1], 'se': [1, 1],
+            'wait': [0, 0]
+        };
+
+        // 이동 버튼
+        document.querySelectorAll('.move-btn').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                e.preventDefault();
+                if (this.gameState !== 'playing') return;
+
+                const dir = btn.dataset.dir;
+                if (dir === 'wait') {
+                    this.addMessage('잠시 쉬었다.', 'system');
+                    this.endTurn();
+                } else if (directions[dir]) {
+                    const [dx, dy] = directions[dir];
+                    this.handlePlayerTurn(dx, dy);
+                }
+            });
+
+            // 터치 이벤트 (모바일)
+            btn.addEventListener('touchstart', (e) => {
+                e.preventDefault();
+                btn.click();
+            });
+        });
+
+        // 액션 버튼
+        document.querySelectorAll('.action-btn').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                e.preventDefault();
+                const action = btn.dataset.action;
+
+                switch (action) {
+                    case 'pickup':
+                        this.pickupItem();
+                        break;
+                    case 'inventory':
+                        this.showInventory();
+                        break;
+                    case 'rest':
+                        if (this.gameState === 'playing') {
+                            this.addMessage('잠시 쉬어 체력을 회복한다.', 'system');
+                            if (this.player.hp < this.player.maxHp) {
+                                this.player.hp = Math.min(this.player.maxHp, this.player.hp + 1);
+                            }
+                            this.endTurn();
+                        }
+                        break;
+                    case 'talk':
+                        this.tryTalkNearby();
+                        break;
+                    case 'stairs':
+                        this.tryUseStairs();
+                        break;
+                    case 'help':
+                        this.showHelp();
+                        break;
+                }
+            });
+
+            btn.addEventListener('touchstart', (e) => {
+                e.preventDefault();
+                btn.click();
+            });
+        });
+    }
+
+    tryTalkNearby() {
+        if (this.gameState !== 'playing') return;
+
+        // 주변 8방향에서 NPC 찾기
+        const dirs = [[-1,-1],[0,-1],[1,-1],[-1,0],[1,0],[-1,1],[0,1],[1,1]];
+        for (const [dx, dy] of dirs) {
+            const nx = this.player.x + dx;
+            const ny = this.player.y + dy;
+            const target = this.gameMap.getActorAt(nx, ny);
+            if (target && target.isNPC && !target.isHostile) {
+                this.talkToNPC(target);
+                return;
+            }
+        }
+        this.addMessage('대화할 수 있는 NPC가 근처에 없다.', 'system');
+    }
+
+    tryUseStairs() {
+        if (this.gameState !== 'playing') return;
+
+        const tile = this.gameMap.tiles[this.player.x][this.player.y];
+        if (tile.char === '>') {
+            this.currentFloor++;
+            this.addMessage(`${this.currentFloor}층으로 내려간다...`, 'system');
+            this.generateNewFloor();
+        } else {
+            this.addMessage('여기에는 계단이 없다.', 'system');
+        }
+    }
+
+    generateNewFloor() {
+        const { map, rooms } = generateDungeon(
+            CONFIG.MAP_WIDTH,
+            CONFIG.MAP_HEIGHT,
+            CONFIG.MAX_ROOMS,
+            CONFIG.ROOM_MIN_SIZE,
+            CONFIG.ROOM_MAX_SIZE
+        );
+        this.gameMap = map;
+
+        // 플레이어를 첫 번째 방에 배치
+        const [startX, startY] = getRoomCenter(rooms[0]);
+        this.player.x = startX;
+        this.player.y = startY;
+
+        // 몬스터와 아이템 생성
+        this.spawnEntities(rooms);
+
+        this.computeFOV();
+        this.render();
     }
 
     handleKeyDown(e) {

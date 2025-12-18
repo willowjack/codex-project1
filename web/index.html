@@ -58,6 +58,38 @@
                     <span class="mini-hp">HP: <span id="mini-hp-text">30/30</span></span> |
                     <span class="mini-pos">위치: <span id="mini-pos-text">(0,0)</span></span>
                 </div>
+
+                <!-- 모바일 컨트롤 -->
+                <div id="mobile-controls">
+                    <!-- 이동 버튼 (큰 버튼) -->
+                    <div id="move-controls">
+                        <div class="move-row">
+                            <button class="move-btn" data-dir="nw">↖</button>
+                            <button class="move-btn" data-dir="n">↑</button>
+                            <button class="move-btn" data-dir="ne">↗</button>
+                        </div>
+                        <div class="move-row">
+                            <button class="move-btn" data-dir="w">←</button>
+                            <button class="move-btn move-wait" data-dir="wait">·</button>
+                            <button class="move-btn" data-dir="e">→</button>
+                        </div>
+                        <div class="move-row">
+                            <button class="move-btn" data-dir="sw">↙</button>
+                            <button class="move-btn" data-dir="s">↓</button>
+                            <button class="move-btn" data-dir="se">↘</button>
+                        </div>
+                    </div>
+
+                    <!-- 단축키 버튼 (작은 버튼) -->
+                    <div id="action-controls">
+                        <button class="action-btn" data-action="pickup" title="줍기">G</button>
+                        <button class="action-btn" data-action="inventory" title="인벤토리">I</button>
+                        <button class="action-btn" data-action="rest" title="휴식">R</button>
+                        <button class="action-btn" data-action="talk" title="대화">T</button>
+                        <button class="action-btn" data-action="stairs" title="계단">></button>
+                        <button class="action-btn" data-action="help" title="도움말">?</button>
+                    </div>
+                </div>
             </div>
 
             <!-- 우측 패널: 던전맵 + UI (70%) -->
