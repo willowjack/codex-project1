@@ -653,10 +653,11 @@
     </div>
 
     <script src="monster_patterns.js"></script>
+    <script src="item_patterns.js"></script>
     <script>
-        // 아이템 문자 목록 (MONSTER_PATTERNS에서 아이템인 것들)
+        // 아이템 문자 목록 (ITEM_PATTERNS에서 가져옴, item_patterns.js에서 정의됨)
         // 전체 아이템: 음식, 음료, 물약, 무기(근접/창/활/완드), 탄약, 방어구, 방패, 금화, 스크롤, 열쇠, 계단, 도구, 보석, 책, 성물, 가방
-        const ITEM_CHARS = ['%', '!', '¡', ')', '/', '}', '-', '|', '[', ']', '*', '~', '=', '>', '(', '$', '+', '&', '{'];
+        // ITEM_CHARS는 item_patterns.js에서 전역으로 제공됨
 
         // 기본 아이템 데이터 (MONSTER_PATTERNS에 없는 경우)
         const DEFAULT_ITEM_DATA = {
@@ -697,10 +698,14 @@
 
         // 아이템 패턴 초기화
         function initPatterns() {
-            // MONSTER_PATTERNS에서 아이템 추출
+            // ITEM_PATTERNS에서 아이템 추출 (item_patterns.js에서 로드)
             for (const char of ITEM_CHARS) {
-                if (MONSTER_PATTERNS[char]) {
-                    patterns[char] = JSON.parse(JSON.stringify(MONSTER_PATTERNS[char]));
+                // ITEM_PATTERNS 우선, 없으면 MONSTER_PATTERNS에서 찾기 (호환성)
+                const source = (typeof ITEM_PATTERNS !== 'undefined' && ITEM_PATTERNS[char])
+                    ? ITEM_PATTERNS[char]
+                    : MONSTER_PATTERNS[char];
+                if (source) {
+                    patterns[char] = JSON.parse(JSON.stringify(source));
                     // 아이템 속성 추가 (없으면)
                     if (!patterns[char].itemData) {
                         patterns[char].itemData = { ...DEFAULT_ITEM_DATA };
@@ -1308,7 +1313,7 @@ ${pattern.map(row => `                "${row}"`).join(',\n')}
             document.getElementById('codeOutput').textContent = code;
 
             navigator.clipboard.writeText(code).then(() => {
-                alert('전체 아이템 코드가 클립보드에 복사되었습니다!\n\nmonster_patterns.js 파일에 붙여넣으세요.');
+                alert('전체 아이템 코드가 클립보드에 복사되었습니다!\n\nitem_patterns.js 파일에 붙여넣으세요.');
             });
         }
 
