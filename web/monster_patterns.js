@@ -1870,6 +1870,7 @@ const MONSTER_PATTERNS = {
         color: '#884400',
         size: { height: 0.3, width: 1.0, weight: 2.0 },
         stats: { hp: 0, power: 0, defense: 0, detection: 0, xp: 0, gold: 0, strength: 'none', weakness: 'none' },
+        itemData: { itemType: 'misc', rarity: 'common', value: 0, weight: 2.0, effect: 0, effectType: 'none', stackable: false },
         patterns: {
             5: [
                 "       ",
@@ -1910,6 +1911,7 @@ const MONSTER_PATTERNS = {
         color: '#00ff00',
         size: { height: 0.4, width: 0.4, weight: 0.3 },
         stats: { hp: 0, power: 0, defense: 0, detection: 0, xp: 0, gold: 0, strength: 'none', weakness: 'none' },
+        itemData: { itemType: 'consumable', rarity: 'common', value: 5, weight: 0.3, effect: 10, effectType: 'heal_hp', stackable: true },
         patterns: {
             5: [
                 "       ",
@@ -1950,6 +1952,7 @@ const MONSTER_PATTERNS = {
         color: '#ff00ff',
         size: { height: 0.5, width: 0.3, weight: 0.2 },
         stats: { hp: 0, power: 0, defense: 0, detection: 0, xp: 0, gold: 0, strength: 'none', weakness: 'none' },
+        itemData: { itemType: 'potion', rarity: 'uncommon', value: 25, weight: 0.2, effect: 30, effectType: 'heal_hp', stackable: true },
         patterns: {
             5: [
                 "       ",
@@ -1990,6 +1993,7 @@ const MONSTER_PATTERNS = {
         color: '#c0c0c0',
         size: { height: 0.8, width: 0.3, weight: 1.0 },
         stats: { hp: 0, power: 0, defense: 0, detection: 0, xp: 0, gold: 0, strength: 'none', weakness: 'none' },
+        itemData: { itemType: 'weapon', rarity: 'common', value: 50, weight: 1.0, effect: 3, effectType: 'damage', stackable: false },
         patterns: {
             5: [
                 "       ",
@@ -2030,6 +2034,7 @@ const MONSTER_PATTERNS = {
         color: '#808080',
         size: { height: 0.6, width: 0.5, weight: 2.0 },
         stats: { hp: 0, power: 0, defense: 0, detection: 0, xp: 0, gold: 0, strength: 'none', weakness: 'none' },
+        itemData: { itemType: 'armor', rarity: 'common', value: 75, weight: 2.0, effect: 2, effectType: 'defense', stackable: false },
         patterns: {
             5: [
                 "       ",
@@ -2070,6 +2075,7 @@ const MONSTER_PATTERNS = {
         color: '#ffd700',
         size: { height: 0.3, width: 0.3, weight: 0.1 },
         stats: { hp: 0, power: 0, defense: 0, detection: 0, xp: 0, gold: 0, strength: 'none', weakness: 'none' },
+        itemData: { itemType: 'gold', rarity: 'common', value: 1, weight: 0.1, effect: 0, effectType: 'none', stackable: true },
         patterns: {
             5: [
                 "       ",
@@ -2110,6 +2116,7 @@ const MONSTER_PATTERNS = {
         color: '#ffffff',
         size: { height: 0.5, width: 0.8, weight: 0.0 },
         stats: { hp: 0, power: 0, defense: 0, detection: 0, xp: 0, gold: 0, strength: 'none', weakness: 'none' },
+        itemData: { itemType: 'misc', rarity: 'common', value: 0, weight: 0, effect: 0, effectType: 'teleport', stackable: false },
         patterns: {
             5: [
                 "       ",
@@ -2150,6 +2157,7 @@ const MONSTER_PATTERNS = {
         color: '#ffa500',
         size: { height: 0.4, width: 0.5, weight: 0.1 },
         stats: { hp: 0, power: 0, defense: 0, detection: 0, xp: 0, gold: 0, strength: 'none', weakness: 'none' },
+        itemData: { itemType: 'scroll', rarity: 'uncommon', value: 30, weight: 0.1, effect: 0, effectType: 'reveal', stackable: true },
         patterns: {
             5: [
                 "       ",
@@ -2190,6 +2198,7 @@ const MONSTER_PATTERNS = {
         color: '#ffcc00',
         size: { height: 0.3, width: 0.5, weight: 0.1 },
         stats: { hp: 0, power: 0, defense: 0, detection: 0, xp: 0, gold: 0, strength: 'none', weakness: 'none' },
+        itemData: { itemType: 'key', rarity: 'rare', value: 100, weight: 0.1, effect: 0, effectType: 'unlock', stackable: true },
         patterns: {
             5: [
                 "       ",
