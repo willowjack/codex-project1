@@ -900,18 +900,75 @@ class Game {
 
     openShop(merchant) {
         this.currentModal = 'shop';
+        this.currentMerchant = merchant;
         document.getElementById('shop-modal').classList.remove('hidden');
         document.getElementById('shop-title').textContent = `${merchant.name}의 상점`;
 
+        this.updateShopDisplay();
+    }
+
+    updateShopDisplay() {
         const shopDiv = document.getElementById('shop-inventory');
-        shopDiv.innerHTML = `
-            <p>당신의 골드: ${this.player.gold}G</p>
-            <h3>구매 가능한 물품:</h3>
-            <div class="shop-item"><span>마른 고기</span><span class="price">10G</span></div>
-            <div class="shop-item"><span>물병</span><span class="price">5G</span></div>
-            <div class="shop-item"><span>치료 물약</span><span class="price">50G</span></div>
-            <p style="color: #666; margin-top: 15px;">[ESC] 닫기</p>
-        `;
+        const shopItems = [
+            { name: '마른 고기', price: 10, desc: '배고픔 +30' },
+            { name: '물병', price: 5, desc: '갈증 +40' },
+            { name: '치료 물약', price: 50, desc: 'HP +30' },
+            { name: '횃불', price: 15, desc: '주변을 밝힌다' },
+        ];
+
+        let html = `<p>당신의 골드: <span style="color: #ffd700;">${this.player.gold}G</span></p>
+            <h3>구매 가능한 물품:</h3>`;
+
+        shopItems.forEach((item, index) => {
+            const canAfford = this.player.gold >= item.price;
+            const textColor = canAfford ? '#fff' : '#666';
+            const cursor = canAfford ? 'pointer' : 'not-allowed';
+            html += `<div class="shop-item" style="cursor: ${cursor}; color: ${textColor};"
+                onclick="game.buyItem(${index})">
+                <span class="key">[${index + 1}]</span>
+                <span>${item.name}</span>
+                <span style="color: #888; font-size: 11px;">(${item.desc})</span>
+                <span class="price">${item.price}G</span>
+            </div>`;
+        });
+
+        html += `<p style="color: #666; margin-top: 15px;">[ESC] 닫기 | 숫자키로 구매</p>`;
+        shopDiv.innerHTML = html;
+    }
+
+    buyItem(index) {
+        const shopItems = [
+            { name: '마른 고기', price: 10, char: '!', color: 'tile-food', consumable: true, nutrition: 30, itemType: 'food' },
+            { name: '물병', price: 5, char: '!', color: 'tile-food', consumable: true, hydration: 40, itemType: 'water' },
+            { name: '치료 물약', price: 50, char: '¡', color: 'tile-potion', consumable: true, healAmount: 30, itemType: 'potion' },
+            { name: '횃불', price: 15, char: '/', color: 'tile-item', consumable: false, itemType: 'tool' },
+        ];
+
+        const item = shopItems[index];
+        if (!item) return;
+
+        if (this.player.gold < item.price) {
+            this.addMessage('골드가 부족합니다!', 'system');
+            return;
+        }
+
+        // 골드 차감
+        this.player.gold -= item.price;
+
+        // 인벤토리에 아이템 추가
+        const newItem = new Item(0, 0, item.char, item.color, item.name, {
+            consumable: item.consumable,
+            nutrition: item.nutrition || 0,
+            hydration: item.hydration || 0,
+            healAmount: item.healAmount || 0,
+            itemType: item.itemType,
+            value: item.price
+        });
+        this.player.inventory.push(newItem);
+
+        this.addMessage(`${item.name}을(를) 구매했습니다! (-${item.price}G)`, 'item');
+        this.updateShopDisplay();
+        this.renderUI();
     }
 
     // ========================================================================
@@ -1291,11 +1348,6 @@ class Game {
                 type: type,
                 color: color,
             });
-        }
-
-        // 디버그: 엔티티 정보 확인
-        if (entities.length > 0) {
-            console.log('3D entities:', entities.map(e => `${e.char}(${e.type})`).join(', '));
         }
 
         // 3D 뷰 렌더링
@@ -1812,6 +1864,15 @@ class Game {
                     } else {
                         this.useItem(index);
                     }
+                }
+            }
+
+            // 상점 키 처리
+            if (this.currentModal === 'shop') {
+                const key = e.key;
+                if (key >= '1' && key <= '9') {
+                    const index = parseInt(key) - 1;
+                    this.buyItem(index);
                 }
             }
             return;

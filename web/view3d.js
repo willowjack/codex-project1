@@ -466,13 +466,8 @@ class ASCII3DRenderer {
     // 패턴 관련
     initAsciiPatterns() {
         if (typeof MONSTER_PATTERNS !== 'undefined') {
-            const patterns = this.convertExternalPatterns(MONSTER_PATTERNS);
-            // 패턴 로딩 성공 확인
-            console.log('✅ MONSTER_PATTERNS loaded:', Object.keys(patterns).length, 'patterns');
-            return patterns;
+            return this.convertExternalPatterns(MONSTER_PATTERNS);
         }
-        // MONSTER_PATTERNS가 없으면 기본 패턴 사용
-        console.warn('⚠️ MONSTER_PATTERNS not found, using default patterns');
         return this.getDefaultPatterns();
     }
 
