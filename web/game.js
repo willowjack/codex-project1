@@ -194,6 +194,38 @@ class QuestLog {
         }
         return messages;
     }
+
+    // 완료된 퀘스트 보상 수령
+    claimRewards(player) {
+        const rewards = { gold: 0, xp: 0, items: [], messages: [] };
+        const completedQuests = this.active.filter(q => q.isComplete && q.status === 'completed');
+
+        for (const quest of completedQuests) {
+            if (quest.rewards) {
+                if (quest.rewards.gold) {
+                    rewards.gold += quest.rewards.gold;
+                    rewards.messages.push(`[보상] ${quest.name}: ${quest.rewards.gold}G 획득!`);
+                }
+                if (quest.rewards.xp) {
+                    rewards.xp += quest.rewards.xp;
+                    rewards.messages.push(`[보상] ${quest.name}: ${quest.rewards.xp} 경험치 획득!`);
+                }
+                if (quest.rewards.items) {
+                    rewards.items.push(...quest.rewards.items);
+                    for (const item of quest.rewards.items) {
+                        rewards.messages.push(`[보상] ${quest.name}: ${item.name} 획득!`);
+                    }
+                }
+            }
+            quest.status = 'rewarded';
+            this.completed.push(quest);
+        }
+
+        // 보상 수령한 퀘스트 제거
+        this.active = this.active.filter(q => q.status !== 'rewarded');
+
+        return rewards;
+    }
 }
 
 // ============================================================================
@@ -282,13 +314,45 @@ class Religion {
 // ============================================================================
 
 const ITEM_PRICES = {
+    // 음식
     '마른 고기': 10,
     '빵': 5,
     '물병': 5,
+    '생고기': 3,
+    '썩은 고기': 1,
+    // 물약
     '치료 물약': 50,
+    '힘의 물약': 40,
+    '속도의 물약': 40,
+    // 무기
     '단검': 30,
     '숏소드': 60,
+    '롱소드': 100,
+    '도끼': 80,
+    // 방어구
     '가죽 갑옷': 50,
+    '사슬 갑옷': 120,
+    '철 갑옷': 200,
+    // 도구
+    '횃불': 15,
+    '밧줄': 20,
+    '열쇠': 25,
+    // 시체 (몬스터별)
+    '쥐의 시체': 2,
+    '거미의 시체': 5,
+    '박쥐의 시체': 3,
+    '고블린의 시체': 15,
+    '오크의 시체': 25,
+    '스켈레톤의 시체': 10,
+    '좀비의 시체': 8,
+    '슬라임의 시체': 5,
+    '트롤의 시체': 50,
+    '미노타우로스의 시체': 80,
+    // 기타 시체
+    '늑대의 시체': 12,
+    '곰의 시체': 30,
+    // 기본 시체 가격
+    '시체': 5,
 };
 
 class Shop {
@@ -743,8 +807,10 @@ class Game {
         }
 
         // 시체/아이템 드롭
-        const corpse = new Item(entity.x, entity.y, '%', 'tile-food', `${entity.name}의 시체`, {
-            consumable: true, nutrition: 100, itemType: 'food', value: 5
+        const corpseName = `${entity.name}의 시체`;
+        const corpseValue = ITEM_PRICES[corpseName] || Math.max(5, Math.floor((entity.maxHp || 10) / 2));
+        const corpse = new Item(entity.x, entity.y, '%', 'tile-food', corpseName, {
+            consumable: true, nutrition: Math.floor(50 + (entity.maxHp || 10) * 2), itemType: 'food', value: corpseValue
         });
         this.gameMap.addItem(corpse);
 
@@ -930,24 +996,84 @@ class Game {
             { name: '횃불', price: 15, desc: '주변을 밝힌다' },
         ];
 
-        let html = `<p>당신의 골드: <span style="color: #ffd700;">${this.player.gold}G</span></p>
-            <h3>구매 가능한 물품:</h3>`;
+        // 탭 상태 (구매/판매)
+        this.shopTab = this.shopTab || 'buy';
 
-        shopItems.forEach((item, index) => {
-            const canAfford = this.player.gold >= item.price;
-            const textColor = canAfford ? '#fff' : '#666';
-            const cursor = canAfford ? 'pointer' : 'not-allowed';
-            html += `<div class="shop-item" style="cursor: ${cursor}; color: ${textColor};"
-                onclick="game.buyItem(${index})">
-                <span class="key">[${index + 1}]</span>
-                <span>${item.name}</span>
-                <span style="color: #888; font-size: 11px;">(${item.desc})</span>
-                <span class="price">${item.price}G</span>
-            </div>`;
-        });
+        let html = `<p>당신의 골드: <span style="color: #ffd700;">${this.player.gold}G</span></p>`;
 
-        html += `<p style="color: #666; margin-top: 15px;">[ESC] 닫기 | 숫자키로 구매</p>`;
+        // 탭 버튼
+        html += `<div style="display: flex; gap: 10px; margin: 10px 0;">
+            <button onclick="game.setShopTab('buy')" style="flex: 1; padding: 8px; cursor: pointer;
+                background: ${this.shopTab === 'buy' ? '#4a4' : '#333'}; color: #fff; border: none;">
+                구매
+            </button>
+            <button onclick="game.setShopTab('sell')" style="flex: 1; padding: 8px; cursor: pointer;
+                background: ${this.shopTab === 'sell' ? '#44a' : '#333'}; color: #fff; border: none;">
+                판매
+            </button>
+        </div>`;
+
+        if (this.shopTab === 'buy') {
+            // 구매 탭
+            html += '<h3>구매 가능한 물품:</h3>';
+            shopItems.forEach((item, index) => {
+                const canAfford = this.player.gold >= item.price;
+                const textColor = canAfford ? '#fff' : '#666';
+                const cursor = canAfford ? 'pointer' : 'not-allowed';
+                html += `<div class="shop-item" style="cursor: ${cursor}; color: ${textColor};"
+                    onclick="game.buyItem(${index})">
+                    <span class="key">[${index + 1}]</span>
+                    <span>${item.name}</span>
+                    <span style="color: #888; font-size: 11px;">(${item.desc})</span>
+                    <span class="price">${item.price}G</span>
+                </div>`;
+            });
+        } else {
+            // 판매 탭
+            html += '<h3>판매할 아이템 선택:</h3>';
+            if (this.player.inventory.length === 0) {
+                html += '<p style="color: #666;">판매할 아이템이 없습니다.</p>';
+            } else {
+                this.player.inventory.forEach((item, index) => {
+                    const sellPrice = this.getSellPrice(item);
+                    html += `<div class="shop-item" style="cursor: pointer; color: #fff;"
+                        onclick="game.sellItem(${index})">
+                        <span class="key">[${index + 1}]</span>
+                        <span style="color: ${item.colorClass || '#fff'};">${item.name}</span>
+                        <span class="price" style="color: #ffd700;">+${sellPrice}G</span>
+                    </div>`;
+                });
+            }
+        }
+
+        html += `<p style="color: #666; margin-top: 15px;">[ESC] 닫기 | 숫자키로 ${this.shopTab === 'buy' ? '구매' : '판매'}</p>`;
         shopDiv.innerHTML = html;
+    }
+
+    setShopTab(tab) {
+        this.shopTab = tab;
+        this.updateShopDisplay();
+    }
+
+    getSellPrice(item) {
+        // 아이템 이름으로 가격 조회, 없으면 value 속성 사용, 기본값 5
+        const basePrice = ITEM_PRICES[item.name] || item.value || 5;
+        return Math.floor(basePrice * 0.5); // 50% 가격에 판매
+    }
+
+    sellItem(index) {
+        if (index < 0 || index >= this.player.inventory.length) return;
+
+        const item = this.player.inventory[index];
+        const sellPrice = this.getSellPrice(item);
+
+        // 아이템 제거 및 골드 추가
+        this.player.inventory.splice(index, 1);
+        this.player.gold += sellPrice;
+
+        this.addMessage(`${item.name}을(를) ${sellPrice}G에 판매했습니다!`, 'item');
+        this.updateShopDisplay();
+        this.renderUI();
     }
 
     buyItem(index) {
@@ -1559,21 +1685,81 @@ class Game {
 
         const listDiv = document.getElementById('quest-list');
         const quests = this.player.questLog.active;
+        const completed = this.player.questLog.completed;
 
-        if (quests.length === 0) {
-            listDiv.innerHTML = '<p style="color: #666;">진행 중인 퀘스트가 없습니다.</p>';
-            return;
+        let html = '';
+
+        // 완료된 퀘스트 보상 수령 가능 여부 체크
+        const rewardable = quests.filter(q => q.isComplete && q.status === 'completed');
+        if (rewardable.length > 0) {
+            html += `<div style="background: #2a3a2a; padding: 10px; margin-bottom: 10px; border: 1px solid #4a4;">
+                <p style="color: #4f4;">완료된 퀘스트가 있습니다!</p>
+                <button onclick="game.claimQuestRewards()" style="background: #4a4; color: #fff; border: none; padding: 5px 15px; cursor: pointer;">
+                    [R] 보상 수령
+                </button>
+            </div>`;
         }
 
-        listDiv.innerHTML = quests.map(q => `
-            <div class="quest-item ${q.status}">
-                <div class="quest-name">${q.name}</div>
-                <div class="quest-desc">${q.description}</div>
-                <div class="quest-progress">
-                    ${q.objectives.map(o => `${o.target}: ${o.current}/${o.required}`).join(', ')}
-                </div>
-            </div>
-        `).join('');
+        if (quests.length === 0 && completed.length === 0) {
+            html += '<p style="color: #666;">진행 중인 퀘스트가 없습니다.</p>';
+        } else {
+            // 진행 중인 퀘스트
+            if (quests.length > 0) {
+                html += '<h4 style="color: #aaa; margin: 10px 0 5px;">진행 중</h4>';
+                html += quests.map(q => {
+                    const rewardText = this.formatRewards(q.rewards);
+                    const statusText = q.isComplete ? '<span style="color: #4f4;">[완료]</span>' : '';
+                    return `<div class="quest-item ${q.status}" style="background: ${q.isComplete ? '#2a3a2a' : '#1a1a2e'}; margin: 5px 0; padding: 8px;">
+                        <div class="quest-name" style="color: #fff;">${statusText} ${q.name}</div>
+                        <div class="quest-desc" style="color: #888; font-size: 12px;">${q.description}</div>
+                        <div class="quest-progress" style="color: #aaa;">
+                            ${q.objectives.map(o => `${o.target}: ${o.current}/${o.required}`).join(', ')}
+                        </div>
+                        <div class="quest-rewards" style="color: #ffd700; font-size: 11px;">보상: ${rewardText}</div>
+                    </div>`;
+                }).join('');
+            }
+
+            // 완료된 퀘스트
+            if (completed.length > 0) {
+                html += '<h4 style="color: #666; margin: 15px 0 5px;">완료됨</h4>';
+                html += completed.slice(-5).map(q => `
+                    <div style="color: #555; font-size: 12px; margin: 3px 0;">✓ ${q.name}</div>
+                `).join('');
+            }
+        }
+
+        listDiv.innerHTML = html;
+    }
+
+    formatRewards(rewards) {
+        if (!rewards) return '없음';
+        const parts = [];
+        if (rewards.gold) parts.push(`${rewards.gold}G`);
+        if (rewards.xp) parts.push(`${rewards.xp} 경험치`);
+        if (rewards.items) parts.push(...rewards.items.map(i => i.name));
+        return parts.length > 0 ? parts.join(', ') : '없음';
+    }
+
+    claimQuestRewards() {
+        const rewards = this.player.questLog.claimRewards(this.player);
+
+        if (rewards.gold > 0) {
+            this.player.gold += rewards.gold;
+        }
+        if (rewards.xp > 0) {
+            this.player.xp = (this.player.xp || 0) + rewards.xp;
+        }
+        for (const item of rewards.items) {
+            this.player.inventory.push(item);
+        }
+
+        for (const msg of rewards.messages) {
+            this.addMessage(msg, 'quest');
+        }
+
+        this.showQuestLog(); // UI 갱신
+        this.renderUI();
     }
 
     showHelp() {
