@@ -488,6 +488,8 @@
                 <button class="btn btn-primary" onclick="savePattern()">💾 저장</button>
                 <button class="btn" onclick="exportCode()">📋 코드 복사</button>
                 <button class="btn" onclick="exportAllCode()">📄 전체 내보내기</button>
+                <button class="btn btn-danger" onclick="resetCurrentMonster()">🔄 현재 몬스터 복원</button>
+                <button class="btn btn-danger" onclick="resetAllPatterns()">⚠️ 전체 초기화</button>
             </div>
 
             <div class="code-output" id="codeOutput" style="display: none;"></div>
@@ -868,6 +870,38 @@ ${pattern.map(row => `            "${row}"`).join(',\n')}
             navigator.clipboard.writeText(code).then(() => {
                 alert('코드가 클립보드에 복사되었습니다!');
             });
+        }
+
+        // 현재 몬스터 복원
+        function resetCurrentMonster() {
+            if (!confirm(`'${patterns[currentMonster].name}' 패턴을 원래대로 복원하시겠습니까?\n\n저장하지 않은 변경사항이 사라집니다.`)) {
+                return;
+            }
+
+            if (MONSTER_PATTERNS[currentMonster]) {
+                patterns[currentMonster] = JSON.parse(JSON.stringify(MONSTER_PATTERNS[currentMonster]));
+                renderGrid();
+                updatePreview();
+                updateSettingsUI();
+                alert('패턴이 원래대로 복원되었습니다.');
+            } else {
+                alert('원본 패턴을 찾을 수 없습니다.');
+            }
+        }
+
+        // 전체 패턴 초기화
+        function resetAllPatterns() {
+            if (!confirm('모든 패턴을 원래대로 초기화하시겠습니까?\n\n저장하지 않은 모든 변경사항이 사라집니다.')) {
+                return;
+            }
+
+            patterns = JSON.parse(JSON.stringify(MONSTER_PATTERNS));
+            localStorage.removeItem('monster_patterns');
+            renderMonsterList();
+            renderGrid();
+            updatePreview();
+            updateSettingsUI();
+            alert('모든 패턴이 초기화되었습니다.');
         }
 
         // 전체 코드 내보내기
