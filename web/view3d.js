@@ -15,13 +15,6 @@ class ASCII3DRenderer {
         this.floorChar = '.';
         this.ceilingChar = ' ';
 
-        // 엔티티 표시 문자
-        this.entityChars = {
-            'monster': ['☠', '◈', '◇', '·'],  // 거리별
-            'npc': ['☺', '◎', '○', '·'],
-            'item': ['★', '☆', '·', ' '],
-        };
-
         // 플레이어 방향 (라디안)
         this.playerAngle = 0;
 
@@ -36,6 +29,260 @@ class ASCII3DRenderer {
             'down-left': 3 * Math.PI / 4,
             'down-right': Math.PI / 4,
         };
+
+        // 기본 엔티티 크기 설정 (나중에 몬스터별로 커스터마이징 가능)
+        this.defaultEntitySize = {
+            height: 1.0,   // 기본 높이 배율
+            width: 1.0,    // 기본 너비 배율
+            weight: 1.0    // 기본 무게 (미래 사용)
+        };
+
+        // ASCII 확대 패턴 정의 (각 문자를 크기별로 확대)
+        this.asciiScalePatterns = this.initAsciiPatterns();
+    }
+
+    // ASCII 문자 확대 패턴 초기화
+    initAsciiPatterns() {
+        return {
+            // 고블린 (g) - 5단계 크기
+            'g': {
+                5: [  // 매우 가까움 (5x7)
+                    "  ▄▄▄  ",
+                    " █░░░█ ",
+                    " █◕_◕█ ",
+                    "  ███  ",
+                    " ▄███▄ ",
+                    " █ g █ ",
+                    " ▀   ▀ "
+                ],
+                4: [  // 가까움 (4x5)
+                    " ▄▄▄ ",
+                    " █▪█ ",
+                    "  █  ",
+                    " ▄█▄ ",
+                    " ▀ ▀ "
+                ],
+                3: [  // 보통 (3x3)
+                    " ▄ ",
+                    "█g█",
+                    " ▀ "
+                ],
+                2: [  // 멀리 (2x2)
+                    "▄▄",
+                    "▀▀"
+                ],
+                1: [  // 매우 멀리 (1x1)
+                    "g"
+                ]
+            },
+            // 오크 (o) - 더 크고 근육질
+            'o': {
+                5: [
+                    " ▄███▄ ",
+                    "██◕▄◕██",
+                    " █▀▀▀█ ",
+                    "▄█████▄",
+                    "██ o ██",
+                    "█▀   ▀█",
+                    "▀     ▀"
+                ],
+                4: [
+                    " ▄█▄ ",
+                    "█▪▄▪█",
+                    " ███ ",
+                    "█▀o▀█",
+                    "▀   ▀"
+                ],
+                3: [
+                    "▄█▄",
+                    "█o█",
+                    "▀▀▀"
+                ],
+                2: [
+                    "██",
+                    "▀▀"
+                ],
+                1: [
+                    "o"
+                ]
+            },
+            // 트롤 (T) - 거대함
+            'T': {
+                5: [
+                    "▄▄███▄▄",
+                    "██◕█◕██",
+                    " ██▀██ ",
+                    "▄█████▄",
+                    "███T███",
+                    "██▀ ▀██",
+                    "▀▀   ▀▀"
+                ],
+                4: [
+                    "▄███▄",
+                    "█◕█◕█",
+                    " ███ ",
+                    "██T██",
+                    "▀▀ ▀▀"
+                ],
+                3: [
+                    "███",
+                    "█T█",
+                    "▀▀▀"
+                ],
+                2: [
+                    "██",
+                    "▀▀"
+                ],
+                1: [
+                    "T"
+                ]
+            },
+            // 쥐 (r) - 작음
+            'r': {
+                5: [
+                    "       ",
+                    "  ▄▄   ",
+                    " ◕ ◕▄  ",
+                    "  ▀▀▀▀~",
+                    "   r   ",
+                    "       ",
+                    "       "
+                ],
+                4: [
+                    "     ",
+                    " ▄▄  ",
+                    "◕◕▀▀~",
+                    "     ",
+                    "     "
+                ],
+                3: [
+                    "   ",
+                    "▄r~",
+                    "   "
+                ],
+                2: [
+                    "r~",
+                    "  "
+                ],
+                1: [
+                    "r"
+                ]
+            },
+            // 늑대 (w)
+            'w': {
+                5: [
+                    " ▲   ▲ ",
+                    "██▄▄▄██",
+                    "█ ◕ ◕ █",
+                    " █▀▀▀█ ",
+                    "▄█████▄",
+                    "██ w ██",
+                    "▀▀   ▀▀"
+                ],
+                4: [
+                    "▲   ▲",
+                    "█▄▄▄█",
+                    " ███ ",
+                    "█ w █",
+                    "▀   ▀"
+                ],
+                3: [
+                    "▲ ▲",
+                    "█w█",
+                    "▀ ▀"
+                ],
+                2: [
+                    "▲▲",
+                    "▀▀"
+                ],
+                1: [
+                    "w"
+                ]
+            },
+            // NPC (@) - 노란색
+            '@': {
+                5: [
+                    "  ▄▄▄  ",
+                    " █   █ ",
+                    " █◕◕█ ",
+                    "  ▀█▀  ",
+                    " ▄███▄ ",
+                    " █ @ █ ",
+                    " ▀   ▀ "
+                ],
+                4: [
+                    " ▄▄▄ ",
+                    " █◕█ ",
+                    "  █  ",
+                    " █@█ ",
+                    " ▀ ▀ "
+                ],
+                3: [
+                    " ▄ ",
+                    "█@█",
+                    " ▀ "
+                ],
+                2: [
+                    "@@",
+                    "▀▀"
+                ],
+                1: [
+                    "@"
+                ]
+            },
+            // 기본 패턴 (알 수 없는 문자용)
+            'default': {
+                5: [
+                    "  ▄▄▄  ",
+                    " █???█ ",
+                    " █   █ ",
+                    "  ███  ",
+                    " █   █ ",
+                    " █ ? █ ",
+                    " ▀   ▀ "
+                ],
+                4: [
+                    " ▄▄▄ ",
+                    " █?█ ",
+                    "  █  ",
+                    " █?█ ",
+                    " ▀ ▀ "
+                ],
+                3: [
+                    " ▄ ",
+                    "█?█",
+                    " ▀ "
+                ],
+                2: [
+                    "??",
+                    "▀▀"
+                ],
+                1: [
+                    "?"
+                ]
+            }
+        };
+    }
+
+    // 거리와 엔티티 크기에 따른 스케일 레벨 계산
+    getScaleLevel(distance, entitySize = null) {
+        const size = entitySize || this.defaultEntitySize;
+        const sizeMultiplier = size.height || 1.0;
+
+        // 거리에 따른 기본 스케일 (크기 배율 적용)
+        const adjustedDist = distance / sizeMultiplier;
+
+        if (adjustedDist < 2) return 5;      // 매우 가까움
+        if (adjustedDist < 4) return 4;      // 가까움
+        if (adjustedDist < 6) return 3;      // 보통
+        if (adjustedDist < 10) return 2;     // 멀리
+        return 1;                             // 매우 멀리
+    }
+
+    // 엔티티의 ASCII 패턴 가져오기
+    getEntityPattern(char, scaleLevel) {
+        const patterns = this.asciiScalePatterns[char] || this.asciiScalePatterns['default'];
+        return patterns[scaleLevel] || patterns[1];
     }
 
     // 플레이어 방향 설정
@@ -181,7 +428,7 @@ class ASCII3DRenderer {
         return '.';
     }
 
-    // 엔티티(몬스터, NPC, 아이템) 렌더링
+    // 엔티티(몬스터, NPC, 아이템) 렌더링 - 확대된 ASCII 아트 사용
     renderEntities(buffer, depthBuffer, gameMap, playerX, playerY, entities) {
         // 플레이어로부터의 거리로 정렬 (먼 것부터)
         const sortedEntities = entities
@@ -218,32 +465,110 @@ class ASCII3DRenderer {
                 if (screenX >= 0 && screenX < this.width) {
                     // 깊이 버퍼 체크 (벽 뒤에 있으면 그리지 않음)
                     if (entity.dist < depthBuffer[screenX]) {
-                        // 엔티티 크기 계산
-                        const entityHeight = Math.floor(this.height / entity.dist);
-                        const startY = Math.floor((this.height - entityHeight) / 2);
-                        const endY = startY + entityHeight;
+                        // 엔티티 크기 정보 가져오기 (있으면 사용, 없으면 기본값)
+                        const entitySize = entity.size || this.defaultEntitySize;
 
-                        // 엔티티 타입에 따른 문자 선택
-                        const entityType = entity.type || 'monster';
-                        const chars = this.entityChars[entityType] || this.entityChars['monster'];
-                        const charIndex = Math.min(
-                            Math.floor(entity.dist / 4),
-                            chars.length - 1
-                        );
-                        const entityChar = chars[charIndex];
+                        // 스케일 레벨 계산
+                        const scaleLevel = this.getScaleLevel(entity.dist, entitySize);
 
-                        // 화면에 그리기
+                        // 엔티티의 원본 ASCII 문자 가져오기
+                        const entityChar = entity.char || '?';
+
+                        // 확대된 ASCII 패턴 가져오기
+                        const pattern = this.getEntityPattern(entityChar, scaleLevel);
+
+                        // 패턴 크기
+                        const patternHeight = pattern.length;
+                        const patternWidth = pattern[0].length;
+
+                        // 화면 중앙에 패턴 배치
                         const centerY = Math.floor(this.height / 2);
-                        if (centerY >= 0 && centerY < this.height && entityChar !== ' ') {
-                            buffer[screenX][centerY] = {
-                                char: entityChar,
-                                color: entity.color || '#f00'
-                            };
+                        const startY = centerY - Math.floor(patternHeight / 2);
+                        const startX = screenX - Math.floor(patternWidth / 2);
+
+                        // 너비 배율 적용
+                        const widthMultiplier = entitySize.width || 1.0;
+                        const adjustedPatternWidth = Math.floor(patternWidth * widthMultiplier);
+
+                        // 패턴을 버퍼에 그리기
+                        for (let py = 0; py < patternHeight; py++) {
+                            const bufferY = startY + py;
+                            if (bufferY < 0 || bufferY >= this.height) continue;
+
+                            for (let px = 0; px < patternWidth; px++) {
+                                // 너비 배율에 따른 X 위치 조정
+                                const bufferX = startX + Math.floor(px * widthMultiplier);
+                                if (bufferX < 0 || bufferX >= this.width) continue;
+
+                                // 깊이 버퍼 확인 (벽 뒤에 있으면 그리지 않음)
+                                if (entity.dist >= depthBuffer[bufferX]) continue;
+
+                                const char = pattern[py][px];
+                                if (char && char !== ' ') {
+                                    // 색상 결정 (거리에 따라 어두워짐)
+                                    const brightness = Math.max(0.3, 1 - entity.dist / this.maxDepth);
+                                    const baseColor = entity.color || '#ff0000';
+                                    const dimmedColor = this.dimColor(baseColor, brightness);
+
+                                    buffer[bufferX][bufferY] = {
+                                        char: char,
+                                        color: dimmedColor
+                                    };
+
+                                    // 너비 배율이 1보다 크면 추가 열도 채우기
+                                    if (widthMultiplier > 1) {
+                                        for (let wx = 1; wx < widthMultiplier; wx++) {
+                                            const extraX = bufferX + wx;
+                                            if (extraX >= 0 && extraX < this.width &&
+                                                entity.dist < depthBuffer[extraX]) {
+                                                buffer[extraX][bufferY] = {
+                                                    char: char,
+                                                    color: dimmedColor
+                                                };
+                                            }
+                                        }
+                                    }
+                                }
+                            }
                         }
                     }
                 }
             }
         }
+    }
+
+    // 색상을 어둡게 조절
+    dimColor(color, brightness) {
+        // hex 색상을 RGB로 변환
+        let r, g, b;
+        if (color.startsWith('#')) {
+            const hex = color.slice(1);
+            if (hex.length === 3) {
+                r = parseInt(hex[0] + hex[0], 16);
+                g = parseInt(hex[1] + hex[1], 16);
+                b = parseInt(hex[2] + hex[2], 16);
+            } else {
+                r = parseInt(hex.slice(0, 2), 16);
+                g = parseInt(hex.slice(2, 4), 16);
+                b = parseInt(hex.slice(4, 6), 16);
+            }
+        } else if (color.startsWith('rgb')) {
+            const match = color.match(/\d+/g);
+            if (match) {
+                [r, g, b] = match.map(Number);
+            } else {
+                return color;
+            }
+        } else {
+            return color;
+        }
+
+        // 밝기 적용
+        r = Math.floor(r * brightness);
+        g = Math.floor(g * brightness);
+        b = Math.floor(b * brightness);
+
+        return `rgb(${r},${g},${b})`;
     }
 
     // 버퍼를 문자열로 변환
