@@ -740,20 +740,53 @@ body {
     transform: scale(0.95);
 }
 
-/* 반응형 */
-@media (max-width: 600px) {
+/* 반응형 - 모바일 세로 화면 */
+@media (max-width: 768px) {
     #game-container {
         border-radius: 0;
         border: none;
+        max-width: 100%;
+        min-height: 100vh;
+        height: auto;
+    }
+
+    /* 모바일에서 세로 레이아웃 */
+    #game-screen {
+        flex-direction: column;
+        height: auto;
+        min-height: 100vh;
+    }
+
+    /* 좌측 패널 (3D 뷰 + 컨트롤) - 상단 배치 */
+    #left-panel {
+        width: 100%;
+        min-width: 100%;
+        border-right: none;
+        border-bottom: 2px solid #333;
+    }
+
+    /* 우측 패널 (던전맵 + UI) - 하단 배치 */
+    #right-panel {
+        width: 100%;
+        min-height: 300px;
+    }
+
+    /* 던전맵 중앙 정렬 */
+    #map-container {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
     }
 
     #map-display {
-        font-size: 11px;
-        letter-spacing: 1px;
+        font-size: 10px;
+        letter-spacing: 0px;
+        text-align: center;
+        overflow-x: auto;
     }
 
     .title-art {
-        font-size: 6px;
+        font-size: 5px;
     }
 
     #status-bar {
@@ -765,16 +798,71 @@ body {
         width: 80px;
     }
 
-    /* 모바일에서 컨트롤 더 크게 */
+    #info-bar {
+        flex-wrap: wrap;
+        gap: 8px;
+    }
+
+    /* 모바일 컨트롤 - 이동 버튼 3배 크게 */
+    #mobile-controls {
+        padding: 15px;
+        gap: 20px;
+    }
+
+    .move-row {
+        gap: 6px;
+    }
+
     .move-btn {
-        width: 44px;
-        height: 44px;
-        font-size: 20px;
+        width: 70px;
+        height: 70px;
+        font-size: 32px;
+        border-radius: 8px;
+        border-width: 3px;
+    }
+
+    /* 단축키 버튼도 정사각형으로 크게 */
+    #action-controls {
+        gap: 10px;
     }
 
     .action-btn {
-        width: 36px;
-        height: 36px;
-        font-size: 13px;
+        width: 50px;
+        height: 50px;
+        font-size: 18px;
+        border-radius: 6px;
+        border-width: 2px;
+    }
+
+    /* 3D 뷰 높이 조정 */
+    #view3d-container {
+        min-height: 150px;
+    }
+
+    #view3d-display {
+        font-size: 6px;
+    }
+}
+
+/* 더 작은 화면 (폰) */
+@media (max-width: 480px) {
+    .move-btn {
+        width: 60px;
+        height: 60px;
+        font-size: 28px;
+    }
+
+    .action-btn {
+        width: 45px;
+        height: 45px;
+        font-size: 16px;
+    }
+
+    #map-display {
+        font-size: 8px;
+    }
+
+    #view3d-display {
+        font-size: 5px;
     }
 }
