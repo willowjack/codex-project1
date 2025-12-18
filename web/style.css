@@ -783,6 +783,19 @@ body {
         background-color: #0d0d0d;
         border-top: 2px solid #444;
         z-index: 100;
+        display: flex;
+        flex-direction: column;
+        gap: 15px;
+        padding: 15px;
+    }
+
+    /* 이동버튼이 위, 단축키버튼이 아래 */
+    #move-controls {
+        order: 1;
+    }
+
+    #action-controls {
+        order: 2;
     }
 
     /* 컨트롤 영역 높이만큼 하단 여백 */
