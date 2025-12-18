@@ -293,7 +293,12 @@ body {
 }
 
 /* 타일 색상 클래스 */
-.tile-player { color: #ffffff; font-weight: bold; }
+.tile-player {
+    color: #ffff00;
+    font-weight: bold;
+    background-color: #333;
+    text-shadow: 0 0 5px #ff0;
+}
 .tile-floor { color: #666666; }
 .tile-wall { color: #8b7355; }
 .tile-wall-visible { color: #c8a050; }
@@ -1090,12 +1095,4 @@ body {
     }
 }
 
-/* 플레이어 깜빡임 애니메이션 */
-@keyframes playerBlink {
-    0%, 100% { opacity: 1; }
-    50% { opacity: 0.4; }
-}
-
-.tile-player {
-    animation: playerBlink 1s ease-in-out infinite;
-}
+/* 플레이어 스타일은 상단에서 정의됨 */
