@@ -382,9 +382,6 @@ class ASCII3DRenderer {
     }
 
     drawEntity(buffer, entity) {
-        // 디버깅: 엔티티 정보 확인
-        console.log('Drawing entity:', entity.char, entity.type, entity);
-
         const depth = entity.depth;
         const vp = this.viewports[depth];
 
@@ -469,8 +466,13 @@ class ASCII3DRenderer {
     // 패턴 관련
     initAsciiPatterns() {
         if (typeof MONSTER_PATTERNS !== 'undefined') {
-            return this.convertExternalPatterns(MONSTER_PATTERNS);
+            const patterns = this.convertExternalPatterns(MONSTER_PATTERNS);
+            // 패턴 로딩 성공 확인
+            console.log('✅ MONSTER_PATTERNS loaded:', Object.keys(patterns).length, 'patterns');
+            return patterns;
         }
+        // MONSTER_PATTERNS가 없으면 기본 패턴 사용
+        console.warn('⚠️ MONSTER_PATTERNS not found, using default patterns');
         return this.getDefaultPatterns();
     }
 
@@ -499,10 +501,6 @@ class ASCII3DRenderer {
     }
 
     getEntityPattern(char, scaleLevel) {
-        // 디버깅: 패턴 로딩 확인
-        if (!this.asciiScalePatterns[char]) {
-            console.log(`Pattern not found for char: '${char}', available:`, Object.keys(this.asciiScalePatterns).slice(0, 10));
-        }
         const patterns = this.asciiScalePatterns[char] || this.asciiScalePatterns['default'];
         return patterns ? (patterns[scaleLevel] || patterns[1]) : null;
     }

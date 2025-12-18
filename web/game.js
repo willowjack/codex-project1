@@ -1293,6 +1293,11 @@ class Game {
             });
         }
 
+        // 디버그: 엔티티 정보 확인
+        if (entities.length > 0) {
+            console.log('3D entities:', entities.map(e => `${e.char}(${e.type})`).join(', '));
+        }
+
         // 3D 뷰 렌더링
         const html = this.renderer3D.renderToHTML(
             mapData,
