@@ -33,6 +33,7 @@ const MONSTER_PATTERNS = {
         name: '고블린',
         color: '#3f7f3f',
         size: { height: 1.0, width: 1.0, weight: 1.0 },
+        stats: { hp: 12, power: 4, defense: 1, detection: 6, xp: 15, gold: 10, strength: 'none', weakness: 'holy' },
         patterns: {
             5: [
                 "  ▄█▄  ",
@@ -72,6 +73,7 @@ const MONSTER_PATTERNS = {
         name: '오크',
         color: '#007f00',
         size: { height: 1.2, width: 1.3, weight: 2.0 },
+        stats: { hp: 20, power: 6, defense: 2, detection: 7, xp: 25, gold: 15, strength: 'physical', weakness: 'ice' },
         patterns: {
             5: [
                 " ▄███▄ ",
@@ -111,6 +113,7 @@ const MONSTER_PATTERNS = {
         name: '트롤',
         color: '#4a7f4a',
         size: { height: 1.6, width: 1.4, weight: 3.5 },
+        stats: { hp: 40, power: 8, defense: 3, detection: 6, xp: 50, gold: 30, strength: 'physical', weakness: 'fire' },
         patterns: {
             5: [
                 "▄▄███▄▄",
@@ -150,6 +153,7 @@ const MONSTER_PATTERNS = {
         name: '오우거',
         color: '#8b4513',
         size: { height: 1.8, width: 1.6, weight: 5.0 },
+        stats: { hp: 50, power: 10, defense: 3, detection: 5, xp: 60, gold: 40, strength: 'physical', weakness: 'lightning' },
         patterns: {
             5: [
                 " ▄███▄ ",
@@ -189,6 +193,7 @@ const MONSTER_PATTERNS = {
         name: '임프',
         color: '#ff4444',
         size: { height: 0.7, width: 0.7, weight: 0.5 },
+        stats: { hp: 8, power: 3, defense: 0, detection: 8, xp: 10, gold: 5, strength: 'fire', weakness: 'holy' },
         patterns: {
             5: [
                 " ▲   ▲ ",
@@ -228,6 +233,7 @@ const MONSTER_PATTERNS = {
         name: '해골',
         color: '#f0f0f0',
         size: { height: 1.0, width: 0.9, weight: 0.5 },
+        stats: { hp: 14, power: 5, defense: 1, detection: 6, xp: 18, gold: 8, strength: 'dark', weakness: 'holy' },
         patterns: {
             5: [
                 " .-▄▄-. ",
@@ -267,6 +273,7 @@ const MONSTER_PATTERNS = {
         name: '좀비',
         color: '#556b2f',
         size: { height: 1.1, width: 1.0, weight: 1.5 },
+        stats: { hp: 25, power: 5, defense: 3, detection: 4, xp: 20, gold: 5, strength: 'poison', weakness: 'holy' },
         patterns: {
             5: [
                 "  ▄▓▄  ",
@@ -306,6 +313,7 @@ const MONSTER_PATTERNS = {
         name: '뱀파이어',
         color: '#8b0000',
         size: { height: 1.1, width: 1.0, weight: 1.2 },
+        stats: { hp: 35, power: 8, defense: 2, detection: 10, xp: 45, gold: 35, strength: 'dark', weakness: 'holy' },
         patterns: {
             5: [
                 " ▄▄▄▄▄ ",
@@ -345,6 +353,7 @@ const MONSTER_PATTERNS = {
         name: '리치',
         color: '#9400d3',
         size: { height: 1.2, width: 1.0, weight: 0.8 },
+        stats: { hp: 45, power: 12, defense: 2, detection: 12, xp: 80, gold: 60, strength: 'dark', weakness: 'holy' },
         patterns: {
             5: [
                 " ▄▄▄▄▄ ",
@@ -384,6 +393,7 @@ const MONSTER_PATTERNS = {
         name: '기사',
         color: '#c0c0c0',
         size: { height: 1.2, width: 1.1, weight: 2.5 },
+        stats: { hp: 30, power: 7, defense: 5, detection: 7, xp: 35, gold: 25, strength: 'physical', weakness: 'lightning' },
         patterns: {
             5: [
                 "  ▄█▄  ",
@@ -423,6 +433,7 @@ const MONSTER_PATTERNS = {
         name: '마법사',
         color: '#4169e1',
         size: { height: 1.1, width: 1.0, weight: 1.0 },
+        stats: { hp: 20, power: 10, defense: 1, detection: 10, xp: 40, gold: 30, strength: 'lightning', weakness: 'physical' },
         patterns: {
             5: [
                 "  ▄▄▄  ",
@@ -462,6 +473,7 @@ const MONSTER_PATTERNS = {
         name: '강령술사',
         color: '#2f4f4f',
         size: { height: 1.1, width: 1.0, weight: 1.0 },
+        stats: { hp: 25, power: 9, defense: 1, detection: 9, xp: 45, gold: 35, strength: 'dark', weakness: 'holy' },
         patterns: {
             5: [
                 "  ▄▄▄  ",
@@ -501,6 +513,7 @@ const MONSTER_PATTERNS = {
         name: '궁수',
         color: '#228b22',
         size: { height: 1.0, width: 1.0, weight: 1.0 },
+        stats: { hp: 18, power: 6, defense: 1, detection: 12, xp: 25, gold: 15, strength: 'none', weakness: 'physical' },
         patterns: {
             5: [
                 "  ▄▄▄  ",
@@ -544,6 +557,7 @@ const MONSTER_PATTERNS = {
         name: '쥐',
         color: '#96644a',
         size: { height: 0.4, width: 0.6, weight: 0.2 },
+        stats: { hp: 5, power: 2, defense: 0, detection: 5, xp: 5, gold: 2, strength: 'none', weakness: 'none' },
         patterns: {
             5: [
                 "       ",
@@ -583,6 +597,7 @@ const MONSTER_PATTERNS = {
         name: '박쥐',
         color: '#4a4a4a',
         size: { height: 0.5, width: 1.2, weight: 0.3 },
+        stats: { hp: 6, power: 2, defense: 0, detection: 8, xp: 5, gold: 1, strength: 'dark', weakness: 'lightning' },
         patterns: {
             5: [
                 "       ",
@@ -622,6 +637,7 @@ const MONSTER_PATTERNS = {
         name: '늑대',
         color: '#708090',
         size: { height: 1.0, width: 1.3, weight: 1.5 },
+        stats: { hp: 18, power: 7, defense: 1, detection: 10, xp: 22, gold: 8, strength: 'ice', weakness: 'fire' },
         patterns: {
             5: [
                 " ▲   ▲ ",
@@ -661,6 +677,7 @@ const MONSTER_PATTERNS = {
         name: '곰',
         color: '#5c4033',
         size: { height: 1.5, width: 1.6, weight: 4.5 },
+        stats: { hp: 35, power: 9, defense: 2, detection: 8, xp: 45, gold: 25, strength: 'physical', weakness: 'ice' },
         patterns: {
             5: [
                 " ▄▄█▄▄ ",
@@ -700,6 +717,7 @@ const MONSTER_PATTERNS = {
         name: '뱀',
         color: '#32cd32',
         size: { height: 0.3, width: 1.5, weight: 0.5 },
+        stats: { hp: 10, power: 4, defense: 0, detection: 7, xp: 12, gold: 3, strength: 'poison', weakness: 'ice' },
         patterns: {
             5: [
                 "       ",
@@ -739,6 +757,7 @@ const MONSTER_PATTERNS = {
         name: '거미',
         color: '#8b4513',
         size: { height: 0.6, width: 1.2, weight: 0.4 },
+        stats: { hp: 8, power: 3, defense: 0, detection: 6, xp: 8, gold: 3, strength: 'poison', weakness: 'fire' },
         patterns: {
             5: [
                 "\\  |  /",
@@ -778,6 +797,7 @@ const MONSTER_PATTERNS = {
         name: '전갈',
         color: '#daa520',
         size: { height: 0.4, width: 1.0, weight: 0.3 },
+        stats: { hp: 12, power: 5, defense: 2, detection: 6, xp: 15, gold: 5, strength: 'poison', weakness: 'ice' },
         patterns: {
             5: [
                 "    ◆  ",
@@ -821,6 +841,7 @@ const MONSTER_PATTERNS = {
         name: '드래곤',
         color: '#ff4500',
         size: { height: 2.5, width: 2.5, weight: 15.0 },
+        stats: { hp: 80, power: 15, defense: 5, detection: 10, xp: 200, gold: 150, strength: 'fire', weakness: 'ice' },
         patterns: {
             5: [
                 "/\\▄█▄/\\",
@@ -860,6 +881,7 @@ const MONSTER_PATTERNS = {
         name: '와이번',
         color: '#6b8e23',
         size: { height: 1.4, width: 1.8, weight: 3.0 },
+        stats: { hp: 45, power: 10, defense: 3, detection: 9, xp: 60, gold: 40, strength: 'poison', weakness: 'lightning' },
         patterns: {
             5: [
                 "▄     ▄",
@@ -899,6 +921,7 @@ const MONSTER_PATTERNS = {
         name: '유니콘',
         color: '#ffffff',
         size: { height: 1.3, width: 1.4, weight: 2.0 },
+        stats: { hp: 30, power: 6, defense: 2, detection: 12, xp: 40, gold: 50, strength: 'holy', weakness: 'dark' },
         patterns: {
             5: [
                 "   ★   ",
@@ -938,6 +961,7 @@ const MONSTER_PATTERNS = {
         name: '페가수스',
         color: '#f0f8ff',
         size: { height: 1.4, width: 1.8, weight: 2.5 },
+        stats: { hp: 35, power: 7, defense: 2, detection: 14, xp: 50, gold: 45, strength: 'holy', weakness: 'dark' },
         patterns: {
             5: [
                 "▄     ▄",
@@ -977,6 +1001,7 @@ const MONSTER_PATTERNS = {
         name: '불사조',
         color: '#ff6600',
         size: { height: 1.5, width: 2.0, weight: 1.5 },
+        stats: { hp: 50, power: 12, defense: 2, detection: 12, xp: 100, gold: 80, strength: 'fire', weakness: 'ice' },
         patterns: {
             5: [
                 "  ★★★  ",
@@ -1016,6 +1041,7 @@ const MONSTER_PATTERNS = {
         name: '그리폰',
         color: '#daa520',
         size: { height: 1.5, width: 1.6, weight: 3.5 },
+        stats: { hp: 40, power: 9, defense: 3, detection: 12, xp: 55, gold: 45, strength: 'physical', weakness: 'lightning' },
         patterns: {
             5: [
                 "▄     ▄",
@@ -1055,6 +1081,7 @@ const MONSTER_PATTERNS = {
         name: '켄타우로스',
         color: '#d2691e',
         size: { height: 1.4, width: 1.5, weight: 3.0 },
+        stats: { hp: 35, power: 8, defense: 2, detection: 9, xp: 45, gold: 30, strength: 'physical', weakness: 'ice' },
         patterns: {
             5: [
                 "  ▄▄▄  ",
@@ -1094,6 +1121,7 @@ const MONSTER_PATTERNS = {
         name: '미노타우로스',
         color: '#8b4513',
         size: { height: 1.6, width: 1.4, weight: 4.0 },
+        stats: { hp: 60, power: 12, defense: 4, detection: 7, xp: 100, gold: 80, strength: 'physical', weakness: 'lightning' },
         patterns: {
             5: [
                 "▄     ▄",
@@ -1133,6 +1161,7 @@ const MONSTER_PATTERNS = {
         name: '하피',
         color: '#9370db',
         size: { height: 1.1, width: 1.5, weight: 1.0 },
+        stats: { hp: 22, power: 6, defense: 1, detection: 11, xp: 28, gold: 20, strength: 'none', weakness: 'lightning' },
         patterns: {
             5: [
                 "▄     ▄",
@@ -1176,6 +1205,7 @@ const MONSTER_PATTERNS = {
         name: '유령',
         color: '#b0c4de',
         size: { height: 1.0, width: 1.0, weight: 0.0 },
+        stats: { hp: 15, power: 5, defense: 0, detection: 8, xp: 18, gold: 0, strength: 'dark', weakness: 'holy' },
         patterns: {
             5: [
                 "  .-.  ",
@@ -1215,6 +1245,7 @@ const MONSTER_PATTERNS = {
         name: '레이스',
         color: '#483d8b',
         size: { height: 1.2, width: 1.0, weight: 0.0 },
+        stats: { hp: 30, power: 8, defense: 0, detection: 10, xp: 40, gold: 0, strength: 'dark', weakness: 'holy' },
         patterns: {
             5: [
                 "  ▄▄▄  ",
@@ -1254,6 +1285,7 @@ const MONSTER_PATTERNS = {
         name: '불 정령',
         color: '#ff4500',
         size: { height: 1.3, width: 1.2, weight: 0.5 },
+        stats: { hp: 25, power: 10, defense: 1, detection: 8, xp: 35, gold: 20, strength: 'fire', weakness: 'ice' },
         patterns: {
             5: [
                 " (★*★) ",
@@ -1293,6 +1325,7 @@ const MONSTER_PATTERNS = {
         name: '물 정령',
         color: '#00bfff',
         size: { height: 1.3, width: 1.2, weight: 1.5 },
+        stats: { hp: 28, power: 8, defense: 2, detection: 8, xp: 35, gold: 20, strength: 'ice', weakness: 'lightning' },
         patterns: {
             5: [
                 "  ~~~  ",
@@ -1336,6 +1369,7 @@ const MONSTER_PATTERNS = {
         name: '슬라임',
         color: '#00ff00',
         size: { height: 0.6, width: 1.0, weight: 0.8 },
+        stats: { hp: 15, power: 3, defense: 2, detection: 4, xp: 12, gold: 5, strength: 'physical', weakness: 'fire' },
         patterns: {
             5: [
                 "  °    ",
@@ -1375,6 +1409,7 @@ const MONSTER_PATTERNS = {
         name: '젤리',
         color: '#7cfc00',
         size: { height: 1.0, width: 1.5, weight: 2.0 },
+        stats: { hp: 30, power: 5, defense: 3, detection: 4, xp: 25, gold: 10, strength: 'physical', weakness: 'fire' },
         patterns: {
             5: [
                 " ▄▄▄▄▄ ",
@@ -1418,6 +1453,7 @@ const MONSTER_PATTERNS = {
         name: '미라',
         color: '#f5deb3',
         size: { height: 1.1, width: 1.0, weight: 1.2 },
+        stats: { hp: 28, power: 6, defense: 3, detection: 5, xp: 30, gold: 25, strength: 'dark', weakness: 'fire' },
         patterns: {
             5: [
                 "  ▄▄▄  ",
@@ -1457,6 +1493,7 @@ const MONSTER_PATTERNS = {
         name: '구울',
         color: '#708090',
         size: { height: 1.0, width: 1.0, weight: 1.3 },
+        stats: { hp: 22, power: 7, defense: 1, detection: 6, xp: 25, gold: 10, strength: 'dark', weakness: 'holy' },
         patterns: {
             5: [
                 "  ▄▄▄  ",
@@ -1500,6 +1537,7 @@ const MONSTER_PATTERNS = {
         name: '거대 개미',
         color: '#8b0000',
         size: { height: 0.5, width: 1.0, weight: 0.3 },
+        stats: { hp: 8, power: 3, defense: 1, detection: 5, xp: 8, gold: 2, strength: 'none', weakness: 'fire' },
         patterns: {
             5: [
                 "       ",
@@ -1539,6 +1577,7 @@ const MONSTER_PATTERNS = {
         name: '벌',
         color: '#ffd700',
         size: { height: 0.4, width: 0.8, weight: 0.2 },
+        stats: { hp: 6, power: 4, defense: 0, detection: 8, xp: 8, gold: 3, strength: 'poison', weakness: 'ice' },
         patterns: {
             5: [
                 "       ",
@@ -1582,6 +1621,7 @@ const MONSTER_PATTERNS = {
         name: 'NPC',
         color: '#ffff00',
         size: { height: 1.0, width: 1.0, weight: 1.0 },
+        stats: { hp: 20, power: 5, defense: 2, detection: 8, xp: 0, gold: 0, strength: 'none', weakness: 'none' },
         patterns: {
             5: [
                 "  ▄▄▄  ",
@@ -1621,6 +1661,7 @@ const MONSTER_PATTERNS = {
         name: '상인',
         color: '#ffd700',
         size: { height: 1.0, width: 1.0, weight: 1.2 },
+        stats: { hp: 30, power: 3, defense: 3, detection: 10, xp: 0, gold: 100, strength: 'none', weakness: 'none' },
         patterns: {
             5: [
                 "  ▄▄▄  ",
@@ -1664,6 +1705,7 @@ const MONSTER_PATTERNS = {
         name: '미믹',
         color: '#daa520',
         size: { height: 0.8, width: 1.0, weight: 1.5 },
+        stats: { hp: 25, power: 8, defense: 3, detection: 15, xp: 35, gold: 50, strength: 'physical', weakness: 'fire' },
         patterns: {
             5: [
                 "       ",
@@ -1703,6 +1745,7 @@ const MONSTER_PATTERNS = {
         name: '비홀더',
         color: '#ff69b4',
         size: { height: 1.0, width: 1.0, weight: 0.5 },
+        stats: { hp: 55, power: 14, defense: 2, detection: 15, xp: 120, gold: 100, strength: 'dark', weakness: 'physical' },
         patterns: {
             5: [
                 "~◕~◕~◕~",
@@ -1742,6 +1785,7 @@ const MONSTER_PATTERNS = {
         name: '젤라틴 큐브',
         color: '#7fffd4',
         size: { height: 1.5, width: 1.5, weight: 3.0 },
+        stats: { hp: 40, power: 6, defense: 4, detection: 3, xp: 40, gold: 30, strength: 'physical', weakness: 'fire' },
         patterns: {
             5: [
                 "▄▄▄▄▄▄▄",
@@ -1781,6 +1825,7 @@ const MONSTER_PATTERNS = {
         name: '알 수 없음',
         color: '#ffffff',
         size: { height: 1.0, width: 1.0, weight: 1.0 },
+        stats: { hp: 10, power: 3, defense: 0, detection: 6, xp: 10, gold: 5, strength: 'none', weakness: 'none' },
         patterns: {
             5: [
                 "  ▄▄▄  ",
@@ -1824,6 +1869,7 @@ const MONSTER_PATTERNS = {
         name: '시체',
         color: '#884400',
         size: { height: 0.3, width: 1.0, weight: 2.0 },
+        stats: { hp: 0, power: 0, defense: 0, detection: 0, xp: 0, gold: 0, strength: 'none', weakness: 'none' },
         patterns: {
             5: [
                 "       ",
@@ -1863,6 +1909,7 @@ const MONSTER_PATTERNS = {
         name: '음식',
         color: '#00ff00',
         size: { height: 0.4, width: 0.4, weight: 0.3 },
+        stats: { hp: 0, power: 0, defense: 0, detection: 0, xp: 0, gold: 0, strength: 'none', weakness: 'none' },
         patterns: {
             5: [
                 "       ",
@@ -1902,6 +1949,7 @@ const MONSTER_PATTERNS = {
         name: '물약',
         color: '#ff00ff',
         size: { height: 0.5, width: 0.3, weight: 0.2 },
+        stats: { hp: 0, power: 0, defense: 0, detection: 0, xp: 0, gold: 0, strength: 'none', weakness: 'none' },
         patterns: {
             5: [
                 "       ",
@@ -1941,6 +1989,7 @@ const MONSTER_PATTERNS = {
         name: '무기',
         color: '#c0c0c0',
         size: { height: 0.8, width: 0.3, weight: 1.0 },
+        stats: { hp: 0, power: 0, defense: 0, detection: 0, xp: 0, gold: 0, strength: 'none', weakness: 'none' },
         patterns: {
             5: [
                 "       ",
@@ -1980,6 +2029,7 @@ const MONSTER_PATTERNS = {
         name: '방어구',
         color: '#808080',
         size: { height: 0.6, width: 0.5, weight: 2.0 },
+        stats: { hp: 0, power: 0, defense: 0, detection: 0, xp: 0, gold: 0, strength: 'none', weakness: 'none' },
         patterns: {
             5: [
                 "       ",
@@ -2019,6 +2069,7 @@ const MONSTER_PATTERNS = {
         name: '금화',
         color: '#ffd700',
         size: { height: 0.3, width: 0.3, weight: 0.1 },
+        stats: { hp: 0, power: 0, defense: 0, detection: 0, xp: 0, gold: 0, strength: 'none', weakness: 'none' },
         patterns: {
             5: [
                 "       ",
@@ -2058,6 +2109,7 @@ const MONSTER_PATTERNS = {
         name: '계단',
         color: '#ffffff',
         size: { height: 0.5, width: 0.8, weight: 0.0 },
+        stats: { hp: 0, power: 0, defense: 0, detection: 0, xp: 0, gold: 0, strength: 'none', weakness: 'none' },
         patterns: {
             5: [
                 "       ",
@@ -2097,6 +2149,7 @@ const MONSTER_PATTERNS = {
         name: '스크롤',
         color: '#ffa500',
         size: { height: 0.4, width: 0.5, weight: 0.1 },
+        stats: { hp: 0, power: 0, defense: 0, detection: 0, xp: 0, gold: 0, strength: 'none', weakness: 'none' },
         patterns: {
             5: [
                 "       ",
@@ -2136,6 +2189,7 @@ const MONSTER_PATTERNS = {
         name: '열쇠',
         color: '#ffcc00',
         size: { height: 0.3, width: 0.5, weight: 0.1 },
+        stats: { hp: 0, power: 0, defense: 0, detection: 0, xp: 0, gold: 0, strength: 'none', weakness: 'none' },
         patterns: {
             5: [
                 "       ",
