@@ -410,6 +410,7 @@
                 <button class="tool-btn active" id="toolDraw" onclick="setTool('draw')">🖌️ 그리기</button>
                 <button class="tool-btn" id="toolErase" onclick="setTool('erase')">🧹 지우기</button>
                 <button class="tool-btn" id="toolFill" onclick="setTool('fill')">🪣 채우기</button>
+                <button class="tool-btn" id="toolDrag" onclick="toggleDragMode()">✋ 드래그 모드</button>
                 <button class="tool-btn" onclick="clearGrid()">🗑️ 전체 지우기</button>
                 <button class="tool-btn" onclick="flipHorizontal()">↔️ 좌우 반전</button>
             </div>
@@ -462,7 +463,67 @@
                 <div class="palette" id="paletteMisc"></div>
             </div>
 
-            <h2 style="margin-top: 20px;">⚙️ 설정</h2>
+            <h2 style="margin-top: 20px;">⚔️ 몬스터 특성</h2>
+
+            <div class="size-inputs">
+                <div class="size-input">
+                    <label>HP</label>
+                    <input type="number" id="statHp" value="10" min="1" max="999">
+                </div>
+                <div class="size-input">
+                    <label>공격력</label>
+                    <input type="number" id="statPower" value="3" min="0" max="99">
+                </div>
+                <div class="size-input">
+                    <label>방어력</label>
+                    <input type="number" id="statDefense" value="0" min="0" max="99">
+                </div>
+            </div>
+
+            <div class="size-inputs">
+                <div class="size-input">
+                    <label>탐지 거리</label>
+                    <input type="number" id="statDetection" value="6" min="1" max="20">
+                </div>
+                <div class="size-input">
+                    <label>경험치</label>
+                    <input type="number" id="statXp" value="10" min="0" max="999">
+                </div>
+                <div class="size-input">
+                    <label>골드</label>
+                    <input type="number" id="statGold" value="5" min="0" max="999">
+                </div>
+            </div>
+
+            <div style="margin: 10px 0;">
+                <label style="font-size: 12px; color: #888;">강점 속성</label>
+                <select id="statStrength" style="width: 100%; padding: 8px; background: #0f3460; border: 1px solid #1a4a7a; border-radius: 5px; color: #4f4; font-family: inherit;">
+                    <option value="none">없음</option>
+                    <option value="fire">🔥 불</option>
+                    <option value="ice">❄️ 얼음</option>
+                    <option value="lightning">⚡ 번개</option>
+                    <option value="poison">☠️ 독</option>
+                    <option value="holy">✨ 신성</option>
+                    <option value="dark">🌑 암흑</option>
+                    <option value="physical">💪 물리</option>
+                </select>
+            </div>
+
+            <div style="margin: 10px 0;">
+                <label style="font-size: 12px; color: #888;">약점 속성</label>
+                <select id="statWeakness" style="width: 100%; padding: 8px; background: #0f3460; border: 1px solid #1a4a7a; border-radius: 5px; color: #f44; font-family: inherit;">
+                    <option value="none">없음</option>
+                    <option value="fire">🔥 불</option>
+                    <option value="ice">❄️ 얼음</option>
+                    <option value="lightning">⚡ 번개</option>
+                    <option value="poison">☠️ 독</option>
+                    <option value="holy">✨ 신성</option>
+                    <option value="dark">🌑 암흑</option>
+                    <option value="physical">💪 물리</option>
+                </select>
+            </div>
+
+            <h2 style="margin-top: 20px;">⚙️ 아트 설정</h2>
 
             <div class="color-picker">
                 <input type="color" id="monsterColor" value="#ff0000">
@@ -525,6 +586,7 @@
         let currentTool = 'draw';
         let patterns = JSON.parse(JSON.stringify(MONSTER_PATTERNS));
         let isMouseDown = false;
+        let dragMode = false; // 드래그 모드 (기본: 클릭만)
 
         // 그리드 크기 (스케일별)
         const GRID_SIZES = {
@@ -542,6 +604,7 @@
             renderPalettes();
             renderGrid();
             updatePreview();
+            updateSettingsUI();
 
             // 색상 변경 이벤트
             document.getElementById('monsterColor').addEventListener('change', (e) => {
@@ -552,6 +615,16 @@
             // 사이즈 변경 이벤트
             ['sizeHeight', 'sizeWidth', 'sizeWeight'].forEach(id => {
                 document.getElementById(id).addEventListener('change', updateSize);
+            });
+
+            // 스탯 변경 이벤트
+            ['statHp', 'statPower', 'statDefense', 'statDetection', 'statXp', 'statGold'].forEach(id => {
+                document.getElementById(id).addEventListener('change', updateStats);
+            });
+
+            // 속성 변경 이벤트
+            ['statStrength', 'statWeakness'].forEach(id => {
+                document.getElementById(id).addEventListener('change', updateStats);
             });
 
             // 마우스 이벤트
@@ -639,13 +712,18 @@
                     cell.textContent = char;
                     cell.style.color = patterns[currentMonster]?.color || '#fff';
 
-                    // 이벤트
-                    cell.onmousedown = (e) => {
-                        isMouseDown = true;
+                    // 이벤트 - 클릭할 때만 그리기 (드래그 모드가 켜져있으면 드래그도 가능)
+                    cell.onclick = (e) => {
                         handleCellClick(x, y, e);
                     };
+                    cell.onmousedown = (e) => {
+                        if (dragMode) {
+                            isMouseDown = true;
+                            handleCellClick(x, y, e);
+                        }
+                    };
                     cell.onmouseenter = (e) => {
-                        if (isMouseDown) handleCellClick(x, y, e);
+                        if (dragMode && isMouseDown) handleCellClick(x, y, e);
                     };
 
                     container.appendChild(cell);
@@ -749,9 +827,22 @@
         function setTool(tool) {
             currentTool = tool;
             document.querySelectorAll('.tool-btn').forEach(btn => {
-                btn.classList.remove('active');
+                if (btn.id !== 'toolDrag') btn.classList.remove('active');
             });
             document.getElementById('tool' + tool.charAt(0).toUpperCase() + tool.slice(1)).classList.add('active');
+        }
+
+        // 드래그 모드 토글
+        function toggleDragMode() {
+            dragMode = !dragMode;
+            const btn = document.getElementById('toolDrag');
+            if (dragMode) {
+                btn.classList.add('active');
+                btn.textContent = '✋ 드래그 ON';
+            } else {
+                btn.classList.remove('active');
+                btn.textContent = '✋ 드래그 모드';
+            }
         }
 
         // 그리드 지우기
@@ -781,10 +872,20 @@
         // 설정 UI 업데이트
         function updateSettingsUI() {
             const data = patterns[currentMonster];
+            // 아트 설정
             document.getElementById('monsterColor').value = data.color || '#ffffff';
             document.getElementById('sizeHeight').value = data.size?.height || 1.0;
             document.getElementById('sizeWidth').value = data.size?.width || 1.0;
             document.getElementById('sizeWeight').value = data.size?.weight || 1.0;
+            // 스탯 설정
+            document.getElementById('statHp').value = data.stats?.hp || 10;
+            document.getElementById('statPower').value = data.stats?.power || 3;
+            document.getElementById('statDefense').value = data.stats?.defense || 0;
+            document.getElementById('statDetection').value = data.stats?.detection || 6;
+            document.getElementById('statXp').value = data.stats?.xp || 10;
+            document.getElementById('statGold').value = data.stats?.gold || 5;
+            document.getElementById('statStrength').value = data.stats?.strength || 'none';
+            document.getElementById('statWeakness').value = data.stats?.weakness || 'none';
         }
 
         // 사이즈 업데이트
@@ -793,6 +894,23 @@
                 height: parseFloat(document.getElementById('sizeHeight').value) || 1.0,
                 width: parseFloat(document.getElementById('sizeWidth').value) || 1.0,
                 weight: parseFloat(document.getElementById('sizeWeight').value) || 1.0
+            };
+        }
+
+        // 스탯 업데이트
+        function updateStats() {
+            if (!patterns[currentMonster].stats) {
+                patterns[currentMonster].stats = {};
+            }
+            patterns[currentMonster].stats = {
+                hp: parseInt(document.getElementById('statHp').value) || 10,
+                power: parseInt(document.getElementById('statPower').value) || 3,
+                defense: parseInt(document.getElementById('statDefense').value) || 0,
+                detection: parseInt(document.getElementById('statDetection').value) || 6,
+                xp: parseInt(document.getElementById('statXp').value) || 10,
+                gold: parseInt(document.getElementById('statGold').value) || 5,
+                strength: document.getElementById('statStrength').value || 'none',
+                weakness: document.getElementById('statWeakness').value || 'none'
             };
         }
 
@@ -863,11 +981,13 @@
         function exportCode() {
             const char = currentMonster;
             const data = patterns[char];
+            const stats = data.stats || { hp: 10, power: 3, defense: 0, detection: 6, xp: 10, gold: 5, strength: 'none', weakness: 'none' };
 
             const code = `'${char}': {
     name: '${data.name}',
     color: '${data.color}',
-    size: { height: ${data.size.height}, width: ${data.size.width}, weight: ${data.size.weight} },
+    size: { height: ${data.size?.height || 1}, width: ${data.size?.width || 1}, weight: ${data.size?.weight || 1} },
+    stats: { hp: ${stats.hp}, power: ${stats.power}, defense: ${stats.defense}, detection: ${stats.detection}, xp: ${stats.xp}, gold: ${stats.gold}, strength: '${stats.strength}', weakness: '${stats.weakness}' },
     patterns: {
 ${Object.entries(data.patterns).map(([scale, pattern]) => `        ${scale}: [
 ${pattern.map(row => `            "${row}"`).join(',\n')}
@@ -1001,10 +1121,12 @@ ${pattern.map(row => `            "${row}"`).join(',\n')}
             let code = `const MONSTER_PATTERNS = {\n`;
 
             for (const [char, data] of Object.entries(patterns)) {
+                const stats = data.stats || { hp: 10, power: 3, defense: 0, detection: 6, xp: 10, gold: 5, strength: 'none', weakness: 'none' };
                 code += `    '${char}': {
         name: '${data.name}',
         color: '${data.color}',
-        size: { height: ${data.size.height}, width: ${data.size.width}, weight: ${data.size.weight} },
+        size: { height: ${data.size?.height || 1}, width: ${data.size?.width || 1}, weight: ${data.size?.weight || 1} },
+        stats: { hp: ${stats.hp}, power: ${stats.power}, defense: ${stats.defense}, detection: ${stats.detection}, xp: ${stats.xp}, gold: ${stats.gold}, strength: '${stats.strength}', weakness: '${stats.weakness}' },
         patterns: {
 ${Object.entries(data.patterns).map(([scale, pattern]) => `            ${scale}: [
 ${pattern.map(row => `                "${row}"`).join(',\n')}
