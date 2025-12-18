@@ -178,6 +178,46 @@ body {
     color: #fff;
 }
 
+/* 맵 줌 컨트롤 */
+#map-zoom-controls {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.zoom-btn {
+    width: 24px;
+    height: 24px;
+    font-size: 16px;
+    font-family: inherit;
+    background-color: #222;
+    border: 1px solid #444;
+    color: #aaa;
+    cursor: pointer;
+    border-radius: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    line-height: 1;
+}
+
+.zoom-btn:hover {
+    background-color: #333;
+    border-color: #ffcc00;
+    color: #fff;
+}
+
+.zoom-btn:active {
+    background-color: #111;
+}
+
+#zoom-level {
+    font-size: 10px;
+    color: #888;
+    min-width: 35px;
+    text-align: center;
+}
+
 /* 3D 뷰 컨테이너 (좌측 패널 내부) */
 #view3d-container {
     flex: 1;
@@ -811,10 +851,23 @@ body {
     }
 
     #map-display {
-        font-size: 10px;
-        letter-spacing: 0px;
+        font-size: 14px;
+        letter-spacing: 1px;
         text-align: center;
-        overflow-x: auto;
+        overflow: auto;
+        max-height: 40vh;
+    }
+
+    /* 모바일에서 줌 버튼 크게 */
+    .zoom-btn {
+        width: 32px;
+        height: 32px;
+        font-size: 20px;
+    }
+
+    #zoom-level {
+        font-size: 12px;
+        min-width: 45px;
     }
 
     .title-art {
@@ -891,10 +944,16 @@ body {
     }
 
     #map-display {
-        font-size: 8px;
+        font-size: 12px;
     }
 
     #view3d-display {
         font-size: 5px;
+    }
+
+    .zoom-btn {
+        width: 36px;
+        height: 36px;
+        font-size: 22px;
     }
 }

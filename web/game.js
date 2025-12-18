@@ -1428,6 +1428,52 @@ class Game {
     setupEventListeners() {
         document.addEventListener('keydown', (e) => this.handleKeyDown(e));
         this.setupMobileControls();
+        this.setupMapZoom();
+    }
+
+    setupMapZoom() {
+        this.mapZoomLevel = 100;
+        const mapDisplay = document.getElementById('map-display');
+        const zoomInBtn = document.getElementById('zoom-in-btn');
+        const zoomOutBtn = document.getElementById('zoom-out-btn');
+        const zoomLevelDisplay = document.getElementById('zoom-level');
+
+        // 기본 폰트 크기 저장
+        const computedStyle = window.getComputedStyle(mapDisplay);
+        this.mapBaseFontSize = parseFloat(computedStyle.fontSize);
+
+        const updateZoom = () => {
+            const newSize = this.mapBaseFontSize * (this.mapZoomLevel / 100);
+            mapDisplay.style.fontSize = newSize + 'px';
+            zoomLevelDisplay.textContent = this.mapZoomLevel + '%';
+        };
+
+        zoomInBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            if (this.mapZoomLevel < 200) {
+                this.mapZoomLevel += 20;
+                updateZoom();
+            }
+        });
+
+        zoomOutBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            if (this.mapZoomLevel > 40) {
+                this.mapZoomLevel -= 20;
+                updateZoom();
+            }
+        });
+
+        // 터치 이벤트
+        zoomInBtn.addEventListener('touchstart', (e) => {
+            e.preventDefault();
+            zoomInBtn.click();
+        });
+
+        zoomOutBtn.addEventListener('touchstart', (e) => {
+            e.preventDefault();
+            zoomOutBtn.click();
+        });
     }
 
     setupMobileControls() {
