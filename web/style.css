@@ -716,18 +716,18 @@ body {
         display: none;
     }
 
-    /* 모바일 상단 영역 - 3D 뷰 + 상태창 */
+    /* 모바일 상단 영역 - 3D 뷰 + 상태창 (확대) */
     #mobile-top-area {
         display: flex;
         flex-direction: row;
-        height: 120px;
+        height: 180px;
         flex-shrink: 0;
         background-color: #0a0a0a;
-        border-bottom: 1px solid #333;
+        border-bottom: 2px solid #333;
     }
 
     #mobile-3d-view {
-        width: 50%;
+        width: 55%;
         background-color: #000;
         overflow: hidden;
         display: flex;
@@ -736,8 +736,8 @@ body {
     }
 
     #mobile-view3d {
-        font-size: 4px;
-        line-height: 0.85;
+        font-size: 5px;
+        line-height: 0.9;
         letter-spacing: 0px;
         white-space: pre;
         font-family: 'Courier New', monospace;
@@ -745,11 +745,11 @@ body {
     }
 
     #mobile-status-panel {
-        width: 50%;
-        padding: 5px 8px;
+        width: 45%;
+        padding: 8px 10px;
         display: flex;
         flex-direction: column;
-        justify-content: space-between;
+        justify-content: space-around;
         background-color: #111;
     }
 
@@ -859,17 +859,18 @@ body {
         align-items: center;
     }
 
-    .dpad {
+    /* 9방향 로그라이크 키패드 */
+    .dpad-9way {
         display: grid;
-        grid-template-columns: repeat(3, 38px);
-        grid-template-rows: repeat(3, 38px);
-        gap: 2px;
+        grid-template-columns: repeat(3, 32px);
+        grid-template-rows: repeat(3, 32px);
+        gap: 3px;
     }
 
     .dpad-btn {
-        width: 38px;
-        height: 38px;
-        font-size: 18px;
+        width: 32px;
+        height: 32px;
+        font-size: 16px;
         font-family: inherit;
         background: linear-gradient(180deg, #2a2a2a 0%, #1a1a1a 100%);
         border: 2px solid #444;
@@ -884,15 +885,16 @@ body {
     }
 
     .dpad-btn:active {
-        background: linear-gradient(180deg, #3a3a3a 0%, #2a2a2a 100%);
+        background: linear-gradient(180deg, #4a4a4a 0%, #3a3a3a 100%);
         border-color: #ffcc00;
+        transform: scale(0.95);
     }
 
-    .dpad-up { grid-column: 2; grid-row: 1; }
-    .dpad-left { grid-column: 1; grid-row: 2; }
-    .dpad-center { grid-column: 2; grid-row: 2; background: #333; font-size: 12px; }
-    .dpad-right { grid-column: 3; grid-row: 2; }
-    .dpad-down { grid-column: 2; grid-row: 3; }
+    .dpad-center {
+        background: linear-gradient(180deg, #333 0%, #222 100%);
+        font-size: 20px;
+        color: #666;
+    }
 
     /* 기능키 컨테이너 */
     #action-container {

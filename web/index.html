@@ -7,49 +7,6 @@
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <!-- 모바일 공지 팝업 -->
-    <div id="mobile-notice" onclick="this.style.display='none'">
-        <div class="notice-content">
-            <h1>📱 공지</h1>
-            <p>모바일 레이아웃 v2.0</p>
-            <p>업데이트: 2024.12.19</p>
-            <p style="margin-top: 20px; font-size: 14px; color: #888;">터치하면 닫힙니다</p>
-        </div>
-    </div>
-    <style>
-        #mobile-notice {
-            display: none;
-            position: fixed;
-            top: 0; left: 0; right: 0; bottom: 0;
-            background: rgba(0,0,0,0.9);
-            z-index: 9999;
-            justify-content: center;
-            align-items: center;
-        }
-        .notice-content {
-            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
-            border: 3px solid #ffcc00;
-            border-radius: 20px;
-            padding: 40px;
-            text-align: center;
-            max-width: 80%;
-            box-shadow: 0 0 30px rgba(255,204,0,0.3);
-        }
-        .notice-content h1 {
-            color: #ffcc00;
-            font-size: 32px;
-            margin-bottom: 20px;
-        }
-        .notice-content p {
-            color: #fff;
-            font-size: 18px;
-            margin: 10px 0;
-        }
-        @media (max-width: 900px) {
-            #mobile-notice { display: flex; }
-        }
-    </style>
-
     <div id="game-container">
         <!-- 타이틀 화면 -->
         <div id="title-screen" class="screen">
@@ -187,14 +144,18 @@
 
             <!-- 모바일 터치 컨트롤 -->
             <div id="mobile-controls">
-                <!-- 왼쪽: 방향키 -->
+                <!-- 왼쪽: 9방향 키패드 (로그라이크 스타일) -->
                 <div id="dpad-container">
-                    <div class="dpad">
-                        <button class="dpad-btn dpad-up" data-dir="up">↑</button>
-                        <button class="dpad-btn dpad-left" data-dir="left">←</button>
-                        <button class="dpad-btn dpad-center" data-action="wait">●</button>
-                        <button class="dpad-btn dpad-right" data-dir="right">→</button>
-                        <button class="dpad-btn dpad-down" data-dir="down">↓</button>
+                    <div class="dpad-9way">
+                        <button class="dpad-btn" data-dir="up-left">↖</button>
+                        <button class="dpad-btn" data-dir="up">↑</button>
+                        <button class="dpad-btn" data-dir="up-right">↗</button>
+                        <button class="dpad-btn" data-dir="left">←</button>
+                        <button class="dpad-btn dpad-center" data-action="wait">·</button>
+                        <button class="dpad-btn" data-dir="right">→</button>
+                        <button class="dpad-btn" data-dir="down-left">↙</button>
+                        <button class="dpad-btn" data-dir="down">↓</button>
+                        <button class="dpad-btn" data-dir="down-right">↘</button>
                     </div>
                 </div>
                 <!-- 오른쪽: 기능키 -->
@@ -202,7 +163,7 @@
                     <button class="action-btn" data-action="pickup">줍기</button>
                     <button class="action-btn" data-action="inventory">가방</button>
                     <button class="action-btn" data-action="rest">휴식</button>
-                    <button class="action-btn" data-action="talk">대화</button>
+                    <button class="action-btn" data-action="stairs">계단</button>
                 </div>
             </div>
         </div>
