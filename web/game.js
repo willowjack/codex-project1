@@ -1185,9 +1185,10 @@ class Game {
 
     render3D() {
         const display = document.getElementById('view3d-display');
+        const mobileDisplay = document.getElementById('mobile-view3d');
         const compassDisplay = document.getElementById('compass-display');
 
-        if (!display) return;
+        if (!display && !mobileDisplay) return;
 
         // 맵을 2D 문자 배열로 변환
         const mapData = [];
@@ -1243,16 +1244,19 @@ class Game {
             this.player.y,
             entities
         );
-        display.innerHTML = html;
+        if (display) display.innerHTML = html;
+        if (mobileDisplay) mobileDisplay.innerHTML = html;
 
         // 나침반 업데이트
-        const angle = this.renderer3D.playerAngle;
-        let direction;
-        if (angle > -Math.PI/4 && angle <= Math.PI/4) direction = 'E';
-        else if (angle > Math.PI/4 && angle <= 3*Math.PI/4) direction = 'S';
-        else if (angle > -3*Math.PI/4 && angle <= -Math.PI/4) direction = 'N';
-        else direction = 'W';
-        compassDisplay.textContent = `[${direction}]`;
+        if (compassDisplay) {
+            const angle = this.renderer3D.playerAngle;
+            let direction;
+            if (angle > -Math.PI/4 && angle <= Math.PI/4) direction = 'E';
+            else if (angle > Math.PI/4 && angle <= 3*Math.PI/4) direction = 'S';
+            else if (angle > -3*Math.PI/4 && angle <= -Math.PI/4) direction = 'N';
+            else direction = 'W';
+            compassDisplay.textContent = `[${direction}]`;
+        }
     }
 
     toggleView() {
@@ -1314,6 +1318,58 @@ class Game {
 
         // 메시지 로그
         this.renderMessages();
+
+        // 모바일 UI 업데이트
+        this.renderMobileUI();
+    }
+
+    renderMobileUI() {
+        // 모바일 HP 바
+        const hpPercent = (this.player.hp / this.player.maxHp) * 100;
+        const mobileHpBar = document.getElementById('mobile-hp-bar');
+        const mobileHpText = document.getElementById('mobile-hp-text');
+        if (mobileHpBar) mobileHpBar.style.width = hpPercent + '%';
+        if (mobileHpText) mobileHpText.textContent = `${this.player.hp}/${this.player.maxHp}`;
+
+        // 모바일 배고픔 바
+        const hungerPercent = this.player.hungerPercent;
+        const mobileHungerBar = document.getElementById('mobile-hunger-bar');
+        const mobileHungerText = document.getElementById('mobile-hunger-text');
+        if (mobileHungerBar) mobileHungerBar.style.width = hungerPercent + '%';
+        if (mobileHungerText) mobileHungerText.textContent = Math.floor(hungerPercent) + '%';
+
+        // 모바일 갈증 바
+        const thirstPercent = this.player.thirstPercent;
+        const mobileThirstBar = document.getElementById('mobile-thirst-bar');
+        const mobileThirstText = document.getElementById('mobile-thirst-text');
+        if (mobileThirstBar) mobileThirstBar.style.width = thirstPercent + '%';
+        if (mobileThirstText) mobileThirstText.textContent = Math.floor(thirstPercent) + '%';
+
+        // 모바일 정보
+        const mobileTime = document.getElementById('mobile-time');
+        const mobileGold = document.getElementById('mobile-gold');
+        if (mobileTime) mobileTime.textContent = `D${this.day} ${String(this.hour).padStart(2, '0')}:00`;
+        if (mobileGold) mobileGold.textContent = `💰${this.player.gold}`;
+
+        // 모바일 메시지 (최근 1개)
+        const mobileMessage = document.getElementById('mobile-message');
+        if (mobileMessage && this.messageLog.length > 0) {
+            const lastMsg = this.messageLog[this.messageLog.length - 1];
+            mobileMessage.textContent = lastMsg.text;
+            mobileMessage.style.color = this.getMessageColor(lastMsg.type);
+        }
+    }
+
+    getMessageColor(type) {
+        const colors = {
+            'combat': '#ff6666',
+            'item': '#6699ff',
+            'survival': '#ffcc00',
+            'quest': '#66ff66',
+            'religion': '#cc99ff',
+            'system': '#888888'
+        };
+        return colors[type] || '#888888';
     }
 
     renderMessages() {

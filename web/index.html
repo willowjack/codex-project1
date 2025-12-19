@@ -41,7 +41,42 @@
 
         <!-- 게임 화면 -->
         <div id="game-screen" class="screen hidden">
-            <!-- 좌측 패널: 3D 뷰 (30%) -->
+            <!-- 모바일 상단 영역: 3D 뷰 + 상태창 -->
+            <div id="mobile-top-area">
+                <div id="mobile-3d-view">
+                    <pre id="mobile-view3d"></pre>
+                </div>
+                <div id="mobile-status-panel">
+                    <div class="mobile-stat">
+                        <span class="stat-icon">♥</span>
+                        <div class="mobile-bar-wrap">
+                            <div id="mobile-hp-bar" class="mobile-bar hp"></div>
+                        </div>
+                        <span id="mobile-hp-text">30/30</span>
+                    </div>
+                    <div class="mobile-stat">
+                        <span class="stat-icon">🍖</span>
+                        <div class="mobile-bar-wrap">
+                            <div id="mobile-hunger-bar" class="mobile-bar hunger"></div>
+                        </div>
+                        <span id="mobile-hunger-text">100%</span>
+                    </div>
+                    <div class="mobile-stat">
+                        <span class="stat-icon">💧</span>
+                        <div class="mobile-bar-wrap">
+                            <div id="mobile-thirst-bar" class="mobile-bar thirst"></div>
+                        </div>
+                        <span id="mobile-thirst-text">100%</span>
+                    </div>
+                    <div id="mobile-info">
+                        <span id="mobile-time">D1 08:00</span>
+                        <span id="mobile-gold">💰100</span>
+                    </div>
+                    <div id="mobile-message"></div>
+                </div>
+            </div>
+
+            <!-- 좌측 패널: 3D 뷰 (30%) - 데스크탑용 -->
             <div id="left-panel">
                 <div class="view-header">
                     <span class="view-title">[ 1인칭 뷰 ]</span>
