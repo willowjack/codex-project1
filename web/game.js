@@ -708,6 +708,9 @@ class Game {
             { gold: 50 }
         ));
 
+        // 던전 층 초기화 (던전 생성 전에 설정해야 함)
+        this.dungeonLevel = 1;
+
         // 던전 생성
         const { map, rooms } = generateDungeon(
             CONFIG.MAP_WIDTH,
@@ -749,7 +752,6 @@ class Game {
         this.turnCount = 0;
         this.hour = 8;
         this.day = 1;
-        this.dungeonLevel = 1;
         this.gameState = 'playing';
         this.messageLog = [];
 
