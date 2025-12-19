@@ -1427,6 +1427,103 @@ class Game {
 
     setupEventListeners() {
         document.addEventListener('keydown', (e) => this.handleKeyDown(e));
+        this.setupTouchControls();
+    }
+
+    setupTouchControls() {
+        // 방향키 버튼
+        const dpadButtons = document.querySelectorAll('.dpad-btn[data-dir]');
+        dpadButtons.forEach(btn => {
+            btn.addEventListener('touchstart', (e) => {
+                e.preventDefault();
+                const dir = btn.dataset.dir;
+                const dirMap = {
+                    'up': [0, -1],
+                    'down': [0, 1],
+                    'left': [-1, 0],
+                    'right': [1, 0]
+                };
+                if (dirMap[dir]) {
+                    const [dx, dy] = dirMap[dir];
+                    this.handlePlayerTurn(dx, dy);
+                }
+            });
+            btn.addEventListener('click', (e) => {
+                e.preventDefault();
+                const dir = btn.dataset.dir;
+                const dirMap = {
+                    'up': [0, -1],
+                    'down': [0, 1],
+                    'left': [-1, 0],
+                    'right': [1, 0]
+                };
+                if (dirMap[dir]) {
+                    const [dx, dy] = dirMap[dir];
+                    this.handlePlayerTurn(dx, dy);
+                }
+            });
+        });
+
+        // 대기 버튼 (중앙)
+        const waitBtn = document.querySelector('.dpad-center');
+        if (waitBtn) {
+            const handleWait = (e) => {
+                e.preventDefault();
+                if (this.gameState === 'playing' && !this.currentModal) {
+                    this.addMessage('잠시 쉬었다.', 'system');
+                    this.endTurn();
+                }
+            };
+            waitBtn.addEventListener('touchstart', handleWait);
+            waitBtn.addEventListener('click', handleWait);
+        }
+
+        // 기능키 버튼
+        const actionButtons = document.querySelectorAll('.action-btn');
+        actionButtons.forEach(btn => {
+            const handleAction = (e) => {
+                e.preventDefault();
+                if (this.gameState !== 'playing') return;
+
+                const action = btn.dataset.action;
+                switch (action) {
+                    case 'pickup':
+                        if (!this.currentModal) this.pickupItem();
+                        break;
+                    case 'inventory':
+                        if (this.currentModal === 'inventory') {
+                            this.closeModal();
+                        } else {
+                            this.closeModal();
+                            this.showInventory();
+                        }
+                        break;
+                    case 'rest':
+                        if (!this.currentModal) {
+                            this.addMessage('잠시 휴식을 취했다.', 'system');
+                            this.player.heal(1);
+                            this.endTurn();
+                        }
+                        break;
+                    case 'talk':
+                        if (!this.currentModal) {
+                            // 주변 NPC 찾기
+                            const dirs = [[0,-1],[0,1],[-1,0],[1,0],[-1,-1],[1,-1],[-1,1],[1,1]];
+                            for (const [dx, dy] of dirs) {
+                                const actor = this.gameMap.getActorAt(this.player.x + dx, this.player.y + dy);
+                                if (actor && actor.isNPC) {
+                                    this.talkToNPC(actor);
+                                    return;
+                                }
+                            }
+                            this.addMessage('주변에 대화할 NPC가 없다.', 'system');
+                        }
+                        break;
+                }
+            };
+            btn.addEventListener('touchstart', handleAction);
+            btn.addEventListener('click', handleAction);
+        });
     }
 
     handleKeyDown(e) {

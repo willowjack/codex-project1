@@ -644,28 +644,275 @@ body {
     background: #555;
 }
 
-/* 반응형 */
+/* ============================================
+   모바일 터치 컨트롤 (기본: 숨김)
+   ============================================ */
+#mobile-controls {
+    display: none;
+}
+
+/* 반응형 - 모바일 */
 @media (max-width: 600px) {
+    body {
+        align-items: flex-start;
+    }
+
     #game-container {
         border-radius: 0;
         border: none;
+        max-width: 100%;
+        min-height: 100vh;
+        height: 100vh;
+        display: flex;
+        flex-direction: column;
+    }
+
+    .screen {
+        min-height: auto;
+        height: 100%;
+    }
+
+    /* 타이틀 화면 */
+    .title-art {
+        font-size: 5px;
+        margin-bottom: 15px;
+    }
+
+    .menu button {
+        padding: 10px 30px;
+        font-size: 14px;
+    }
+
+    /* 게임 화면 - 세로 배치 */
+    #game-screen {
+        flex-direction: column;
+        height: 100%;
+    }
+
+    /* 좌측 패널 (3D 뷰) - 상단으로 이동 */
+    #left-panel {
+        width: 100%;
+        min-width: auto;
+        height: 25vh;
+        border-right: none;
+        border-bottom: 1px solid #333;
+    }
+
+    #view3d-display {
+        font-size: 5px;
+        line-height: 0.9;
+        padding: 2px;
+    }
+
+    /* 나침반 숨김 - 공간 절약 */
+    #compass-container {
+        display: none;
+    }
+
+    /* 미니 상태 숨김 - 중복 제거 */
+    #mini-status {
+        display: none;
+    }
+
+    /* 우측 패널 (맵 + UI) */
+    #right-panel {
+        width: 100%;
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        min-height: 0;
+    }
+
+    /* 뷰 컨테이너 */
+    #view-container {
+        flex: 1;
+        min-height: 0;
+    }
+
+    /* 맵 컨테이너 */
+    #map-container {
+        height: 100%;
+    }
+
+    .view-header {
+        padding: 1px 5px;
+        font-size: 10px;
     }
 
     #map-display {
-        font-size: 11px;
-        letter-spacing: 1px;
+        font-size: 9px;
+        letter-spacing: 0px;
+        line-height: 1.0;
+        padding: 2px;
     }
 
-    .title-art {
-        font-size: 6px;
+    /* UI 패널 - 간소화 */
+    #ui-panel {
+        padding: 4px;
+        flex-shrink: 0;
     }
 
     #status-bar {
-        flex-direction: column;
-        gap: 5px;
+        flex-direction: row;
+        gap: 8px;
+        margin-bottom: 4px;
+        flex-wrap: wrap;
+    }
+
+    .stat {
+        gap: 4px;
+    }
+
+    .stat-label {
+        width: 28px;
+        font-size: 10px;
     }
 
     .bar-container {
-        width: 80px;
+        width: 50px;
+        height: 10px;
+    }
+
+    #status-bar span {
+        font-size: 10px;
+    }
+
+    #info-bar {
+        gap: 5px;
+        margin-bottom: 4px;
+        font-size: 10px;
+        flex-wrap: wrap;
+    }
+
+    #info-bar span {
+        padding: 1px 4px;
+    }
+
+    /* 메시지 로그 - 축소 */
+    #message-log {
+        height: 30px;
+        font-size: 10px;
+        line-height: 1.2;
+        padding: 2px;
+    }
+
+    /* 모바일 터치 컨트롤 - 표시 */
+    #mobile-controls {
+        display: flex;
+        flex-direction: row;
+        justify-content: space-between;
+        align-items: center;
+        padding: 8px 10px;
+        background-color: #111;
+        border-top: 2px solid #333;
+        flex-shrink: 0;
+        height: 120px;
+    }
+
+    /* 방향키 컨테이너 */
+    #dpad-container {
+        flex: 1;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
+
+    .dpad {
+        display: grid;
+        grid-template-columns: repeat(3, 40px);
+        grid-template-rows: repeat(3, 40px);
+        gap: 3px;
+    }
+
+    .dpad-btn {
+        width: 40px;
+        height: 40px;
+        font-size: 18px;
+        font-family: inherit;
+        background: linear-gradient(180deg, #2a2a2a 0%, #1a1a1a 100%);
+        border: 2px solid #444;
+        color: #fff;
+        border-radius: 6px;
+        cursor: pointer;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        -webkit-tap-highlight-color: transparent;
+        touch-action: manipulation;
+    }
+
+    .dpad-btn:active {
+        background: linear-gradient(180deg, #3a3a3a 0%, #2a2a2a 100%);
+        border-color: #ffcc00;
+    }
+
+    .dpad-up { grid-column: 2; grid-row: 1; }
+    .dpad-left { grid-column: 1; grid-row: 2; }
+    .dpad-center { grid-column: 2; grid-row: 2; background: #333; font-size: 12px; }
+    .dpad-right { grid-column: 3; grid-row: 2; }
+    .dpad-down { grid-column: 2; grid-row: 3; }
+
+    /* 기능키 컨테이너 */
+    #action-container {
+        flex: 1;
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        grid-template-rows: repeat(2, 1fr);
+        gap: 5px;
+        padding-left: 10px;
+    }
+
+    .action-btn {
+        padding: 10px 5px;
+        font-size: 12px;
+        font-family: inherit;
+        background: linear-gradient(180deg, #2a2a2a 0%, #1a1a1a 100%);
+        border: 2px solid #444;
+        color: #ddd;
+        border-radius: 6px;
+        cursor: pointer;
+        -webkit-tap-highlight-color: transparent;
+        touch-action: manipulation;
+    }
+
+    .action-btn:active {
+        background: linear-gradient(180deg, #3a3a3a 0%, #2a2a2a 100%);
+        border-color: #ffcc00;
+        color: #fff;
+    }
+
+    /* 뷰 모드에 따른 조정 */
+    #game-screen.view-3d-only #left-panel {
+        height: 40vh;
+    }
+
+    #game-screen.view-3d-only #right-panel {
+        width: 100%;
+    }
+
+    #game-screen.view-2d-only #left-panel {
+        display: none;
+    }
+
+    /* 모달 모바일 최적화 */
+    .modal-content {
+        min-width: auto;
+        width: 95%;
+        max-height: 70vh;
+        padding: 15px;
+    }
+
+    .modal-content h2 {
+        font-size: 16px;
+    }
+
+    .help-content {
+        max-height: 50vh;
+        font-size: 12px;
+    }
+
+    .inventory-item {
+        padding: 8px;
+        font-size: 12px;
     }
 }

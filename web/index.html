@@ -105,6 +105,27 @@
                     <div id="message-log"></div>
                 </div>
             </div>
+
+            <!-- 모바일 터치 컨트롤 -->
+            <div id="mobile-controls">
+                <!-- 왼쪽: 방향키 -->
+                <div id="dpad-container">
+                    <div class="dpad">
+                        <button class="dpad-btn dpad-up" data-dir="up">↑</button>
+                        <button class="dpad-btn dpad-left" data-dir="left">←</button>
+                        <button class="dpad-btn dpad-center" data-action="wait">●</button>
+                        <button class="dpad-btn dpad-right" data-dir="right">→</button>
+                        <button class="dpad-btn dpad-down" data-dir="down">↓</button>
+                    </div>
+                </div>
+                <!-- 오른쪽: 기능키 -->
+                <div id="action-container">
+                    <button class="action-btn" data-action="pickup">줍기</button>
+                    <button class="action-btn" data-action="inventory">가방</button>
+                    <button class="action-btn" data-action="rest">휴식</button>
+                    <button class="action-btn" data-action="talk">대화</button>
+                </div>
+            </div>
         </div>
 
         <!-- 인벤토리 모달 -->
