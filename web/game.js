@@ -13,8 +13,168 @@ const CONFIG = {
     MAX_ROOMS: 20,
     ROOM_MIN_SIZE: 4,
     ROOM_MAX_SIZE: 10,
-    MAX_MONSTERS_PER_ROOM: 2,
+    MAX_MONSTERS_PER_ROOM: 3,
     MAX_ITEMS_PER_ROOM: 2,
+    MAX_DUNGEON_LEVEL: 20,
+};
+
+// ============================================================================
+// 몬스터 데이터 (층별 출현 및 난이도)
+// ============================================================================
+const MONSTER_DATA = {
+    // ========== 약한 몬스터 (1-5층) ==========
+    'r': {
+        name: '쥐', char: 'r',
+        minFloor: 1, maxFloor: 5, spawnWeight: 100,
+        stats: { maxHp: 5, defense: 0, power: 2, detectionRange: 5 }
+    },
+    'b': {
+        name: '박쥐', char: 'b',
+        minFloor: 1, maxFloor: 6, spawnWeight: 80,
+        stats: { maxHp: 4, defense: 0, power: 1, detectionRange: 8 }
+    },
+    'x': {
+        name: '거미', char: 'x',
+        minFloor: 1, maxFloor: 7, spawnWeight: 60,
+        stats: { maxHp: 6, defense: 0, power: 3, detectionRange: 6 }
+    },
+    'a': {
+        name: '거대 개미', char: 'a',
+        minFloor: 2, maxFloor: 8, spawnWeight: 50,
+        stats: { maxHp: 8, defense: 1, power: 2, detectionRange: 5 }
+    },
+
+    // ========== 일반 몬스터 (3-10층) ==========
+    'g': {
+        name: '고블린', char: 'g',
+        minFloor: 2, maxFloor: 10, spawnWeight: 80,
+        stats: { maxHp: 10, defense: 0, power: 3, detectionRange: 6 }
+    },
+    'S': {
+        name: '뱀', char: 'S',
+        minFloor: 3, maxFloor: 12, spawnWeight: 50,
+        stats: { maxHp: 8, defense: 0, power: 4, detectionRange: 5 }
+    },
+    'j': {
+        name: '슬라임', char: 'j',
+        minFloor: 3, maxFloor: 15, spawnWeight: 40,
+        stats: { maxHp: 15, defense: 2, power: 2, detectionRange: 4 }
+    },
+    's': {
+        name: '해골', char: 's',
+        minFloor: 4, maxFloor: 12, spawnWeight: 45,
+        stats: { maxHp: 12, defense: 1, power: 4, detectionRange: 6 }
+    },
+
+    // ========== 중급 몬스터 (5-15층) ==========
+    'o': {
+        name: '오크', char: 'o',
+        minFloor: 4, maxFloor: 14, spawnWeight: 60,
+        stats: { maxHp: 16, defense: 1, power: 4, detectionRange: 8 }
+    },
+    'w': {
+        name: '늑대', char: 'w',
+        minFloor: 5, maxFloor: 15, spawnWeight: 50,
+        stats: { maxHp: 14, defense: 0, power: 5, detectionRange: 10 }
+    },
+    'Z': {
+        name: '좀비', char: 'Z',
+        minFloor: 5, maxFloor: 16, spawnWeight: 40,
+        stats: { maxHp: 20, defense: 2, power: 4, detectionRange: 5 }
+    },
+    'h': {
+        name: '유령', char: 'h',
+        minFloor: 6, maxFloor: 18, spawnWeight: 30,
+        stats: { maxHp: 10, defense: 3, power: 5, detectionRange: 8 }
+    },
+    'u': {
+        name: '구울', char: 'u',
+        minFloor: 6, maxFloor: 16, spawnWeight: 35,
+        stats: { maxHp: 18, defense: 1, power: 6, detectionRange: 7 }
+    },
+
+    // ========== 강한 몬스터 (8-18층) ==========
+    'T': {
+        name: '트롤', char: 'T',
+        minFloor: 8, maxFloor: 18, spawnWeight: 30,
+        stats: { maxHp: 30, defense: 2, power: 6, detectionRange: 6 }
+    },
+    'B': {
+        name: '곰', char: 'B',
+        minFloor: 7, maxFloor: 16, spawnWeight: 25,
+        stats: { maxHp: 35, defense: 3, power: 7, detectionRange: 7 }
+    },
+    'Y': {
+        name: '미라', char: 'Y',
+        minFloor: 9, maxFloor: 18, spawnWeight: 25,
+        stats: { maxHp: 25, defense: 3, power: 6, detectionRange: 6 }
+    },
+    'J': {
+        name: '젤리', char: 'J',
+        minFloor: 8, maxFloor: 20, spawnWeight: 20,
+        stats: { maxHp: 40, defense: 4, power: 5, detectionRange: 4 }
+    },
+    'K': {
+        name: '다크 나이트', char: 'K',
+        minFloor: 10, maxFloor: 18, spawnWeight: 20,
+        stats: { maxHp: 35, defense: 4, power: 8, detectionRange: 8 }
+    },
+
+    // ========== 엘리트 몬스터 (12-20층) ==========
+    'R': {
+        name: '레이스', char: 'R',
+        minFloor: 12, maxFloor: 20, spawnWeight: 15,
+        stats: { maxHp: 30, defense: 5, power: 8, detectionRange: 10 }
+    },
+    'V': {
+        name: '뱀파이어', char: 'V',
+        minFloor: 12, maxFloor: 20, spawnWeight: 15,
+        stats: { maxHp: 40, defense: 3, power: 10, detectionRange: 10 }
+    },
+    'M': {
+        name: '어둠 마법사', char: 'M',
+        minFloor: 14, maxFloor: 20, spawnWeight: 10,
+        stats: { maxHp: 25, defense: 2, power: 12, detectionRange: 12 }
+    },
+    'I': {
+        name: '비홀더', char: 'I',
+        minFloor: 14, maxFloor: 20, spawnWeight: 8,
+        stats: { maxHp: 45, defense: 4, power: 10, detectionRange: 10 }
+    },
+    'c': {
+        name: '젤라틴 큐브', char: 'c',
+        minFloor: 10, maxFloor: 20, spawnWeight: 12,
+        stats: { maxHp: 50, defense: 5, power: 6, detectionRange: 3 }
+    },
+
+    // ========== 보스급 몬스터 (15-20층) ==========
+    'L': {
+        name: '리치', char: 'L',
+        minFloor: 16, maxFloor: 20, spawnWeight: 5,
+        stats: { maxHp: 50, defense: 5, power: 15, detectionRange: 12 }
+    },
+    'D': {
+        name: '드래곤', char: 'D',
+        minFloor: 18, maxFloor: 20, spawnWeight: 3,
+        stats: { maxHp: 100, defense: 8, power: 20, detectionRange: 15 }
+    },
+
+    // ========== 특수 몬스터 ==========
+    '?': {
+        name: '미믹', char: '?',
+        minFloor: 5, maxFloor: 20, spawnWeight: 5,
+        stats: { maxHp: 20, defense: 2, power: 8, detectionRange: 0 }
+    },
+    'e': {
+        name: '불 정령', char: 'e',
+        minFloor: 10, maxFloor: 20, spawnWeight: 10,
+        stats: { maxHp: 20, defense: 2, power: 10, detectionRange: 8 }
+    },
+    'E': {
+        name: '물 정령', char: 'E',
+        minFloor: 10, maxFloor: 20, spawnWeight: 10,
+        stats: { maxHp: 25, defense: 3, power: 8, detectionRange: 8 }
+    },
 };
 
 // ============================================================================
@@ -27,6 +187,7 @@ const TILES = {
     TREE: { char: 'T', walkable: false, transparent: false, color: 'tile-tree' },
     GRASS: { char: '"', walkable: true, transparent: true, color: 'tile-grass' },
     STAIRS_DOWN: { char: '>', walkable: true, transparent: true, color: 'tile-stairs' },
+    STAIRS_UP: { char: '<', walkable: true, transparent: true, color: 'tile-stairs' },
 };
 
 // ============================================================================
@@ -411,7 +572,7 @@ class GameMap {
 }
 
 // 던전 생성
-function generateDungeon(width, height, maxRooms, roomMinSize, roomMaxSize) {
+function generateDungeon(width, height, maxRooms, roomMinSize, roomMaxSize, dungeonLevel = 1) {
     const map = new GameMap(width, height);
     const rooms = [];
 
@@ -459,8 +620,14 @@ function generateDungeon(width, height, maxRooms, roomMinSize, roomMaxSize) {
         rooms.push(room);
     }
 
-    // 마지막 방에 계단
-    if (rooms.length > 0) {
+    // 첫 번째 방에 상승 계단 (1층 제외)
+    if (rooms.length > 0 && dungeonLevel > 1) {
+        const [ux, uy] = roomCenter(rooms[0]);
+        map.tiles[ux][uy] = { ...TILES.STAIRS_UP };
+    }
+
+    // 마지막 방에 하강 계단 (최하층 제외)
+    if (rooms.length > 0 && dungeonLevel < CONFIG.MAX_DUNGEON_LEVEL) {
         const [sx, sy] = roomCenter(rooms[rooms.length - 1]);
         map.tiles[sx][sy] = { ...TILES.STAIRS_DOWN };
     }
@@ -503,6 +670,7 @@ class Game {
         this.turnCount = 0;
         this.hour = 8;
         this.day = 1;
+        this.dungeonLevel = 1; // 현재 던전 층
         this.gameState = 'title'; // title, playing, dead
         this.currentModal = null;
 
@@ -546,7 +714,8 @@ class Game {
             CONFIG.MAP_HEIGHT,
             CONFIG.MAX_ROOMS,
             CONFIG.ROOM_MIN_SIZE,
-            CONFIG.ROOM_MAX_SIZE
+            CONFIG.ROOM_MAX_SIZE,
+            this.dungeonLevel
         );
         this.gameMap = map;
 
@@ -580,40 +749,70 @@ class Game {
         this.turnCount = 0;
         this.hour = 8;
         this.day = 1;
+        this.dungeonLevel = 1;
         this.gameState = 'playing';
         this.messageLog = [];
 
-        this.addMessage('던전에 입장했다. 살아남아야 한다!', 'system');
+        this.addMessage(`던전 ${this.dungeonLevel}층에 입장했다. 살아남아야 한다!`, 'system');
         this.addMessage('[?]를 눌러 도움말을 볼 수 있다.', 'system');
+        this.addMessage('[>] 계단을 이용해 더 깊은 층으로 내려갈 수 있다.', 'system');
 
         this.updateFOV();
         this.showScreen('game-screen');
         this.render();
     }
 
+    // 현재 층에서 출현 가능한 몬스터 목록 반환
+    getSpawnableMonsters(floor) {
+        const spawnable = [];
+        for (const [char, data] of Object.entries(MONSTER_DATA)) {
+            if (floor >= data.minFloor && floor <= data.maxFloor) {
+                spawnable.push({ char, ...data });
+            }
+        }
+        return spawnable;
+    }
+
+    // 가중치 기반 랜덤 몬스터 선택
+    selectWeightedMonster(monsters) {
+        const totalWeight = monsters.reduce((sum, m) => sum + m.spawnWeight, 0);
+        let roll = Math.random() * totalWeight;
+
+        for (const monster of monsters) {
+            roll -= monster.spawnWeight;
+            if (roll <= 0) return monster;
+        }
+        return monsters[monsters.length - 1];
+    }
+
     placeEntities(room) {
-        // 몬스터 배치
-        const numMonsters = randomInt(0, CONFIG.MAX_MONSTERS_PER_ROOM);
+        // 현재 층에서 출현 가능한 몬스터 목록
+        const spawnableMonsters = this.getSpawnableMonsters(this.dungeonLevel);
+
+        // 층이 깊어질수록 몬스터 수 증가
+        const bonusMonsters = Math.floor(this.dungeonLevel / 5);
+        const maxMonsters = Math.min(CONFIG.MAX_MONSTERS_PER_ROOM + bonusMonsters, 5);
+        const numMonsters = randomInt(0, maxMonsters);
+
         for (let i = 0; i < numMonsters; i++) {
             const x = randomInt(room.x1 + 1, room.x2 - 1);
             const y = randomInt(room.y1 + 1, room.y2 - 1);
 
             if (this.gameMap.getBlockingEntityAt(x, y)) continue;
 
-            let monster;
-            if (Math.random() < 0.6) {
-                monster = new Actor(x, y, 'r', 'tile-monster', '쥐', {
-                    maxHp: 5, defense: 0, power: 2, isHostile: true, detectionRange: 5
-                });
-            } else if (Math.random() < 0.8) {
-                monster = new Actor(x, y, 'g', 'tile-monster', '고블린', {
-                    maxHp: 10, defense: 0, power: 3, isHostile: true, detectionRange: 6
-                });
-            } else {
-                monster = new Actor(x, y, 'o', 'tile-monster', '오크', {
-                    maxHp: 16, defense: 1, power: 4, isHostile: true, detectionRange: 8
-                });
-            }
+            // 가중치 기반 몬스터 선택
+            const monsterData = this.selectWeightedMonster(spawnableMonsters);
+            const stats = monsterData.stats;
+
+            // 층 보너스: 깊은 층일수록 몬스터가 약간 강해짐
+            const floorBonus = Math.floor((this.dungeonLevel - monsterData.minFloor) / 3);
+            const monster = new Actor(x, y, monsterData.char, 'tile-monster', monsterData.name, {
+                maxHp: stats.maxHp + floorBonus * 2,
+                defense: stats.defense,
+                power: stats.power + floorBonus,
+                isHostile: true,
+                detectionRange: stats.detectionRange
+            });
             monster.ai = 'hostile';
             this.gameMap.addEntity(monster);
         }
@@ -643,6 +842,103 @@ class Game {
             }
             this.gameMap.addItem(item);
         }
+    }
+
+    // ========================================================================
+    // 층 이동
+    // ========================================================================
+
+    // 다음 층으로 내려가기
+    goToNextFloor() {
+        const tile = this.gameMap.tiles[this.player.x][this.player.y];
+        if (tile.char !== '>') {
+            this.addMessage('여기에는 내려가는 계단이 없다.', 'system');
+            return;
+        }
+
+        if (this.dungeonLevel >= CONFIG.MAX_DUNGEON_LEVEL) {
+            this.addMessage('더 이상 내려갈 수 없다. 이곳이 최하층이다.', 'system');
+            return;
+        }
+
+        this.dungeonLevel++;
+        this.generateNewFloor('down');
+        this.addMessage(`던전 ${this.dungeonLevel}층으로 내려왔다.`, 'system');
+
+        // 깊은 층 경고 메시지
+        if (this.dungeonLevel === 5) {
+            this.addMessage('공기가 더 차가워졌다. 더 강한 적들이 도사리고 있다.', 'system');
+        } else if (this.dungeonLevel === 10) {
+            this.addMessage('어둠이 짙어진다. 위험한 기운이 느껴진다...', 'system');
+        } else if (this.dungeonLevel === 15) {
+            this.addMessage('지옥의 문턱에 다가서고 있다. 각오해라.', 'system');
+        } else if (this.dungeonLevel === 18) {
+            this.addMessage('드래곤의 숨결이 느껴진다...', 'system');
+        }
+
+        this.endTurn();
+    }
+
+    // 이전 층으로 올라가기
+    goToPrevFloor() {
+        const tile = this.gameMap.tiles[this.player.x][this.player.y];
+        if (tile.char !== '<') {
+            this.addMessage('여기에는 올라가는 계단이 없다.', 'system');
+            return;
+        }
+
+        if (this.dungeonLevel <= 1) {
+            this.addMessage('던전 입구다. 밖으로 나갈 수 없다.', 'system');
+            return;
+        }
+
+        this.dungeonLevel--;
+        this.generateNewFloor('up');
+        this.addMessage(`던전 ${this.dungeonLevel}층으로 올라왔다.`, 'system');
+        this.endTurn();
+    }
+
+    // 새 층 생성
+    generateNewFloor(direction) {
+        // 새 던전 생성
+        const { map, rooms } = generateDungeon(
+            CONFIG.MAP_WIDTH,
+            CONFIG.MAP_HEIGHT,
+            CONFIG.MAX_ROOMS,
+            CONFIG.ROOM_MIN_SIZE,
+            CONFIG.ROOM_MAX_SIZE,
+            this.dungeonLevel
+        );
+
+        // 기존 맵의 플레이어 제거
+        this.gameMap.removeEntity(this.player);
+
+        // 새 맵 설정
+        this.gameMap = map;
+
+        // 플레이어 위치 설정 (올라왔으면 하강계단, 내려왔으면 상승계단에 배치)
+        if (direction === 'down' && rooms.length > 0) {
+            // 상승 계단 위치 (첫 번째 방)에 배치
+            const [px, py] = roomCenter(rooms[0]);
+            this.player.x = px;
+            this.player.y = py;
+        } else if (direction === 'up' && rooms.length > 0) {
+            // 하강 계단 위치 (마지막 방)에 배치
+            const [px, py] = roomCenter(rooms[rooms.length - 1]);
+            this.player.x = px;
+            this.player.y = py;
+        }
+
+        this.gameMap.addEntity(this.player);
+
+        // 몬스터/아이템 배치
+        for (let i = 1; i < rooms.length; i++) {
+            this.placeEntities(rooms[i]);
+        }
+
+        // FOV 업데이트
+        this.updateFOV();
+        this.render();
     }
 
     // ========================================================================
@@ -1008,6 +1304,7 @@ class Game {
             turnCount: this.turnCount,
             hour: this.hour,
             day: this.day,
+            dungeonLevel: this.dungeonLevel,
             map: {
                 width: this.gameMap.width,
                 height: this.gameMap.height,
@@ -1112,10 +1409,11 @@ class Game {
             this.turnCount = save.turnCount;
             this.hour = save.hour;
             this.day = save.day;
+            this.dungeonLevel = save.dungeonLevel || 1;
             this.gameState = 'playing';
             this.messageLog = [];
 
-            this.addMessage('게임을 불러왔습니다.', 'system');
+            this.addMessage(`던전 ${this.dungeonLevel}층에서 게임을 불러왔습니다.`, 'system');
             this.updateFOV();
             this.showScreen('game-screen');
             this.render();
@@ -1185,9 +1483,10 @@ class Game {
 
     render3D() {
         const display = document.getElementById('view3d-display');
+        const mobileDisplay = document.getElementById('mobile-view3d');
         const compassDisplay = document.getElementById('compass-display');
 
-        if (!display) return;
+        if (!display && !mobileDisplay) return;
 
         // 맵을 2D 문자 배열로 변환
         const mapData = [];
@@ -1243,16 +1542,19 @@ class Game {
             this.player.y,
             entities
         );
-        display.innerHTML = html;
+        if (display) display.innerHTML = html;
+        if (mobileDisplay) mobileDisplay.innerHTML = html;
 
         // 나침반 업데이트
-        const angle = this.renderer3D.playerAngle;
-        let direction;
-        if (angle > -Math.PI/4 && angle <= Math.PI/4) direction = 'E';
-        else if (angle > Math.PI/4 && angle <= 3*Math.PI/4) direction = 'S';
-        else if (angle > -3*Math.PI/4 && angle <= -Math.PI/4) direction = 'N';
-        else direction = 'W';
-        compassDisplay.textContent = `[${direction}]`;
+        if (compassDisplay) {
+            const angle = this.renderer3D.playerAngle;
+            let direction;
+            if (angle > -Math.PI/4 && angle <= Math.PI/4) direction = 'E';
+            else if (angle > Math.PI/4 && angle <= 3*Math.PI/4) direction = 'S';
+            else if (angle > -3*Math.PI/4 && angle <= -Math.PI/4) direction = 'N';
+            else direction = 'W';
+            compassDisplay.textContent = `[${direction}]`;
+        }
     }
 
     toggleView() {
@@ -1312,8 +1614,90 @@ class Game {
         document.getElementById('gold-display').textContent = `Gold: ${this.player.gold}`;
         document.getElementById('position-display').textContent = `(${this.player.x}, ${this.player.y})`;
 
+        // 던전 층 표시
+        const floorDisplay = document.getElementById('floor-display');
+        if (floorDisplay) {
+            floorDisplay.textContent = `B${this.dungeonLevel}F`;
+            // 층에 따른 색상 변경
+            if (this.dungeonLevel >= 15) {
+                floorDisplay.style.color = '#ff4444';
+            } else if (this.dungeonLevel >= 10) {
+                floorDisplay.style.color = '#ff8800';
+            } else if (this.dungeonLevel >= 5) {
+                floorDisplay.style.color = '#ffcc00';
+            } else {
+                floorDisplay.style.color = '#88ff88';
+            }
+        }
+
         // 메시지 로그
         this.renderMessages();
+
+        // 모바일 UI 업데이트
+        this.renderMobileUI();
+    }
+
+    renderMobileUI() {
+        // 모바일 HP 바
+        const hpPercent = (this.player.hp / this.player.maxHp) * 100;
+        const mobileHpBar = document.getElementById('mobile-hp-bar');
+        const mobileHpText = document.getElementById('mobile-hp-text');
+        if (mobileHpBar) mobileHpBar.style.width = hpPercent + '%';
+        if (mobileHpText) mobileHpText.textContent = `${this.player.hp}/${this.player.maxHp}`;
+
+        // 모바일 배고픔 바
+        const hungerPercent = this.player.hungerPercent;
+        const mobileHungerBar = document.getElementById('mobile-hunger-bar');
+        const mobileHungerText = document.getElementById('mobile-hunger-text');
+        if (mobileHungerBar) mobileHungerBar.style.width = hungerPercent + '%';
+        if (mobileHungerText) mobileHungerText.textContent = Math.floor(hungerPercent) + '%';
+
+        // 모바일 갈증 바
+        const thirstPercent = this.player.thirstPercent;
+        const mobileThirstBar = document.getElementById('mobile-thirst-bar');
+        const mobileThirstText = document.getElementById('mobile-thirst-text');
+        if (mobileThirstBar) mobileThirstBar.style.width = thirstPercent + '%';
+        if (mobileThirstText) mobileThirstText.textContent = Math.floor(thirstPercent) + '%';
+
+        // 모바일 정보
+        const mobileFloor = document.getElementById('mobile-floor');
+        const mobileTime = document.getElementById('mobile-time');
+        const mobileGold = document.getElementById('mobile-gold');
+        if (mobileFloor) {
+            mobileFloor.textContent = `B${this.dungeonLevel}F`;
+            // 층에 따른 색상 변경
+            if (this.dungeonLevel >= 15) {
+                mobileFloor.style.color = '#ff4444';
+            } else if (this.dungeonLevel >= 10) {
+                mobileFloor.style.color = '#ff8800';
+            } else if (this.dungeonLevel >= 5) {
+                mobileFloor.style.color = '#ffcc00';
+            } else {
+                mobileFloor.style.color = '#88ff88';
+            }
+        }
+        if (mobileTime) mobileTime.textContent = `D${this.day} ${String(this.hour).padStart(2, '0')}:00`;
+        if (mobileGold) mobileGold.textContent = `💰${this.player.gold}`;
+
+        // 모바일 메시지 (최근 1개)
+        const mobileMessage = document.getElementById('mobile-message');
+        if (mobileMessage && this.messageLog.length > 0) {
+            const lastMsg = this.messageLog[this.messageLog.length - 1];
+            mobileMessage.textContent = lastMsg.text;
+            mobileMessage.style.color = this.getMessageColor(lastMsg.type);
+        }
+    }
+
+    getMessageColor(type) {
+        const colors = {
+            'combat': '#ff6666',
+            'item': '#6699ff',
+            'survival': '#ffcc00',
+            'quest': '#66ff66',
+            'religion': '#cc99ff',
+            'system': '#888888'
+        };
+        return colors[type] || '#888888';
     }
 
     renderMessages() {
@@ -1427,6 +1811,103 @@ class Game {
 
     setupEventListeners() {
         document.addEventListener('keydown', (e) => this.handleKeyDown(e));
+        this.setupTouchControls();
+    }
+
+    setupTouchControls() {
+        // 방향키 버튼
+        const dpadButtons = document.querySelectorAll('.dpad-btn[data-dir]');
+        dpadButtons.forEach(btn => {
+            btn.addEventListener('touchstart', (e) => {
+                e.preventDefault();
+                const dir = btn.dataset.dir;
+                const dirMap = {
+                    'up': [0, -1],
+                    'down': [0, 1],
+                    'left': [-1, 0],
+                    'right': [1, 0]
+                };
+                if (dirMap[dir]) {
+                    const [dx, dy] = dirMap[dir];
+                    this.handlePlayerTurn(dx, dy);
+                }
+            });
+            btn.addEventListener('click', (e) => {
+                e.preventDefault();
+                const dir = btn.dataset.dir;
+                const dirMap = {
+                    'up': [0, -1],
+                    'down': [0, 1],
+                    'left': [-1, 0],
+                    'right': [1, 0]
+                };
+                if (dirMap[dir]) {
+                    const [dx, dy] = dirMap[dir];
+                    this.handlePlayerTurn(dx, dy);
+                }
+            });
+        });
+
+        // 대기 버튼 (중앙)
+        const waitBtn = document.querySelector('.dpad-center');
+        if (waitBtn) {
+            const handleWait = (e) => {
+                e.preventDefault();
+                if (this.gameState === 'playing' && !this.currentModal) {
+                    this.addMessage('잠시 쉬었다.', 'system');
+                    this.endTurn();
+                }
+            };
+            waitBtn.addEventListener('touchstart', handleWait);
+            waitBtn.addEventListener('click', handleWait);
+        }
+
+        // 기능키 버튼
+        const actionButtons = document.querySelectorAll('.action-btn');
+        actionButtons.forEach(btn => {
+            const handleAction = (e) => {
+                e.preventDefault();
+                if (this.gameState !== 'playing') return;
+
+                const action = btn.dataset.action;
+                switch (action) {
+                    case 'pickup':
+                        if (!this.currentModal) this.pickupItem();
+                        break;
+                    case 'inventory':
+                        if (this.currentModal === 'inventory') {
+                            this.closeModal();
+                        } else {
+                            this.closeModal();
+                            this.showInventory();
+                        }
+                        break;
+                    case 'rest':
+                        if (!this.currentModal) {
+                            this.addMessage('잠시 휴식을 취했다.', 'system');
+                            this.player.heal(1);
+                            this.endTurn();
+                        }
+                        break;
+                    case 'talk':
+                        if (!this.currentModal) {
+                            // 주변 NPC 찾기
+                            const dirs = [[0,-1],[0,1],[-1,0],[1,0],[-1,-1],[1,-1],[-1,1],[1,1]];
+                            for (const [dx, dy] of dirs) {
+                                const actor = this.gameMap.getActorAt(this.player.x + dx, this.player.y + dy);
+                                if (actor && actor.isNPC) {
+                                    this.talkToNPC(actor);
+                                    return;
+                                }
+                            }
+                            this.addMessage('주변에 대화할 NPC가 없다.', 'system');
+                        }
+                        break;
+                }
+            };
+            btn.addEventListener('touchstart', handleAction);
+            btn.addEventListener('click', handleAction);
+        });
     }
 
     handleKeyDown(e) {
@@ -1533,6 +2014,16 @@ class Game {
             case 'V':
                 // 뷰 전환
                 this.toggleView();
+                break;
+
+            case '>':
+                // 계단 내려가기
+                this.goToNextFloor();
+                break;
+
+            case '<':
+                // 계단 올라가기
+                this.goToPrevFloor();
                 break;
 
             case 'Escape':

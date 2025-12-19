@@ -41,7 +41,43 @@
 
         <!-- 게임 화면 -->
         <div id="game-screen" class="screen hidden">
-            <!-- 좌측 패널: 3D 뷰 (30%) -->
+            <!-- 모바일 상단 영역: 3D 뷰 + 상태창 -->
+            <div id="mobile-top-area">
+                <div id="mobile-3d-view">
+                    <pre id="mobile-view3d"></pre>
+                </div>
+                <div id="mobile-status-panel">
+                    <div class="mobile-stat">
+                        <span class="stat-icon">♥</span>
+                        <div class="mobile-bar-wrap">
+                            <div id="mobile-hp-bar" class="mobile-bar hp"></div>
+                        </div>
+                        <span id="mobile-hp-text">30/30</span>
+                    </div>
+                    <div class="mobile-stat">
+                        <span class="stat-icon">🍖</span>
+                        <div class="mobile-bar-wrap">
+                            <div id="mobile-hunger-bar" class="mobile-bar hunger"></div>
+                        </div>
+                        <span id="mobile-hunger-text">100%</span>
+                    </div>
+                    <div class="mobile-stat">
+                        <span class="stat-icon">💧</span>
+                        <div class="mobile-bar-wrap">
+                            <div id="mobile-thirst-bar" class="mobile-bar thirst"></div>
+                        </div>
+                        <span id="mobile-thirst-text">100%</span>
+                    </div>
+                    <div id="mobile-info">
+                        <span id="mobile-floor">B1F</span>
+                        <span id="mobile-time">D1 08:00</span>
+                        <span id="mobile-gold">💰100</span>
+                    </div>
+                    <div id="mobile-message"></div>
+                </div>
+            </div>
+
+            <!-- 좌측 패널: 3D 뷰 (30%) - 데스크탑용 -->
             <div id="left-panel">
                 <div class="view-header">
                     <span class="view-title">[ 1인칭 뷰 ]</span>
@@ -103,6 +139,27 @@
                         <span id="position-display">(0, 0)</span>
                     </div>
                     <div id="message-log"></div>
+                </div>
+            </div>
+
+            <!-- 모바일 터치 컨트롤 -->
+            <div id="mobile-controls">
+                <!-- 왼쪽: 방향키 -->
+                <div id="dpad-container">
+                    <div class="dpad">
+                        <button class="dpad-btn dpad-up" data-dir="up">↑</button>
+                        <button class="dpad-btn dpad-left" data-dir="left">←</button>
+                        <button class="dpad-btn dpad-center" data-action="wait">●</button>
+                        <button class="dpad-btn dpad-right" data-dir="right">→</button>
+                        <button class="dpad-btn dpad-down" data-dir="down">↓</button>
+                    </div>
+                </div>
+                <!-- 오른쪽: 기능키 -->
+                <div id="action-container">
+                    <button class="action-btn" data-action="pickup">줍기</button>
+                    <button class="action-btn" data-action="inventory">가방</button>
+                    <button class="action-btn" data-action="rest">휴식</button>
+                    <button class="action-btn" data-action="talk">대화</button>
                 </div>
             </div>
         </div>
@@ -167,6 +224,8 @@
                     <p><kbd>t</kbd> : NPC와 대화</p>
                     <p><kbd>p</kbd> : 기도</p>
                     <p><kbd>q</kbd> : 퀘스트 목록</p>
+                    <p><kbd>></kbd> : 계단 내려가기</p>
+                    <p><kbd><</kbd> : 계단 올라가기</p>
 
                     <h3>시스템</h3>
                     <p><kbd>S</kbd> : 저장</p>
@@ -178,9 +237,9 @@
                     <h3>심볼</h3>
                     <pre>
 @ = 당신          g = 고블린        o = 오크
-% = 음식/시체     ! = 물약          > = 계단
-. = 바닥          # = 벽            ~ = 물
-@ = NPC (노랑)    * = 모닥불        T = 나무
+% = 음식/시체     ! = 물약          > = 하강계단
+. = 바닥          # = 벽            < = 상승계단
+@ = NPC (노랑)    * = 모닥불        ~ = 물
                     </pre>
                 </div>
                 <button onclick="game.closeModal()">닫기 (ESC)</button>

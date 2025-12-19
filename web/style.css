@@ -161,6 +161,19 @@ body {
     color: #888;
 }
 
+#floor-display {
+    color: #88ff88;
+    font-weight: bold;
+    padding: 0 8px;
+    font-size: 12px;
+}
+
+#mobile-floor {
+    color: #88ff88;
+    font-weight: bold;
+    font-size: 11px;
+}
+
 #toggle-view-btn {
     padding: 2px 8px;
     font-size: 10px;
@@ -644,28 +657,291 @@ body {
     background: #555;
 }
 
-/* 반응형 */
-@media (max-width: 600px) {
+/* ============================================
+   모바일 전용 요소 (기본: 숨김)
+   ============================================ */
+#mobile-controls {
+    display: none;
+}
+
+#mobile-top-area {
+    display: none;
+}
+
+/* 반응형 - 모바일 및 태블릿 */
+@media (max-width: 768px) {
+    body {
+        align-items: flex-start;
+    }
+
     #game-container {
         border-radius: 0;
         border: none;
+        max-width: 100%;
+        min-height: 100vh;
+        height: 100vh;
+        display: flex;
+        flex-direction: column;
+    }
+
+    .screen {
+        min-height: auto;
+        height: 100%;
+    }
+
+    /* 타이틀 화면 */
+    .title-art {
+        font-size: 5px;
+        margin-bottom: 15px;
+    }
+
+    .menu button {
+        padding: 10px 30px;
+        font-size: 14px;
+    }
+
+    /* 게임 화면 - 세로 배치 */
+    #game-screen {
+        flex-direction: column;
+        height: 100%;
+    }
+
+    /* 데스크탑용 좌측 패널 숨김 */
+    #left-panel {
+        display: none;
+    }
+
+    /* 데스크탑용 UI 패널 숨김 */
+    #ui-panel {
+        display: none;
+    }
+
+    /* 모바일 상단 영역 - 3D 뷰 + 상태창 */
+    #mobile-top-area {
+        display: flex;
+        flex-direction: row;
+        height: 120px;
+        flex-shrink: 0;
+        background-color: #0a0a0a;
+        border-bottom: 1px solid #333;
+    }
+
+    #mobile-3d-view {
+        width: 50%;
+        background-color: #000;
+        overflow: hidden;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    #mobile-view3d {
+        font-size: 4px;
+        line-height: 0.85;
+        letter-spacing: 0px;
+        white-space: pre;
+        font-family: 'Courier New', monospace;
+        color: #888;
+    }
+
+    #mobile-status-panel {
+        width: 50%;
+        padding: 5px 8px;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        background-color: #111;
+    }
+
+    .mobile-stat {
+        display: flex;
+        align-items: center;
+        gap: 4px;
+        font-size: 11px;
+    }
+
+    .stat-icon {
+        width: 14px;
+        text-align: center;
+    }
+
+    .mobile-bar-wrap {
+        flex: 1;
+        height: 8px;
+        background-color: #333;
+        border-radius: 2px;
+        overflow: hidden;
+    }
+
+    .mobile-bar {
+        height: 100%;
+        transition: width 0.3s ease;
+    }
+
+    .mobile-bar.hp { background: linear-gradient(90deg, #00aa00, #00ff00); }
+    .mobile-bar.hunger { background: linear-gradient(90deg, #aa8800, #ffcc00); }
+    .mobile-bar.thirst { background: linear-gradient(90deg, #0088aa, #00ccff); }
+
+    #mobile-status-panel span {
+        font-size: 10px;
+        color: #aaa;
+    }
+
+    #mobile-info {
+        display: flex;
+        justify-content: space-between;
+        font-size: 10px;
+        color: #888;
+    }
+
+    #mobile-time { color: #ffcc66; }
+    #mobile-gold { color: #ffd700; }
+
+    #mobile-message {
+        font-size: 9px;
+        color: #888;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        min-height: 14px;
+    }
+
+    /* 우측 패널 (맵만) */
+    #right-panel {
+        width: 100%;
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        min-height: 0;
+    }
+
+    /* 뷰 컨테이너 */
+    #view-container {
+        flex: 1;
+        min-height: 0;
+    }
+
+    /* 맵 컨테이너 */
+    #map-container {
+        height: 100%;
+    }
+
+    .view-header {
+        padding: 1px 5px;
+        font-size: 10px;
     }
 
     #map-display {
-        font-size: 11px;
+        font-size: 10px;
         letter-spacing: 1px;
+        line-height: 1.1;
+        padding: 3px;
     }
 
-    .title-art {
-        font-size: 6px;
+    /* 모바일 터치 컨트롤 - 표시 */
+    #mobile-controls {
+        display: flex;
+        flex-direction: row;
+        justify-content: space-between;
+        align-items: center;
+        padding: 8px 10px;
+        background-color: #111;
+        border-top: 2px solid #333;
+        flex-shrink: 0;
+        height: 110px;
     }
 
-    #status-bar {
-        flex-direction: column;
-        gap: 5px;
+    /* 방향키 컨테이너 */
+    #dpad-container {
+        flex: 1;
+        display: flex;
+        justify-content: center;
+        align-items: center;
     }
 
-    .bar-container {
-        width: 80px;
+    .dpad {
+        display: grid;
+        grid-template-columns: repeat(3, 38px);
+        grid-template-rows: repeat(3, 38px);
+        gap: 2px;
+    }
+
+    .dpad-btn {
+        width: 38px;
+        height: 38px;
+        font-size: 18px;
+        font-family: inherit;
+        background: linear-gradient(180deg, #2a2a2a 0%, #1a1a1a 100%);
+        border: 2px solid #444;
+        color: #fff;
+        border-radius: 6px;
+        cursor: pointer;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        -webkit-tap-highlight-color: transparent;
+        touch-action: manipulation;
+    }
+
+    .dpad-btn:active {
+        background: linear-gradient(180deg, #3a3a3a 0%, #2a2a2a 100%);
+        border-color: #ffcc00;
+    }
+
+    .dpad-up { grid-column: 2; grid-row: 1; }
+    .dpad-left { grid-column: 1; grid-row: 2; }
+    .dpad-center { grid-column: 2; grid-row: 2; background: #333; font-size: 12px; }
+    .dpad-right { grid-column: 3; grid-row: 2; }
+    .dpad-down { grid-column: 2; grid-row: 3; }
+
+    /* 기능키 컨테이너 */
+    #action-container {
+        flex: 1;
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        grid-template-rows: repeat(2, 1fr);
+        gap: 4px;
+        padding-left: 10px;
+    }
+
+    .action-btn {
+        padding: 8px 4px;
+        font-size: 11px;
+        font-family: inherit;
+        background: linear-gradient(180deg, #2a2a2a 0%, #1a1a1a 100%);
+        border: 2px solid #444;
+        color: #ddd;
+        border-radius: 6px;
+        cursor: pointer;
+        -webkit-tap-highlight-color: transparent;
+        touch-action: manipulation;
+    }
+
+    .action-btn:active {
+        background: linear-gradient(180deg, #3a3a3a 0%, #2a2a2a 100%);
+        border-color: #ffcc00;
+        color: #fff;
+    }
+
+    /* 모달 모바일 최적화 */
+    .modal-content {
+        min-width: auto;
+        width: 95%;
+        max-height: 70vh;
+        padding: 15px;
+    }
+
+    .modal-content h2 {
+        font-size: 16px;
+    }
+
+    .help-content {
+        max-height: 50vh;
+        font-size: 12px;
+    }
+
+    .inventory-item {
+        padding: 8px;
+        font-size: 12px;
     }
 }
