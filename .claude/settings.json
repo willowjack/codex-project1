@@ -1,0 +1,20 @@
+{
+  "projectName": "ASCII Roguelike Survival",
+  "description": "Nethack + Unreal World 스타일 ASCII 기반 로그라이크 생존 게임",
+  "autoCommit": {
+    "enabled": true,
+    "messageLanguage": "ko",
+    "prefixes": ["feat", "fix", "style", "docs", "refactor", "test", "chore"]
+  },
+  "autoPush": {
+    "enabled": true,
+    "branchPrefix": "claude/",
+    "retryCount": 4,
+    "retryDelays": [2000, 4000, 8000, 16000]
+  },
+  "codeStyle": {
+    "python": "PEP 8",
+    "javascript": "ES6+ OOP",
+    "comments": "Korean"
+  }
+}
