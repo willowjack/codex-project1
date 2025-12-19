@@ -7,49 +7,6 @@
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <!-- 모바일 공지 팝업 -->
-    <div id="mobile-notice" onclick="this.style.display='none'">
-        <div class="notice-content">
-            <h1>📱 공지</h1>
-            <p>모바일 레이아웃 v2.0</p>
-            <p>업데이트: 2024.12.19</p>
-            <p style="margin-top: 20px; font-size: 14px; color: #888;">터치하면 닫힙니다</p>
-        </div>
-    </div>
-    <style>
-        #mobile-notice {
-            display: none;
-            position: fixed;
-            top: 0; left: 0; right: 0; bottom: 0;
-            background: rgba(0,0,0,0.9);
-            z-index: 9999;
-            justify-content: center;
-            align-items: center;
-        }
-        .notice-content {
-            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
-            border: 3px solid #ffcc00;
-            border-radius: 20px;
-            padding: 40px;
-            text-align: center;
-            max-width: 80%;
-            box-shadow: 0 0 30px rgba(255,204,0,0.3);
-        }
-        .notice-content h1 {
-            color: #ffcc00;
-            font-size: 32px;
-            margin-bottom: 20px;
-        }
-        .notice-content p {
-            color: #fff;
-            font-size: 18px;
-            margin: 10px 0;
-        }
-        @media (max-width: 900px) {
-            #mobile-notice { display: flex; }
-        }
-    </style>
-
     <div id="game-container">
         <!-- 타이틀 화면 -->
         <div id="title-screen" class="screen">
