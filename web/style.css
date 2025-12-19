@@ -669,7 +669,7 @@ body {
 }
 
 /* 반응형 - 모바일 및 태블릿 */
-@media (max-width: 768px) {
+@media (max-width: 900px) {
     body {
         align-items: flex-start;
     }
