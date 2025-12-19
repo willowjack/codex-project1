@@ -69,6 +69,7 @@
                         <span id="mobile-thirst-text">100%</span>
                     </div>
                     <div id="mobile-info">
+                        <span id="mobile-floor">B1F</span>
                         <span id="mobile-time">D1 08:00</span>
                         <span id="mobile-gold">💰100</span>
                     </div>
@@ -223,6 +224,8 @@
                     <p><kbd>t</kbd> : NPC와 대화</p>
                     <p><kbd>p</kbd> : 기도</p>
                     <p><kbd>q</kbd> : 퀘스트 목록</p>
+                    <p><kbd>></kbd> : 계단 내려가기</p>
+                    <p><kbd><</kbd> : 계단 올라가기</p>
 
                     <h3>시스템</h3>
                     <p><kbd>S</kbd> : 저장</p>
@@ -234,9 +237,9 @@
                     <h3>심볼</h3>
                     <pre>
 @ = 당신          g = 고블린        o = 오크
-% = 음식/시체     ! = 물약          > = 계단
-. = 바닥          # = 벽            ~ = 물
-@ = NPC (노랑)    * = 모닥불        T = 나무
+% = 음식/시체     ! = 물약          > = 하강계단
+. = 바닥          # = 벽            < = 상승계단
+@ = NPC (노랑)    * = 모닥불        ~ = 물
                     </pre>
                 </div>
                 <button onclick="game.closeModal()">닫기 (ESC)</button>

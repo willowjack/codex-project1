@@ -161,6 +161,19 @@ body {
     color: #888;
 }
 
+#floor-display {
+    color: #88ff88;
+    font-weight: bold;
+    padding: 0 8px;
+    font-size: 12px;
+}
+
+#mobile-floor {
+    color: #88ff88;
+    font-weight: bold;
+    font-size: 11px;
+}
+
 #toggle-view-btn {
     padding: 2px 8px;
     font-size: 10px;
