@@ -720,7 +720,9 @@ body {
     #mobile-top-area {
         display: flex;
         flex-direction: row;
-        height: 180px;
+        height: 25vh;
+        min-height: 120px;
+        max-height: 180px;
         flex-shrink: 0;
         background-color: #0a0a0a;
         border-bottom: 2px solid #333;
@@ -813,29 +815,36 @@ body {
         display: flex;
         flex-direction: column;
         min-height: 0;
+        overflow: hidden;
     }
 
     /* 뷰 컨테이너 */
     #view-container {
         flex: 1;
         min-height: 0;
+        overflow: hidden;
     }
 
     /* 맵 컨테이너 */
     #map-container {
         height: 100%;
+        overflow: hidden;
     }
 
     .view-header {
-        padding: 1px 5px;
+        padding: 2px 8px;
         font-size: 10px;
+        background: #111;
+        display: none; /* 모바일에서 헤더 숨김 */
     }
 
     #map-display {
-        font-size: 10px;
-        letter-spacing: 1px;
-        line-height: 1.1;
-        padding: 3px;
+        font-size: 8px;
+        letter-spacing: 0px;
+        line-height: 1.0;
+        padding: 2px;
+        overflow: hidden;
+        height: 100%;
     }
 
     /* 모바일 터치 컨트롤 - 표시 */
@@ -844,11 +853,13 @@ body {
         flex-direction: row;
         justify-content: space-around;
         align-items: center;
-        padding: 10px 15px;
+        padding: 8px 15px;
         background-color: #0d0d0d;
         border-top: 2px solid #333;
         flex-shrink: 0;
-        height: 150px;
+        height: 22vh;
+        min-height: 130px;
+        max-height: 160px;
     }
 
     /* 방향키 컨테이너 */
