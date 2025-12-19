@@ -655,8 +655,8 @@ body {
     display: none;
 }
 
-/* 반응형 - 모바일 */
-@media (max-width: 600px) {
+/* 반응형 - 모바일 및 태블릿 */
+@media (max-width: 768px) {
     body {
         align-items: flex-start;
     }
