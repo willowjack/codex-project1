@@ -670,6 +670,13 @@ body {
 
 /* 반응형 - 모바일 및 태블릿 */
 @media (max-width: 900px) {
+    html, body {
+        height: 100%;
+        overflow: hidden;
+        position: fixed;
+        width: 100%;
+    }
+
     body {
         align-items: flex-start;
     }
@@ -677,16 +684,18 @@ body {
     #game-container {
         border-radius: 0;
         border: none;
-        max-width: 100%;
-        min-height: 100vh;
-        height: 100vh;
+        width: 100%;
+        height: 100%;
+        max-height: 100vh;
         display: flex;
         flex-direction: column;
+        overflow: hidden;
     }
 
     .screen {
         min-height: auto;
         height: 100%;
+        overflow: hidden;
     }
 
     /* 타이틀 화면 */
@@ -704,6 +713,8 @@ body {
     #game-screen {
         flex-direction: column;
         height: 100%;
+        max-height: 100%;
+        overflow: hidden;
     }
 
     /* 데스크탑용 좌측 패널 숨김 */
@@ -716,50 +727,52 @@ body {
         display: none;
     }
 
-    /* 모바일 상단 영역 - 3D 뷰 + 상태창 (확대) */
+    /* 모바일 상단 영역 - 3D 뷰 + 상태창 */
     #mobile-top-area {
         display: flex;
         flex-direction: row;
-        height: 25vh;
-        min-height: 120px;
-        max-height: 180px;
+        height: 20%;
+        min-height: 100px;
         flex-shrink: 0;
         background-color: #0a0a0a;
         border-bottom: 2px solid #333;
     }
 
     #mobile-3d-view {
-        width: 55%;
+        width: 50%;
         background-color: #000;
         overflow: hidden;
         display: flex;
         align-items: center;
         justify-content: center;
+        padding: 4px;
     }
 
     #mobile-view3d {
-        font-size: 5px;
-        line-height: 0.9;
-        letter-spacing: 0px;
+        font-size: 3.5px;
+        line-height: 1.0;
+        letter-spacing: 0.5px;
         white-space: pre;
-        font-family: 'Courier New', monospace;
+        font-family: monospace;
         color: #888;
+        transform: scaleY(1.2);
     }
 
     #mobile-status-panel {
-        width: 45%;
-        padding: 8px 10px;
+        width: 50%;
+        padding: 6px 8px;
         display: flex;
         flex-direction: column;
         justify-content: space-around;
         background-color: #111;
+        overflow: hidden;
     }
 
     .mobile-stat {
         display: flex;
         align-items: center;
         gap: 4px;
-        font-size: 11px;
+        font-size: 10px;
     }
 
     .stat-icon {
@@ -832,17 +845,14 @@ body {
     }
 
     .view-header {
-        padding: 2px 8px;
-        font-size: 10px;
-        background: #111;
         display: none; /* 모바일에서 헤더 숨김 */
     }
 
     #map-display {
-        font-size: 8px;
-        letter-spacing: 0px;
-        line-height: 1.0;
-        padding: 2px;
+        font-size: 9px;
+        letter-spacing: 1px;
+        line-height: 1.1;
+        padding: 4px;
         overflow: hidden;
         height: 100%;
     }
@@ -853,13 +863,13 @@ body {
         flex-direction: row;
         justify-content: space-around;
         align-items: center;
-        padding: 8px 15px;
+        padding: 6px 10px;
         background-color: #0d0d0d;
         border-top: 2px solid #333;
         flex-shrink: 0;
-        height: 22vh;
-        min-height: 130px;
-        max-height: 160px;
+        height: 25%;
+        min-height: 120px;
+        max-height: 150px;
     }
 
     /* 방향키 컨테이너 */
@@ -872,19 +882,19 @@ body {
     /* 9방향 로그라이크 키패드 */
     .dpad-9way {
         display: grid;
-        grid-template-columns: repeat(3, 42px);
-        grid-template-rows: repeat(3, 42px);
-        gap: 4px;
+        grid-template-columns: repeat(3, 36px);
+        grid-template-rows: repeat(3, 36px);
+        gap: 3px;
         background: #1a1a1a;
-        padding: 6px;
+        padding: 5px;
         border-radius: 10px;
         border: 1px solid #333;
     }
 
     .dpad-btn {
-        width: 42px;
-        height: 42px;
-        font-size: 20px;
+        width: 36px;
+        height: 36px;
+        font-size: 18px;
         font-family: inherit;
         background: linear-gradient(180deg, #3a3a3a 0%, #252525 100%);
         border: 2px solid #555;
@@ -909,7 +919,7 @@ body {
     .dpad-center {
         background: linear-gradient(180deg, #222 0%, #1a1a1a 100%);
         border-color: #444;
-        font-size: 24px;
+        font-size: 20px;
         color: #888;
     }
 
@@ -921,20 +931,20 @@ body {
     /* 기능키 컨테이너 */
     #action-container {
         display: grid;
-        grid-template-columns: repeat(2, 60px);
-        grid-template-rows: repeat(2, 42px);
-        gap: 6px;
+        grid-template-columns: repeat(2, 55px);
+        grid-template-rows: repeat(2, 36px);
+        gap: 5px;
     }
 
     .action-btn {
-        padding: 8px 4px;
-        font-size: 12px;
+        padding: 6px 4px;
+        font-size: 11px;
         font-weight: bold;
         font-family: inherit;
         background: linear-gradient(180deg, #2d4a2d 0%, #1a3a1a 100%);
         border: 2px solid #4a6a4a;
         color: #afd9af;
-        border-radius: 8px;
+        border-radius: 6px;
         cursor: pointer;
         -webkit-tap-highlight-color: transparent;
         touch-action: manipulation;
