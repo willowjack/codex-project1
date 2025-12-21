@@ -1532,20 +1532,26 @@ class Game {
                 type = 'npc';
                 color = '#ff0';
             } else if (!entity.isAlive) {
-                continue;
+                // 시체 처리
+                type = 'corpse';
+                color = '#644';
             }
 
-            // 비행 몬스터 여부 확인
-            const isFlying = flyingMonsters.includes(entity.char);
+            // 비행 몬스터 여부 확인 (살아있는 경우만)
+            const isFlying = entity.isAlive && flyingMonsters.includes(entity.char);
+            const isCorpse = !entity.isAlive;
 
             entities.push({
                 x: entity.x,
                 y: entity.y,
-                char: entity.char,
+                char: isCorpse ? '%' : entity.char,  // 시체는 % 기호
                 type: type,
                 color: color,
                 isFlying: isFlying,
-                isGrounded: !isFlying,
+                isGrounded: !isFlying && !isCorpse,
+                isCorpse: isCorpse,
+                isFloorItem: isCorpse,  // 바닥에 놓이는 것들
+                name: entity.name,
             });
         }
 
@@ -1560,8 +1566,10 @@ class Game {
                 type: 'item',
                 color: '#88f',
                 isFlying: false,
-                isGrounded: true,
+                isGrounded: false,
                 isItem: true,
+                isFloorItem: true,  // 바닥에 놓이는 것들
+                name: item.name,
             });
         }
 
