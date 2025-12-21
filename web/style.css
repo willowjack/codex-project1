@@ -262,9 +262,16 @@ body {
     font-size: 14px;
     line-height: 1.1;
     padding: 5px;
-    letter-spacing: 2px;
+    letter-spacing: 0;
     white-space: pre;
     font-family: 'Courier New', monospace;
+}
+
+/* 모든 맵 타일에 일관된 너비 적용 */
+#map-display span {
+    display: inline-block;
+    width: 1.2em;
+    text-align: center;
 }
 
 /* 타일 색상 클래스 */
@@ -837,9 +844,14 @@ body {
 
     #map-display {
         font-size: 10px;
-        letter-spacing: 1px;
+        letter-spacing: 0;
         line-height: 1.1;
         padding: 3px;
+    }
+
+    /* 모바일 맵 타일 너비 조정 */
+    #map-display span {
+        width: 1em;
     }
 
     /* 모바일 터치 컨트롤 - 표시 */
