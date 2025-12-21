@@ -281,13 +281,6 @@ body {
     text-align: center;
 }
 
-/* 모든 맵 타일에 일관된 너비 적용 */
-#map-display span {
-    display: inline-block;
-    width: 1.2em;
-    text-align: center;
-}
-
 /* 타일 색상 클래스 */
 .tile-player { color: #ffffff; font-weight: bold; }
 .tile-floor { color: #666666; }
