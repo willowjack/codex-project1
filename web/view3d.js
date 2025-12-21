@@ -441,9 +441,7 @@ class ASCII3DRenderer {
 
         // Y 위치 오프셋 계산 (비행/지상/아이템 구분)
         // 뷰포트 하단 계산 (바닥선 위치)
-        const vp = this.viewports[depth];
         const floorY = Math.floor(vp.b * this.height);
-        const midY2 = Math.floor(this.height / 2);
 
         let yOffset = 0;
         if (entity.isFlying) {
@@ -456,7 +454,7 @@ class ASCII3DRenderer {
         } else if (entity.isGrounded) {
             // 지상 몬스터: 바닥에 발이 닿게 표시
             // 몬스터 하단이 바닥선에 오도록 계산
-            const monsterBottom = midY2 + Math.floor(pattern.length / 2);
+            const monsterBottom = midY + Math.floor(pattern.length / 2);
             const targetBottom = floorY - 1;  // 바닥선 바로 위
             yOffset = targetBottom - monsterBottom;
         }
