@@ -148,6 +148,10 @@ class ASCII3DRenderer {
         const curT = Math.floor(vp.t * this.height);
         const curB = Math.floor(vp.b * this.height);
 
+        // 줄무늬 위치를 현재 뷰포트 기준으로 계산 (정면 벽과 맞춤)
+        const stripeTop = curT + 2;
+        const stripeBottom = curB - 3;
+
         // 벽면 채우기 (사다리꼴)
         for (let y = prevT; y < prevB; y++) {
             // Y 위치에 따른 X 범위 (선형 보간)
@@ -167,8 +171,8 @@ class ASCII3DRenderer {
                 let char = wallChar;
                 let r = localBright - 10, g = localBright - 15, b = localBright;
 
-                // 수평 줄무늬 장식 (측면은 살짝 어두운 노란색)
-                if ((y === prevT + 2 || y === prevB - 3) && x < rightEdge - 1) {
+                // 수평 줄무늬 장식 (정면 벽과 높이 맞춤)
+                if ((y === stripeTop || y === stripeBottom) && x < rightEdge - 1) {
                     char = '─';
                     r = 120 + xRatio * 40; g = 105 + xRatio * 35; b = 35;
                 }
@@ -181,8 +185,8 @@ class ASCII3DRenderer {
 
                 // 문
                 if (isDoor && x > leftEdge + 1 && x < rightEdge - 2) {
-                    const doorTop = prevT + 3;
-                    const doorBottom = prevB - 2;
+                    const doorTop = curT + 3;
+                    const doorBottom = curB - 2;
                     if (y > doorTop && y < doorBottom) {
                         char = '▒';
                         r = Math.floor(bright * 0.5);
@@ -209,6 +213,10 @@ class ASCII3DRenderer {
         const curT = Math.floor(vp.t * this.height);
         const curB = Math.floor(vp.b * this.height);
 
+        // 줄무늬 위치를 현재 뷰포트 기준으로 계산 (정면 벽과 맞춤)
+        const stripeTop = curT + 2;
+        const stripeBottom = curB - 3;
+
         for (let y = prevT; y < prevB; y++) {
             const leftEdge = Math.floor(prevR - (prevR - curR) * (y < this.height/2 ?
                 (this.height/2 - y) / (this.height/2 - prevT) :
@@ -225,8 +233,8 @@ class ASCII3DRenderer {
                 let char = wallChar;
                 let r = localBright - 10, g = localBright - 15, b = localBright;
 
-                // 수평 줄무늬 장식 (측면은 살짝 어두운 노란색)
-                if ((y === prevT + 2 || y === prevB - 3) && x > leftEdge) {
+                // 수평 줄무늬 장식 (정면 벽과 높이 맞춤)
+                if ((y === stripeTop || y === stripeBottom) && x > leftEdge) {
                     char = '─';
                     r = 120 + xRatio * 40; g = 105 + xRatio * 35; b = 35;
                 }
@@ -239,8 +247,8 @@ class ASCII3DRenderer {
 
                 // 문
                 if (isDoor && x > leftEdge + 2 && x < rightEdge - 1) {
-                    const doorTop = prevT + 3;
-                    const doorBottom = prevB - 2;
+                    const doorTop = curT + 3;
+                    const doorBottom = curB - 2;
                     if (y > doorTop && y < doorBottom) {
                         char = '▒';
                         r = Math.floor(bright * 0.5);
