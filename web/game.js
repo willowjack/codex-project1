@@ -9,6 +9,9 @@
 const CONFIG = {
     MAP_WIDTH: 60,
     MAP_HEIGHT: 30,
+    // 화면에 보이는 뷰포트 크기 (플레이어 중심)
+    VIEWPORT_WIDTH: 40,
+    VIEWPORT_HEIGHT: 20,
     FOV_RADIUS: 10,
     MAX_ROOMS: 20,
     ROOM_MIN_SIZE: 4,
@@ -950,6 +953,7 @@ class Game {
 
         // FOV 업데이트
         this.updateFOV();
+        this.resetMapPan(); // 새 층에서 맵 팬 리셋
         this.render();
     }
 
@@ -989,6 +993,7 @@ class Game {
             }
         } else if (this.gameMap.isWalkable(newX, newY)) {
             this.player.move(dx, dy);
+            this.resetMapPan(); // 이동 시 맵 팬 리셋 (플레이어 중앙)
 
             const items = this.gameMap.getItemsAt(this.player.x, this.player.y);
             if (items.length > 0) {
@@ -1453,8 +1458,40 @@ class Game {
         const display = document.getElementById('map-display');
         let html = '';
 
-        for (let y = 0; y < this.gameMap.height; y++) {
-            for (let x = 0; x < this.gameMap.width; x++) {
+        // 뷰포트 계산 (플레이어 중심)
+        const vpWidth = CONFIG.VIEWPORT_WIDTH;
+        const vpHeight = CONFIG.VIEWPORT_HEIGHT;
+        const halfW = Math.floor(vpWidth / 2);
+        const halfH = Math.floor(vpHeight / 2);
+
+        // 뷰포트 시작/끝 위치 계산 (맵 경계 고려)
+        let startX = this.player.x - halfW;
+        let startY = this.player.y - halfH;
+        let endX = startX + vpWidth;
+        let endY = startY + vpHeight;
+
+        // 경계 조정
+        if (startX < 0) {
+            endX -= startX;
+            startX = 0;
+        }
+        if (startY < 0) {
+            endY -= startY;
+            startY = 0;
+        }
+        if (endX > this.gameMap.width) {
+            startX -= (endX - this.gameMap.width);
+            endX = this.gameMap.width;
+        }
+        if (endY > this.gameMap.height) {
+            startY -= (endY - this.gameMap.height);
+            endY = this.gameMap.height;
+        }
+        startX = Math.max(0, startX);
+        startY = Math.max(0, startY);
+
+        for (let y = startY; y < endY; y++) {
+            for (let x = startX; x < endX; x++) {
                 const visible = this.gameMap.visible[x][y];
                 const explored = this.gameMap.explored[x][y];
                 const tile = this.gameMap.tiles[x][y];
