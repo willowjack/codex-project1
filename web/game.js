@@ -1581,103 +1581,65 @@ class Game {
 
     renderMap() {
         const display = document.getElementById('map-display');
+        if (!display || !this.player || !this.gameMap) return;
+
         let html = '';
 
-        // 뷰포트 계산 (플레이어 중심)
+        // 뷰포트 크기
         const vpWidth = CONFIG.VIEWPORT_WIDTH;
         const vpHeight = CONFIG.VIEWPORT_HEIGHT;
-        const halfW = Math.floor(vpWidth / 2);
-        const halfH = Math.floor(vpHeight / 2);
-
-        // 실제 렌더링할 범위 계산
         const mapW = this.gameMap.width;
         const mapH = this.gameMap.height;
 
-        // 뷰포트가 맵보다 큰 경우 맵 전체를 보여줌
-        let startX, startY, endX, endY;
+        // 플레이어 중심 뷰포트 계산
+        let startX = this.player.x - Math.floor(vpWidth / 2);
+        let startY = this.player.y - Math.floor(vpHeight / 2);
 
-        if (vpWidth >= mapW) {
-            // 뷰포트가 맵보다 넓으면 맵 전체 표시
-            startX = 0;
-            endX = mapW;
-        } else {
-            // 플레이어 중심으로 뷰포트 계산
-            startX = this.player.x - halfW;
-            endX = startX + vpWidth;
+        // 경계 클램핑
+        startX = Math.max(0, Math.min(startX, mapW - vpWidth));
+        startY = Math.max(0, Math.min(startY, mapH - vpHeight));
 
-            // 왼쪽 경계 조정
-            if (startX < 0) {
-                startX = 0;
-                endX = vpWidth;
-            }
-            // 오른쪽 경계 조정
-            if (endX > mapW) {
-                endX = mapW;
-                startX = mapW - vpWidth;
-            }
-        }
+        // 맵이 뷰포트보다 작으면 0부터 시작
+        if (mapW <= vpWidth) startX = 0;
+        if (mapH <= vpHeight) startY = 0;
 
-        if (vpHeight >= mapH) {
-            // 뷰포트가 맵보다 높으면 맵 전체 표시
-            startY = 0;
-            endY = mapH;
-        } else {
-            // 플레이어 중심으로 뷰포트 계산
-            startY = this.player.y - halfH;
-            endY = startY + vpHeight;
-
-            // 위쪽 경계 조정
-            if (startY < 0) {
-                startY = 0;
-                endY = vpHeight;
-            }
-            // 아래쪽 경계 조정
-            if (endY > mapH) {
-                endY = mapH;
-                startY = mapH - vpHeight;
-            }
-        }
+        const endX = Math.min(startX + vpWidth, mapW);
+        const endY = Math.min(startY + vpHeight, mapH);
 
         for (let y = startY; y < endY; y++) {
             for (let x = startX; x < endX; x++) {
-                const visible = this.gameMap.visible[x][y];
-                const explored = this.gameMap.explored[x][y];
-                const tile = this.gameMap.tiles[x][y];
+                const visible = this.gameMap.visible[x]?.[y] || false;
+                const explored = this.gameMap.explored[x]?.[y] || false;
+                const tile = this.gameMap.tiles[x]?.[y];
 
                 let char = ' ';
                 let colorClass = 'tile-unexplored';
 
-                if (visible) {
+                // 플레이어 위치 확인 (항상 표시)
+                if (x === this.player.x && y === this.player.y) {
+                    const dirArrows = {
+                        '0,-1': '▲', '0,1': '▼', '-1,0': '◀', '1,0': '▶',
+                        '-1,-1': '◤', '1,-1': '◥', '-1,1': '◣', '1,1': '◢'
+                    };
+                    const dirKey = `${this.playerDirection.dx},${this.playerDirection.dy}`;
+                    char = dirArrows[dirKey] || '▲';
+                    colorClass = 'tile-player';
+                } else if (visible) {
                     // 엔티티 체크
                     const entity = this.gameMap.getActorAt(x, y);
                     const items = this.gameMap.getItemsAt(x, y);
 
-                    if (entity === this.player) {
-                        // 플레이어 방향에 따른 화살표 표시
-                        const dirArrows = {
-                            '0,-1': '▲',  // 북
-                            '0,1': '▼',   // 남
-                            '-1,0': '◀',  // 서
-                            '1,0': '▶',   // 동
-                            '-1,-1': '◤', // 북서
-                            '1,-1': '◥',  // 북동
-                            '-1,1': '◣',  // 남서
-                            '1,1': '◢'    // 남동
-                        };
-                        const dirKey = `${this.playerDirection.dx},${this.playerDirection.dy}`;
-                        char = dirArrows[dirKey] || '▲';
-                        colorClass = 'tile-player';
-                    } else if (entity) {
+                    if (entity && entity !== this.player) {
                         char = entity.char;
                         colorClass = entity.isNPC ? 'tile-npc' : 'tile-monster';
-                    } else if (items.length > 0) {
+                    } else if (items && items.length > 0) {
                         char = items[0].char;
-                        colorClass = items[0].color;
-                    } else {
+                        colorClass = items[0].color || 'tile-item';
+                    } else if (tile) {
                         char = tile.char;
                         colorClass = tile.walkable ? 'tile-floor' : 'tile-wall-visible';
                     }
-                } else if (explored) {
+                } else if (explored && tile) {
                     char = tile.char;
                     colorClass = 'tile-dark';
                 }
