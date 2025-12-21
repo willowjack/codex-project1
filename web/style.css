@@ -718,18 +718,18 @@ body {
         display: none;
     }
 
-    /* 모바일 상단 영역 - 3D 뷰 + 상태창 */
+    /* 모바일 상단 영역 - 3D 뷰 + 상태창 (확대) */
     #mobile-top-area {
         display: flex;
         flex-direction: row;
-        height: 120px;
+        height: 180px;
         flex-shrink: 0;
         background-color: #0a0a0a;
-        border-bottom: 1px solid #333;
+        border-bottom: 2px solid #333;
     }
 
     #mobile-3d-view {
-        width: 50%;
+        width: 55%;
         background-color: #000;
         overflow: hidden;
         display: flex;
@@ -749,11 +749,11 @@ body {
     }
 
     #mobile-status-panel {
-        width: 50%;
-        padding: 5px 8px;
+        width: 45%;
+        padding: 8px 10px;
         display: flex;
         flex-direction: column;
-        justify-content: space-between;
+        justify-content: space-around;
         background-color: #111;
     }
 
@@ -846,85 +846,99 @@ body {
     #mobile-controls {
         display: flex;
         flex-direction: row;
-        justify-content: space-between;
+        justify-content: space-around;
         align-items: center;
-        padding: 8px 10px;
-        background-color: #111;
+        padding: 10px 15px;
+        background-color: #0d0d0d;
         border-top: 2px solid #333;
         flex-shrink: 0;
-        height: 110px;
+        height: 150px;
     }
 
     /* 방향키 컨테이너 */
     #dpad-container {
-        flex: 1;
         display: flex;
         justify-content: center;
         align-items: center;
     }
 
-    .dpad {
+    /* 9방향 로그라이크 키패드 */
+    .dpad-9way {
         display: grid;
-        grid-template-columns: repeat(3, 38px);
-        grid-template-rows: repeat(3, 38px);
-        gap: 2px;
+        grid-template-columns: repeat(3, 42px);
+        grid-template-rows: repeat(3, 42px);
+        gap: 4px;
+        background: #1a1a1a;
+        padding: 6px;
+        border-radius: 10px;
+        border: 1px solid #333;
     }
 
     .dpad-btn {
-        width: 38px;
-        height: 38px;
-        font-size: 18px;
+        width: 42px;
+        height: 42px;
+        font-size: 20px;
         font-family: inherit;
-        background: linear-gradient(180deg, #2a2a2a 0%, #1a1a1a 100%);
-        border: 2px solid #444;
+        background: linear-gradient(180deg, #3a3a3a 0%, #252525 100%);
+        border: 2px solid #555;
         color: #fff;
-        border-radius: 6px;
+        border-radius: 8px;
         cursor: pointer;
         display: flex;
         justify-content: center;
         align-items: center;
         -webkit-tap-highlight-color: transparent;
         touch-action: manipulation;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.3);
     }
 
     .dpad-btn:active {
-        background: linear-gradient(180deg, #3a3a3a 0%, #2a2a2a 100%);
+        background: linear-gradient(180deg, #5a5a5a 0%, #4a4a4a 100%);
+        border-color: #ffcc00;
+        transform: scale(0.95);
+        box-shadow: 0 1px 2px rgba(0,0,0,0.3);
+    }
+
+    .dpad-center {
+        background: linear-gradient(180deg, #222 0%, #1a1a1a 100%);
+        border-color: #444;
+        font-size: 24px;
+        color: #888;
+    }
+
+    .dpad-center:active {
+        background: linear-gradient(180deg, #333 0%, #2a2a2a 100%);
         border-color: #ffcc00;
     }
 
-    .dpad-up { grid-column: 2; grid-row: 1; }
-    .dpad-left { grid-column: 1; grid-row: 2; }
-    .dpad-center { grid-column: 2; grid-row: 2; background: #333; font-size: 12px; }
-    .dpad-right { grid-column: 3; grid-row: 2; }
-    .dpad-down { grid-column: 2; grid-row: 3; }
-
     /* 기능키 컨테이너 */
     #action-container {
-        flex: 1;
         display: grid;
-        grid-template-columns: repeat(2, 1fr);
-        grid-template-rows: repeat(2, 1fr);
-        gap: 4px;
-        padding-left: 10px;
+        grid-template-columns: repeat(2, 60px);
+        grid-template-rows: repeat(2, 42px);
+        gap: 6px;
     }
 
     .action-btn {
         padding: 8px 4px;
-        font-size: 11px;
+        font-size: 12px;
+        font-weight: bold;
         font-family: inherit;
-        background: linear-gradient(180deg, #2a2a2a 0%, #1a1a1a 100%);
-        border: 2px solid #444;
-        color: #ddd;
-        border-radius: 6px;
+        background: linear-gradient(180deg, #2d4a2d 0%, #1a3a1a 100%);
+        border: 2px solid #4a6a4a;
+        color: #afd9af;
+        border-radius: 8px;
         cursor: pointer;
         -webkit-tap-highlight-color: transparent;
         touch-action: manipulation;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.3);
     }
 
     .action-btn:active {
-        background: linear-gradient(180deg, #3a3a3a 0%, #2a2a2a 100%);
-        border-color: #ffcc00;
+        background: linear-gradient(180deg, #4a6a4a 0%, #3a5a3a 100%);
+        border-color: #88ff88;
         color: #fff;
+        transform: scale(0.95);
     }
 
     /* 모달 모바일 최적화 */

@@ -144,14 +144,18 @@
 
             <!-- 모바일 터치 컨트롤 -->
             <div id="mobile-controls">
-                <!-- 왼쪽: 방향키 -->
+                <!-- 왼쪽: 9방향 키패드 (로그라이크 스타일) -->
                 <div id="dpad-container">
-                    <div class="dpad">
-                        <button class="dpad-btn dpad-up" data-dir="up">↑</button>
-                        <button class="dpad-btn dpad-left" data-dir="left">←</button>
-                        <button class="dpad-btn dpad-center" data-action="wait">●</button>
-                        <button class="dpad-btn dpad-right" data-dir="right">→</button>
-                        <button class="dpad-btn dpad-down" data-dir="down">↓</button>
+                    <div class="dpad-9way">
+                        <button class="dpad-btn" data-dir="up-left">↖</button>
+                        <button class="dpad-btn" data-dir="up">↑</button>
+                        <button class="dpad-btn" data-dir="up-right">↗</button>
+                        <button class="dpad-btn" data-dir="left">←</button>
+                        <button class="dpad-btn dpad-center" data-action="wait">·</button>
+                        <button class="dpad-btn" data-dir="right">→</button>
+                        <button class="dpad-btn" data-dir="down-left">↙</button>
+                        <button class="dpad-btn" data-dir="down">↓</button>
+                        <button class="dpad-btn" data-dir="down-right">↘</button>
                     </div>
                 </div>
                 <!-- 오른쪽: 기능키 -->
@@ -159,7 +163,7 @@
                     <button class="action-btn" data-action="pickup">줍기</button>
                     <button class="action-btn" data-action="inventory">가방</button>
                     <button class="action-btn" data-action="rest">휴식</button>
-                    <button class="action-btn" data-action="talk">대화</button>
+                    <button class="action-btn" data-action="stairs">계단</button>
                 </div>
             </div>
         </div>
