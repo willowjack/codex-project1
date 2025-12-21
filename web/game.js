@@ -688,6 +688,12 @@ class Game {
         this.playerDirection = { dx: 0, dy: -1 }; // 초기 방향: 북쪽
         this.viewMode = 'both'; // 'both', '3d-only', '2d-only'
 
+        // 맵 드래그 이동용 상태
+        this.mapPan = { x: 0, y: 0 };
+        this.mapDragging = false;
+        this.mapDragStart = { x: 0, y: 0 };
+        this.mapPanStart = { x: 0, y: 0 };
+
         this.setupEventListeners();
     }
 
@@ -1497,6 +1503,9 @@ class Game {
         }
 
         display.innerHTML = html;
+
+        // 맵 팬 위치 적용
+        this.applyMapPan();
     }
 
     render3D() {
@@ -1850,6 +1859,83 @@ class Game {
     setupEventListeners() {
         document.addEventListener('keydown', (e) => this.handleKeyDown(e));
         this.setupTouchControls();
+        this.setupMapDrag();
+    }
+
+    setupMapDrag() {
+        const mapContainer = document.getElementById('map-container');
+        const mapDisplay = document.getElementById('map-display');
+        if (!mapContainer || !mapDisplay) return;
+
+        // 마우스 드래그 이벤트
+        mapContainer.addEventListener('mousedown', (e) => {
+            if (e.button !== 0) return; // 왼쪽 버튼만
+            this.mapDragging = true;
+            this.mapDragStart = { x: e.clientX, y: e.clientY };
+            this.mapPanStart = { ...this.mapPan };
+            mapContainer.style.cursor = 'grabbing';
+            e.preventDefault();
+        });
+
+        document.addEventListener('mousemove', (e) => {
+            if (!this.mapDragging) return;
+            const dx = e.clientX - this.mapDragStart.x;
+            const dy = e.clientY - this.mapDragStart.y;
+            this.mapPan.x = this.mapPanStart.x + dx;
+            this.mapPan.y = this.mapPanStart.y + dy;
+            this.applyMapPan();
+        });
+
+        document.addEventListener('mouseup', () => {
+            if (this.mapDragging) {
+                this.mapDragging = false;
+                mapContainer.style.cursor = 'grab';
+            }
+        });
+
+        // 터치 드래그 이벤트
+        mapContainer.addEventListener('touchstart', (e) => {
+            if (e.touches.length === 1) {
+                this.mapDragging = true;
+                this.mapDragStart = { x: e.touches[0].clientX, y: e.touches[0].clientY };
+                this.mapPanStart = { ...this.mapPan };
+            }
+        }, { passive: true });
+
+        mapContainer.addEventListener('touchmove', (e) => {
+            if (!this.mapDragging || e.touches.length !== 1) return;
+            const dx = e.touches[0].clientX - this.mapDragStart.x;
+            const dy = e.touches[0].clientY - this.mapDragStart.y;
+            this.mapPan.x = this.mapPanStart.x + dx;
+            this.mapPan.y = this.mapPanStart.y + dy;
+            this.applyMapPan();
+        }, { passive: true });
+
+        mapContainer.addEventListener('touchend', () => {
+            this.mapDragging = false;
+        });
+
+        // 더블클릭으로 맵 위치 초기화
+        mapContainer.addEventListener('dblclick', () => {
+            this.mapPan = { x: 0, y: 0 };
+            this.applyMapPan();
+        });
+
+        // 초기 커서 스타일
+        mapContainer.style.cursor = 'grab';
+    }
+
+    applyMapPan() {
+        const mapDisplay = document.getElementById('map-display');
+        if (mapDisplay) {
+            mapDisplay.style.transform = `translate(${this.mapPan.x}px, ${this.mapPan.y}px)`;
+        }
+    }
+
+    // 플레이어 이동 시 맵 중앙으로 리셋
+    resetMapPan() {
+        this.mapPan = { x: 0, y: 0 };
+        this.applyMapPan();
     }
 
     setupTouchControls() {

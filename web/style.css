@@ -255,6 +255,10 @@ body {
     flex-direction: column;
     overflow: hidden;
     background-color: #000;
+    position: relative;
+    /* 드래그 이동을 위한 설정 */
+    user-select: none;
+    -webkit-user-select: none;
 }
 
 #map-display {
@@ -265,6 +269,16 @@ body {
     letter-spacing: 0;
     white-space: pre;
     font-family: 'Courier New', monospace;
+    /* 드래그 이동을 위한 설정 */
+    transition: none;
+    will-change: transform;
+}
+
+/* 모든 맵 타일에 일관된 너비 적용 */
+#map-display span {
+    display: inline-block;
+    width: 1.2em;
+    text-align: center;
 }
 
 /* 모든 맵 타일에 일관된 너비 적용 */

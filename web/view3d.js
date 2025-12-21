@@ -171,16 +171,17 @@ class ASCII3DRenderer {
                 let char = wallChar;
                 let r = localBright - 10, g = localBright - 15, b = localBright;
 
-                // 수평 줄무늬 장식 (정면 벽과 높이 맞춤)
-                if ((y === stripeTop || y === stripeBottom) && x < rightEdge - 1) {
-                    char = '─';
-                    r = 120 + xRatio * 40; g = 105 + xRatio * 35; b = 35;
-                }
-
-                // 대각선 가장자리 (밝은 테두리)
-                if (x === rightEdge - 1) {
+                // 대각선 가장자리 (밝은 테두리) - 줄무늬 위치 제외
+                const isStripeY = (y === stripeTop || y === stripeBottom);
+                if (x === rightEdge - 1 && !isStripeY) {
                     char = y < this.height/2 ? '╲' : '╱';
                     r = bright + 45; g = bright + 40; b = bright + 50;
+                }
+
+                // 수평 줄무늬 장식 (정면 벽과 높이 맞춤) - 대각선 위치까지 연장
+                if (isStripeY) {
+                    char = '─';
+                    r = 120 + xRatio * 40; g = 105 + xRatio * 35; b = 35;
                 }
 
                 // 문
@@ -233,16 +234,17 @@ class ASCII3DRenderer {
                 let char = wallChar;
                 let r = localBright - 10, g = localBright - 15, b = localBright;
 
-                // 수평 줄무늬 장식 (정면 벽과 높이 맞춤)
-                if ((y === stripeTop || y === stripeBottom) && x > leftEdge) {
-                    char = '─';
-                    r = 120 + xRatio * 40; g = 105 + xRatio * 35; b = 35;
-                }
-
-                // 대각선 가장자리 (밝은 테두리)
-                if (x === leftEdge) {
+                // 대각선 가장자리 (밝은 테두리) - 줄무늬 위치 제외
+                const isStripeY = (y === stripeTop || y === stripeBottom);
+                if (x === leftEdge && !isStripeY) {
                     char = y < this.height/2 ? '╱' : '╲';
                     r = bright + 45; g = bright + 40; b = bright + 50;
+                }
+
+                // 수평 줄무늬 장식 (정면 벽과 높이 맞춤) - 대각선 위치까지 연장
+                if (isStripeY) {
+                    char = '─';
+                    r = 120 + xRatio * 40; g = 105 + xRatio * 35; b = 35;
                 }
 
                 // 문
@@ -438,17 +440,25 @@ class ASCII3DRenderer {
         if (!pattern) return;
 
         // Y 위치 오프셋 계산 (비행/지상/아이템 구분)
+        // 뷰포트 하단 계산 (바닥선 위치)
+        const vp = this.viewports[depth];
+        const floorY = Math.floor(vp.b * this.height);
+        const midY2 = Math.floor(this.height / 2);
+
         let yOffset = 0;
         if (entity.isFlying) {
             // 비행 몬스터: 위쪽에 표시 (공중에 떠있음)
-            yOffset = -Math.floor(pattern.length * 0.5);
+            yOffset = -Math.floor(pattern.length * 0.6);
         } else if (entity.isFloorItem) {
             // 바닥 아이템/시체: 화면 하단에 표시
             const bottomArea = Math.floor(this.height * 0.35);
             yOffset = bottomArea;
         } else if (entity.isGrounded) {
-            // 지상 몬스터: 약간 아래쪽에 표시 (바닥에 서있음)
-            yOffset = Math.floor(pattern.length * 0.2);
+            // 지상 몬스터: 바닥에 발이 닿게 표시
+            // 몬스터 하단이 바닥선에 오도록 계산
+            const monsterBottom = midY2 + Math.floor(pattern.length / 2);
+            const targetBottom = floorY - 1;  // 바닥선 바로 위
+            yOffset = targetBottom - monsterBottom;
         }
 
         const startY = midY - Math.floor(pattern.length / 2) + yOffset;
