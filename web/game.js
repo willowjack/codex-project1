@@ -1589,31 +1589,54 @@ class Game {
         const halfW = Math.floor(vpWidth / 2);
         const halfH = Math.floor(vpHeight / 2);
 
-        // 뷰포트 시작/끝 위치 계산 (맵 경계 고려)
-        let startX = this.player.x - halfW;
-        let startY = this.player.y - halfH;
-        let endX = startX + vpWidth;
-        let endY = startY + vpHeight;
+        // 실제 렌더링할 범위 계산
+        const mapW = this.gameMap.width;
+        const mapH = this.gameMap.height;
 
-        // 경계 조정
-        if (startX < 0) {
-            endX -= startX;
+        // 뷰포트가 맵보다 큰 경우 맵 전체를 보여줌
+        let startX, startY, endX, endY;
+
+        if (vpWidth >= mapW) {
+            // 뷰포트가 맵보다 넓으면 맵 전체 표시
             startX = 0;
+            endX = mapW;
+        } else {
+            // 플레이어 중심으로 뷰포트 계산
+            startX = this.player.x - halfW;
+            endX = startX + vpWidth;
+
+            // 왼쪽 경계 조정
+            if (startX < 0) {
+                startX = 0;
+                endX = vpWidth;
+            }
+            // 오른쪽 경계 조정
+            if (endX > mapW) {
+                endX = mapW;
+                startX = mapW - vpWidth;
+            }
         }
-        if (startY < 0) {
-            endY -= startY;
+
+        if (vpHeight >= mapH) {
+            // 뷰포트가 맵보다 높으면 맵 전체 표시
             startY = 0;
+            endY = mapH;
+        } else {
+            // 플레이어 중심으로 뷰포트 계산
+            startY = this.player.y - halfH;
+            endY = startY + vpHeight;
+
+            // 위쪽 경계 조정
+            if (startY < 0) {
+                startY = 0;
+                endY = vpHeight;
+            }
+            // 아래쪽 경계 조정
+            if (endY > mapH) {
+                endY = mapH;
+                startY = mapH - vpHeight;
+            }
         }
-        if (endX > this.gameMap.width) {
-            startX -= (endX - this.gameMap.width);
-            endX = this.gameMap.width;
-        }
-        if (endY > this.gameMap.height) {
-            startY -= (endY - this.gameMap.height);
-            endY = this.gameMap.height;
-        }
-        startX = Math.max(0, startX);
-        startY = Math.max(0, startY);
 
         for (let y = startY; y < endY; y++) {
             for (let x = startX; x < endX; x++) {
