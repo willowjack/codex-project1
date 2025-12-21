@@ -1,6 +1,6 @@
-name: Auto Create and Merge PR for Claude Branches
+name: Auto Create, Merge PR and Deploy
 
-# claude/ 브랜치에 푸시되면 자동으로 PR 생성 후 머지합니다
+# claude/ 브랜치에 푸시되면 자동으로 PR 생성, 머지, 배포합니다
 
 on:
   push:
@@ -8,12 +8,18 @@ on:
       - 'claude/**'
 
 jobs:
-  create-and-merge-pr:
+  create-merge-deploy:
     runs-on: ubuntu-latest
 
     permissions:
       contents: write
       pull-requests: write
+      pages: write
+      id-token: write
+
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
 
     steps:
       - name: Checkout
@@ -52,7 +58,7 @@ jobs:
           **커밋**: ${{ github.sha }}
 
           ---
-          _이 PR은 자동으로 머지됩니다._" \
+          _이 PR은 자동으로 머지되고 배포됩니다._" \
             --base main \
             --head "${{ github.ref_name }}")
 
@@ -63,7 +69,6 @@ jobs:
 
       - name: Merge PR
         run: |
-          # 기존 PR이 있으면 그것을 사용, 없으면 방금 생성한 것 사용
           if [ "${{ steps.check-pr.outputs.pr_exists }}" == "true" ]; then
             PR_URL="${{ steps.check-pr.outputs.pr_url }}"
           else
@@ -75,3 +80,22 @@ jobs:
           gh pr merge "$PR_URL" --squash --delete-branch
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      # 머지 후 main 브랜치로 체크아웃하여 배포
+      - name: Checkout main after merge
+        run: |
+          git fetch origin main
+          git checkout main
+          git pull origin main
+
+      - name: Setup Pages
+        uses: actions/configure-pages@v4
+
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: './web'
+
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
