@@ -688,8 +688,8 @@
             1: { cols: 1, rows: 1 }
         };
 
-        // ASCII 팔레트
-        const ASCII_PALETTE = window.ASCII_PALETTE || {
+        // ASCII 팔레트 (monster_patterns.js에서 이미 정의됨, 없으면 기본값 사용)
+        const EDITOR_PALETTE = (typeof ASCII_PALETTE !== 'undefined') ? ASCII_PALETTE : {
             blocks: ['█', '▓', '▒', '░', '▐', '▌', '▀', '▄'],
             half: ['▀', '▄', '▌', '▐', '▖', '▗', '▘', '▝'],
             shapes: ['◆', '◇', '○', '●', '□', '■', '△', '▽', '◁', '▷', '★', '☆'],
@@ -826,10 +826,10 @@
         // 팔레트 렌더링
         function renderPalettes() {
             const sections = {
-                'paletteBlocks': ASCII_PALETTE.blocks,
-                'paletteHalf': ASCII_PALETTE.half,
-                'paletteShapes': ASCII_PALETTE.shapes,
-                'paletteMisc': ASCII_PALETTE.misc
+                'paletteBlocks': EDITOR_PALETTE.blocks,
+                'paletteHalf': EDITOR_PALETTE.half,
+                'paletteShapes': EDITOR_PALETTE.shapes,
+                'paletteMisc': EDITOR_PALETTE.misc
             };
 
             for (const [id, chars] of Object.entries(sections)) {
