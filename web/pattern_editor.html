@@ -19,6 +19,50 @@
             padding: 20px;
         }
 
+        /* 네비게이션 바 */
+        .nav-bar {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-bottom: 20px;
+            padding: 15px;
+            background: #16213e;
+            border-radius: 10px;
+            border: 1px solid #0f3460;
+        }
+
+        .nav-btn {
+            padding: 10px 20px;
+            background: #0f3460;
+            border: 2px solid transparent;
+            border-radius: 5px;
+            color: #eee;
+            cursor: pointer;
+            font-family: inherit;
+            font-size: 14px;
+            text-decoration: none;
+            transition: all 0.2s;
+        }
+
+        .nav-btn:hover {
+            background: #1a4a7a;
+            transform: translateY(-2px);
+        }
+
+        .nav-btn.active {
+            border-color: #00ff88;
+            background: #1a4a7a;
+            color: #00ff88;
+        }
+
+        .nav-btn.game-btn {
+            background: #2d5016;
+        }
+
+        .nav-btn.game-btn:hover {
+            background: #3d6a1e;
+        }
+
         h1 {
             text-align: center;
             color: #00ff88;
@@ -384,6 +428,14 @@
     </style>
 </head>
 <body>
+    <!-- 네비게이션 바 -->
+    <div class="nav-bar">
+        <a href="pattern_editor.html" class="nav-btn active">🎨 몬스터 아트 에디터</a>
+        <a href="item_editor.html" class="nav-btn">🎒 아이템 에디터</a>
+        <a href="quest_editor.html" class="nav-btn">📜 퀘스트 에디터</a>
+        <a href="index.html" class="nav-btn game-btn">🎮 게임으로</a>
+    </div>
+
     <h1>🎨 몬스터 ASCII 아트 에디터</h1>
 
     <div class="container">
@@ -484,10 +536,61 @@
                 </div>
             </div>
 
+            <!-- 몬스터 스탯 -->
+            <h3 style="color: #ff6666; margin-top: 15px; margin-bottom: 10px; font-size: 14px;">⚔️ 몬스터 스탯</h3>
+            <div class="size-inputs">
+                <div class="size-input">
+                    <label>HP</label>
+                    <input type="number" id="statHp" value="10" step="1" min="1" max="9999" onchange="updateStats()">
+                </div>
+                <div class="size-input">
+                    <label>공격력</label>
+                    <input type="number" id="statAttack" value="3" step="1" min="0" max="999" onchange="updateStats()">
+                </div>
+                <div class="size-input">
+                    <label>방어력</label>
+                    <input type="number" id="statDefense" value="1" step="1" min="0" max="999" onchange="updateStats()">
+                </div>
+                <div class="size-input">
+                    <label>경험치</label>
+                    <input type="number" id="statExp" value="5" step="1" min="0" max="9999" onchange="updateStats()">
+                </div>
+            </div>
+            <div class="size-inputs" style="margin-top: 5px;">
+                <div class="size-input" style="flex: 2;">
+                    <label>출현 층 (최소-최대)</label>
+                    <div style="display: flex; gap: 5px;">
+                        <input type="number" id="statFloorMin" value="1" step="1" min="1" max="99" style="width: 60px;" onchange="updateStats()">
+                        <span style="color: #888;">~</span>
+                        <input type="number" id="statFloorMax" value="5" step="1" min="1" max="99" style="width: 60px;" onchange="updateStats()">
+                    </div>
+                </div>
+                <div class="size-input">
+                    <label>드롭 아이템</label>
+                    <input type="text" id="statDrops" value="%" placeholder="%, !, )" style="width: 80px;" onchange="updateStats()">
+                </div>
+            </div>
+
             <div class="btn-group">
                 <button class="btn btn-primary" onclick="savePattern()">💾 저장</button>
                 <button class="btn" onclick="exportCode()">📋 코드 복사</button>
                 <button class="btn" onclick="exportAllCode()">📄 전체 내보내기</button>
+                <button class="btn" onclick="toggleImportArea()">📥 코드 가져오기</button>
+            </div>
+
+            <div id="importArea" style="display: none; margin-top: 10px;">
+                <textarea id="importCode" placeholder="여기에 몬스터 패턴 코드를 붙여넣으세요...
+예시:
+'g': {
+    name: '고블린',
+    color: '#3f7f3f',
+    ...
+}"
+                    style="width: 100%; height: 150px; background: #1a1a2e; color: #eee; border: 1px solid #0f3460; border-radius: 5px; padding: 10px; font-family: monospace; font-size: 12px;"></textarea>
+                <div style="margin-top: 5px; display: flex; gap: 5px;">
+                    <button class="btn btn-primary" onclick="importCode()">✅ 가져오기</button>
+                    <button class="btn" onclick="toggleImportArea()">❌ 취소</button>
+                </div>
             </div>
 
             <div class="code-output" id="codeOutput" style="display: none;"></div>
@@ -772,6 +875,16 @@
             document.getElementById('sizeHeight').value = data.size?.height || 1.0;
             document.getElementById('sizeWidth').value = data.size?.width || 1.0;
             document.getElementById('sizeWeight').value = data.size?.weight || 1.0;
+
+            // 몬스터 스탯 로드
+            const stats = data.monsterData || {};
+            document.getElementById('statHp').value = stats.hp || 10;
+            document.getElementById('statAttack').value = stats.attack || 3;
+            document.getElementById('statDefense').value = stats.defense || 1;
+            document.getElementById('statExp').value = stats.exp || 5;
+            document.getElementById('statFloorMin').value = stats.floorMin || 1;
+            document.getElementById('statFloorMax').value = stats.floorMax || 5;
+            document.getElementById('statDrops').value = (stats.drops || ['%']).join(', ');
         }
 
         // 사이즈 업데이트
@@ -780,6 +893,24 @@
                 height: parseFloat(document.getElementById('sizeHeight').value) || 1.0,
                 width: parseFloat(document.getElementById('sizeWidth').value) || 1.0,
                 weight: parseFloat(document.getElementById('sizeWeight').value) || 1.0
+            };
+        }
+
+        // 몬스터 스탯 업데이트
+        function updateStats() {
+            const drops = document.getElementById('statDrops').value
+                .split(/[,\s]+/)
+                .map(s => s.trim())
+                .filter(s => s.length > 0);
+
+            patterns[currentMonster].monsterData = {
+                hp: parseInt(document.getElementById('statHp').value) || 10,
+                attack: parseInt(document.getElementById('statAttack').value) || 3,
+                defense: parseInt(document.getElementById('statDefense').value) || 1,
+                exp: parseInt(document.getElementById('statExp').value) || 5,
+                floorMin: parseInt(document.getElementById('statFloorMin').value) || 1,
+                floorMax: parseInt(document.getElementById('statFloorMax').value) || 5,
+                drops: drops.length > 0 ? drops : ['%']
             };
         }
 
@@ -850,11 +981,21 @@
         function exportCode() {
             const char = currentMonster;
             const data = patterns[char];
+            const stats = data.monsterData || { hp: 10, attack: 3, defense: 1, exp: 5, floorMin: 1, floorMax: 5, drops: ['%'] };
 
             const code = `'${char}': {
     name: '${data.name}',
     color: '${data.color}',
     size: { height: ${data.size.height}, width: ${data.size.width}, weight: ${data.size.weight} },
+    monsterData: {
+        hp: ${stats.hp},
+        attack: ${stats.attack},
+        defense: ${stats.defense},
+        exp: ${stats.exp},
+        floorMin: ${stats.floorMin},
+        floorMax: ${stats.floorMax},
+        drops: [${stats.drops.map(d => `'${d}'`).join(', ')}]
+    },
     patterns: {
 ${Object.entries(data.patterns).map(([scale, pattern]) => `        ${scale}: [
 ${pattern.map(row => `            "${row}"`).join(',\n')}
@@ -875,10 +1016,20 @@ ${pattern.map(row => `            "${row}"`).join(',\n')}
             let code = `const MONSTER_PATTERNS = {\n`;
 
             for (const [char, data] of Object.entries(patterns)) {
+                const stats = data.monsterData || { hp: 10, attack: 3, defense: 1, exp: 5, floorMin: 1, floorMax: 5, drops: ['%'] };
                 code += `    '${char}': {
         name: '${data.name}',
         color: '${data.color}',
         size: { height: ${data.size.height}, width: ${data.size.width}, weight: ${data.size.weight} },
+        monsterData: {
+            hp: ${stats.hp},
+            attack: ${stats.attack},
+            defense: ${stats.defense},
+            exp: ${stats.exp},
+            floorMin: ${stats.floorMin},
+            floorMax: ${stats.floorMax},
+            drops: [${(stats.drops || ['%']).map(d => `'${d}'`).join(', ')}]
+        },
         patterns: {
 ${Object.entries(data.patterns).map(([scale, pattern]) => `            ${scale}: [
 ${pattern.map(row => `                "${row}"`).join(',\n')}
@@ -895,6 +1046,82 @@ ${pattern.map(row => `                "${row}"`).join(',\n')}
             navigator.clipboard.writeText(code).then(() => {
                 alert('전체 코드가 클립보드에 복사되었습니다!\n\nmonster_patterns.js 파일에 붙여넣으세요.');
             });
+        }
+
+        // 코드 가져오기 영역 토글
+        function toggleImportArea() {
+            const area = document.getElementById('importArea');
+            if (area.style.display === 'none') {
+                area.style.display = 'block';
+                document.getElementById('importCode').value = '';
+                document.getElementById('importCode').focus();
+            } else {
+                area.style.display = 'none';
+            }
+        }
+
+        // 코드 가져오기
+        function importCode() {
+            const code = document.getElementById('importCode').value.trim();
+            if (!code) {
+                alert('가져올 코드를 입력해주세요.');
+                return;
+            }
+
+            try {
+                // 다양한 형식 지원
+                let importedPatterns = {};
+
+                // 전체 MONSTER_PATTERNS 객체인 경우
+                if (code.includes('const MONSTER_PATTERNS') || code.includes('MONSTER_PATTERNS = {')) {
+                    const match = code.match(/MONSTER_PATTERNS\s*=\s*(\{[\s\S]*\});?/);
+                    if (match) {
+                        importedPatterns = eval('(' + match[1] + ')');
+                    }
+                }
+                // 개별 몬스터 패턴인 경우
+                else if (code.match(/^['"]?\w['"]?\s*:/)) {
+                    importedPatterns = eval('({' + code + '})');
+                }
+                // 객체만 있는 경우
+                else if (code.startsWith('{')) {
+                    importedPatterns = eval('(' + code + ')');
+                }
+                else {
+                    throw new Error('인식할 수 없는 형식');
+                }
+
+                // 가져온 패턴 병합
+                let importedCount = 0;
+                for (const [char, data] of Object.entries(importedPatterns)) {
+                    if (data.patterns) {
+                        patterns[char] = {
+                            name: data.name || char,
+                            color: data.color || '#ffffff',
+                            size: data.size || { height: 1, width: 1, weight: 1 },
+                            patterns: data.patterns,
+                            monsterData: data.monsterData || null
+                        };
+                        importedCount++;
+                    }
+                }
+
+                if (importedCount === 0) {
+                    throw new Error('유효한 패턴을 찾을 수 없습니다.');
+                }
+
+                // 저장 및 UI 업데이트
+                localStorage.setItem('monster_patterns', JSON.stringify(patterns));
+                renderMonsterList();
+                selectMonster(Object.keys(importedPatterns)[0]);
+
+                alert(`${importedCount}개의 몬스터 패턴을 가져왔습니다!`);
+                toggleImportArea();
+
+            } catch (e) {
+                console.error('Import error:', e);
+                alert('코드 가져오기 실패!\n\n올바른 형식인지 확인해주세요.\n\n오류: ' + e.message);
+            }
         }
 
         // 페이지 로드 시 저장된 패턴 불러오기

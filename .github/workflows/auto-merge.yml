@@ -1,0 +1,32 @@
+name: Auto Merge Claude PRs
+
+# Claude Code에서 생성한 PR을 자동으로 머지합니다
+# claude/ 접두사가 붙은 브랜치에서 온 PR만 자동 머지 대상입니다
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+jobs:
+  auto-merge:
+    # claude/ 브랜치에서 온 PR만 처리
+    if: startsWith(github.head_ref, 'claude/')
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: write
+      pull-requests: write
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Merge PR directly
+        run: |
+          # 잠시 대기 (PR이 완전히 생성될 때까지)
+          sleep 5
+          # 바로 머지 (branch protection 없으므로 --auto 불필요)
+          gh pr merge "$PR_URL" --squash --delete-branch
+        env:
+          PR_URL: ${{ github.event.pull_request.html_url }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

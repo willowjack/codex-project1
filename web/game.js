@@ -1458,7 +1458,19 @@ class Game {
                     const items = this.gameMap.getItemsAt(x, y);
 
                     if (entity === this.player) {
-                        char = '@';
+                        // 플레이어 방향에 따른 화살표 표시
+                        const dirArrows = {
+                            '0,-1': '▲',  // 북
+                            '0,1': '▼',   // 남
+                            '-1,0': '◀',  // 서
+                            '1,0': '▶',   // 동
+                            '-1,-1': '◤', // 북서
+                            '1,-1': '◥',  // 북동
+                            '-1,1': '◣',  // 남서
+                            '1,1': '◢'    // 남동
+                        };
+                        const dirKey = `${this.playerDirection.dx},${this.playerDirection.dy}`;
+                        char = dirArrows[dirKey] || '▲';
                         colorClass = 'tile-player';
                     } else if (entity) {
                         char = entity.char;
@@ -1819,35 +1831,29 @@ class Game {
     setupTouchControls() {
         // 방향키 버튼
         const dpadButtons = document.querySelectorAll('.dpad-btn[data-dir]');
+        // 9방향 이동 맵 (로그라이크 스타일)
+        const dirMap = {
+            'up': [0, -1],
+            'down': [0, 1],
+            'left': [-1, 0],
+            'right': [1, 0],
+            'up-left': [-1, -1],
+            'up-right': [1, -1],
+            'down-left': [-1, 1],
+            'down-right': [1, 1]
+        };
+
         dpadButtons.forEach(btn => {
-            btn.addEventListener('touchstart', (e) => {
+            const handleMove = (e) => {
                 e.preventDefault();
                 const dir = btn.dataset.dir;
-                const dirMap = {
-                    'up': [0, -1],
-                    'down': [0, 1],
-                    'left': [-1, 0],
-                    'right': [1, 0]
-                };
                 if (dirMap[dir]) {
                     const [dx, dy] = dirMap[dir];
                     this.handlePlayerTurn(dx, dy);
                 }
-            });
-            btn.addEventListener('click', (e) => {
-                e.preventDefault();
-                const dir = btn.dataset.dir;
-                const dirMap = {
-                    'up': [0, -1],
-                    'down': [0, 1],
-                    'left': [-1, 0],
-                    'right': [1, 0]
-                };
-                if (dirMap[dir]) {
-                    const [dx, dy] = dirMap[dir];
-                    this.handlePlayerTurn(dx, dy);
-                }
-            });
+            };
+            btn.addEventListener('touchstart', handleMove);
+            btn.addEventListener('click', handleMove);
         });
 
         // 대기 버튼 (중앙)
@@ -1891,18 +1897,17 @@ class Game {
                             this.endTurn();
                         }
                         break;
-                    case 'talk':
+                    case 'stairs':
                         if (!this.currentModal) {
-                            // 주변 NPC 찾기
-                            const dirs = [[0,-1],[0,1],[-1,0],[1,0],[-1,-1],[1,-1],[-1,1],[1,1]];
-                            for (const [dx, dy] of dirs) {
-                                const actor = this.gameMap.getActorAt(this.player.x + dx, this.player.y + dy);
-                                if (actor && actor.isNPC) {
-                                    this.talkToNPC(actor);
-                                    return;
-                                }
+                            // 계단 사용
+                            const tile = this.gameMap.tiles[this.player.y][this.player.x];
+                            if (tile.type === 'stairs_down') {
+                                this.descendStairs();
+                            } else if (tile.type === 'stairs_up') {
+                                this.ascendStairs();
+                            } else {
+                                this.addMessage('여기에는 계단이 없다.', 'system');
                             }
-                            this.addMessage('주변에 대화할 NPC가 없다.', 'system');
                         }
                         break;
                 }

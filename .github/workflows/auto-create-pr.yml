@@ -1,0 +1,77 @@
+name: Auto Create and Merge PR for Claude Branches
+
+# claude/ 브랜치에 푸시되면 자동으로 PR 생성 후 머지합니다
+
+on:
+  push:
+    branches:
+      - 'claude/**'
+
+jobs:
+  create-and-merge-pr:
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: write
+      pull-requests: write
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Check if PR already exists
+        id: check-pr
+        run: |
+          PR_URL=$(gh pr list --head "${{ github.ref_name }}" --state open --json url --jq '.[0].url // empty')
+          echo "pr_url=$PR_URL" >> $GITHUB_OUTPUT
+          if [ -n "$PR_URL" ]; then
+            echo "PR already exists: $PR_URL"
+            echo "pr_exists=true" >> $GITHUB_OUTPUT
+          else
+            echo "No existing PR found"
+            echo "pr_exists=false" >> $GITHUB_OUTPUT
+          fi
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Create Pull Request
+        id: create-pr
+        if: steps.check-pr.outputs.pr_exists == 'false'
+        run: |
+          COMMIT_MSG=$(git log -1 --pretty=%s)
+
+          PR_URL=$(gh pr create \
+            --title "$COMMIT_MSG" \
+            --body "## Auto-generated PR
+
+          이 PR은 Claude Code에서 자동으로 생성되었습니다.
+
+          **브랜치**: ${{ github.ref_name }}
+          **커밋**: ${{ github.sha }}
+
+          ---
+          _이 PR은 자동으로 머지됩니다._" \
+            --base main \
+            --head "${{ github.ref_name }}")
+
+          echo "pr_url=$PR_URL" >> $GITHUB_OUTPUT
+          echo "Created PR: $PR_URL"
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Merge PR
+        run: |
+          # 기존 PR이 있으면 그것을 사용, 없으면 방금 생성한 것 사용
+          if [ "${{ steps.check-pr.outputs.pr_exists }}" == "true" ]; then
+            PR_URL="${{ steps.check-pr.outputs.pr_url }}"
+          else
+            PR_URL="${{ steps.create-pr.outputs.pr_url }}"
+          fi
+
+          echo "Merging PR: $PR_URL"
+          sleep 3
+          gh pr merge "$PR_URL" --squash --delete-branch
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
