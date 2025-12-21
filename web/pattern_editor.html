@@ -1079,8 +1079,8 @@ ${pattern.map(row => `                "${row}"`).join(',\n')}
                         importedPatterns = eval('(' + match[1] + ')');
                     }
                 }
-                // 개별 몬스터 패턴인 경우
-                else if (code.match(/^['"]?\w['"]?\s*:/)) {
+                // 개별 몬스터 패턴인 경우 (특수문자 키 포함: %, $, !, 등)
+                else if (code.match(/^['"].['"]?\s*:/) || code.match(/^['"]?\w['"]?\s*:/)) {
                     importedPatterns = eval('({' + code + '})');
                 }
                 // 객체만 있는 경우
@@ -1091,18 +1091,41 @@ ${pattern.map(row => `                "${row}"`).join(',\n')}
                     throw new Error('인식할 수 없는 형식');
                 }
 
+                // 기본 패턴 생성 함수
+                const createDefaultPattern = (scale, char) => {
+                    const sizes = { 5: 7, 4: 5, 3: 3, 2: 2, 1: 1 };
+                    const s = sizes[scale];
+                    const arr = [];
+                    for (let i = 0; i < s; i++) {
+                        if (i === Math.floor(s / 2)) {
+                            const pad = ' '.repeat(Math.floor(s / 2));
+                            arr.push(pad + char + pad.slice(0, s - pad.length - 1));
+                        } else {
+                            arr.push(' '.repeat(s));
+                        }
+                    }
+                    return arr;
+                };
+
                 // 가져온 패턴 병합
                 let importedCount = 0;
                 for (const [char, data] of Object.entries(importedPatterns)) {
                     if (data.patterns) {
+                        // 누락된 스케일 채우기
+                        const completePatterns = {};
+                        for (let scale = 1; scale <= 5; scale++) {
+                            completePatterns[scale] = data.patterns[scale] || createDefaultPattern(scale, char);
+                        }
+
                         patterns[char] = {
                             name: data.name || char,
                             color: data.color || '#ffffff',
                             size: data.size || { height: 1, width: 1, weight: 1 },
-                            patterns: data.patterns,
-                            monsterData: data.monsterData || null
+                            patterns: completePatterns,
+                            monsterData: data.monsterData || data.stats || null
                         };
                         importedCount++;
+                        console.log(`Imported pattern for '${char}':`, patterns[char]);
                     }
                 }
 

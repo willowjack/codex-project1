@@ -1309,6 +1309,12 @@ class Game {
         this.renderShop();
     }
 
+    closeShop() {
+        document.getElementById('shop-modal').classList.add('hidden');
+        this.currentModal = null;
+        this.currentMerchant = null;
+    }
+
     getItemSellPrice(itemName) {
         // 시체인 경우 특별 처리
         if (itemName.includes('의 시체')) {
