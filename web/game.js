@@ -544,6 +544,12 @@ class GameMap {
             }
         }
 
+        // 플레이어 위치는 항상 visible
+        if (this.inBounds(centerX, centerY)) {
+            this.visible[centerX][centerY] = true;
+            this.explored[centerX][centerY] = true;
+        }
+
         // Simple raycasting FOV
         for (let angle = 0; angle < 360; angle += 1) {
             const rad = angle * Math.PI / 180;
