@@ -42,7 +42,18 @@ web/
 
 ## 자동화 워크플로우
 
-### 완전 자동화 흐름 (목표)
+### ⚠️ 필수 GitHub 설정 (중요!)
+
+자동화가 작동하려면 **반드시** 아래 설정이 필요:
+
+| 설정 위치 | 설정 항목 | 필요 값 |
+|-----------|-----------|---------|
+| Settings → General → Pull Requests | Allow auto-merge | ✅ 체크 |
+| Settings → Actions → General → Workflow permissions | Allow GitHub Actions to create and approve pull requests | ✅ 체크 |
+| Settings → Branches | Branch protection rules | 없음 (또는 최소한으로) |
+| Settings → Pages → Source | Build and deployment | GitHub Actions |
+
+### 완전 자동화 흐름
 ```
 claude/xxx 브랜치에 푸시
         ↓
