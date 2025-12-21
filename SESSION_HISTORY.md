@@ -64,10 +64,18 @@ claude/xxx 브랜치에 푸시
 [자동] GitHub Pages 배포 (deploy-pages.yml)
 ```
 
-### 현재 이슈
-- GitHub Pages 배포가 자동 트리거 안됨
-- **해결법**: Repository Settings → Pages → Source를 "GitHub Actions"로 설정 필요
-- 또는 Actions 탭에서 "Deploy to GitHub Pages" 수동 실행
+### GitHub 자동화 문제 해결 기록 (2025-12-21)
+
+자동화가 처음에 작동하지 않았던 이유와 해결책:
+
+| 문제 | 원인 | 해결 |
+|------|------|------|
+| `--auto` 머지 실패 | Branch protection 없으면 `--auto` 불필요 | `--squash --delete-branch`로 직접 머지 |
+| PR 생성 권한 오류 | Workflow 권한 설정 안 됨 | Settings → Actions → "Allow GitHub Actions to create and approve pull requests" 체크 |
+| GITHUB_TOKEN이 다른 워크플로우 트리거 못함 | GitHub 보안 정책 (의도된 동작) | auto-create-pr.yml에서 PR 생성과 머지를 **하나의 워크플로우로 통합** |
+| 머지 충돌 | 브랜치가 main에서 분기된 후 변경됨 | `git rebase origin/main` 후 `git push --force` |
+
+**핵심 해결책**: PR 생성과 머지를 분리하면 GITHUB_TOKEN 제한으로 머지가 트리거되지 않음. `auto-create-pr.yml`에서 PR 생성 후 바로 머지하도록 통합해야 함.
 
 ---
 
@@ -142,7 +150,26 @@ claude/xxx 브랜치에 푸시
 
 ## 최근 작업 내역
 
-### 2024-12-21
+### 2025-12-21 (이번 세션)
+1. **GitHub 자동화 완전 해결**:
+   - `auto-create-pr.yml`: PR 생성 + 머지 통합 워크플로우
+   - `auto-merge.yml`: 단순화된 직접 머지
+   - GITHUB_TOKEN 제한 문제 해결 (워크플로우 통합)
+
+2. **몬스터 에디터 개선** (`web/pattern_editor.html`):
+   - 네비게이션 바 추가 (다른 에디터 이동)
+   - 코드 가져오기 기능 추가
+   - 몬스터 스탯 편집 기능 (HP, 공격력, 방어력, 경험치, 층, 드롭)
+
+3. **3D 뷰 아이템 렌더링 수정** (`web/index.html`):
+   - `item_patterns.js` 스크립트 로딩 추가 (누락되어 있었음)
+
+4. **.claude 디렉토리 구성**:
+   - `settings.json`: 프로젝트 설정
+   - `commands/commit-push.md`: 자동 커밋/푸시 명령
+   - `commands/analyze.md`: 프로젝트 분석 명령
+
+### 2024-12-21 (이전 세션)
 1. 삭제된 파일 복구:
    - `web/item_editor.html`
    - `web/item_patterns.js`
@@ -183,10 +210,13 @@ git checkout 0589721 -- web/item_editor.html
 
 ## 다음 작업 TODO
 
-1. [ ] 몬스터 에디터에 코드 가져오기 기능 추가
-2. [ ] monster_patterns.js에 monsterData 추가
-3. [ ] GitHub Pages 배포 확인 (Settings → Pages)
-4. [ ] 모바일에서 기능 테스트
+1. [x] ~~몬스터 에디터에 코드 가져오기 기능 추가~~ ✅
+2. [x] ~~몬스터 에디터에 네비게이션 바 추가~~ ✅
+3. [x] ~~item_patterns.js 스크립트 로딩 추가~~ ✅
+4. [ ] monster_patterns.js에 monsterData 추가 (game.js와 연동)
+5. [ ] 모바일에서 기능 테스트
+6. [ ] 더 많은 몬스터 ASCII 아트 추가
+7. [ ] 야외 맵 (숲, 눈 지형) 구현
 
 ---
 
@@ -194,6 +224,7 @@ git checkout 0589721 -- web/item_editor.html
 
 | 커밋 | 설명 |
 |------|------|
+| `226f26b` | PR 생성과 머지 통합 워크플로우 |
 | `0589721` | 아이템 에디터/패턴 완성 버전 |
 | `788c2a2` | 아이템 에디터에 모든 데이터 추가 |
 | `ea3f787` | 몬스터 패턴 에디터 최초 추가 |
@@ -201,4 +232,4 @@ git checkout 0589721 -- web/item_editor.html
 
 ---
 
-*마지막 업데이트: 2024-12-21*
+*마지막 업데이트: 2025-12-21*
