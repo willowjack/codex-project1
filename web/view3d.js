@@ -381,7 +381,20 @@ class ASCII3DRenderer {
 
         if (!pattern) return;
 
-        const startY = midY - Math.floor(pattern.length / 2);
+        // Y 위치 오프셋 계산 (비행/지상/아이템 구분)
+        let yOffset = 0;
+        if (entity.isFlying) {
+            // 비행 몬스터: 위쪽에 표시 (공중에 떠있음)
+            yOffset = -Math.floor(pattern.length * 0.4);
+        } else if (entity.isItem) {
+            // 아이템: 바닥에 놓여있음
+            yOffset = Math.floor(pattern.length * 0.6);
+        } else if (entity.isGrounded) {
+            // 지상 몬스터: 약간 아래쪽에 표시 (바닥에 서있음)
+            yOffset = Math.floor(pattern.length * 0.2);
+        }
+
+        const startY = midY - Math.floor(pattern.length / 2) + yOffset;
         const startX = entityCenterX - Math.floor(pattern[0].length / 2);
 
         const brightness = Math.max(0.4, 1 - depth * 0.2);

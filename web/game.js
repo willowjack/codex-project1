@@ -1518,6 +1518,8 @@ class Game {
         }
 
         // 시야 내의 엔티티 목록 생성
+        // 비행 몬스터 목록 (공중에 떠 있음)
+        const flyingMonsters = ['b', 'h', 'R', 'F', 'P', 'e', 'E', 'G', 'D'];
         const entities = [];
         for (const entity of this.gameMap.entities) {
             if (entity === this.player) continue;
@@ -1533,23 +1535,33 @@ class Game {
                 continue;
             }
 
+            // 비행 몬스터 여부 확인
+            const isFlying = flyingMonsters.includes(entity.char);
+
             entities.push({
                 x: entity.x,
                 y: entity.y,
+                char: entity.char,
                 type: type,
                 color: color,
+                isFlying: isFlying,
+                isGrounded: !isFlying,
             });
         }
 
-        // 아이템 추가
+        // 아이템 추가 (바닥에 놓임)
         for (const item of this.gameMap.items) {
             if (!this.gameMap.visible[item.x][item.y]) continue;
 
             entities.push({
                 x: item.x,
                 y: item.y,
+                char: item.char,
                 type: 'item',
                 color: '#88f',
+                isFlying: false,
+                isGrounded: true,
+                isItem: true,
             });
         }
 
