@@ -796,12 +796,16 @@ class Game {
         this.gameState = 'playing';
         this.messageLog = [];
 
+        // 맵 팬 초기화 (플레이어 중앙 보기)
+        this.mapPan = { x: 0, y: 0 };
+
         this.addMessage(`던전 ${this.dungeonLevel}층에 입장했다. 살아남아야 한다!`, 'system');
         this.addMessage('[?]를 눌러 도움말을 볼 수 있다.', 'system');
         this.addMessage('[>] 계단을 이용해 더 깊은 층으로 내려갈 수 있다.', 'system');
 
         this.updateFOV();
         this.showScreen('game-screen');
+        this.resetMapPan(); // 맵 팬 리셋 후 렌더링
         this.render();
     }
 
