@@ -358,14 +358,53 @@ class ASCII3DRenderer {
             }
         }
 
+        // 깊이별로 정렬 (뒤에서 앞으로)
         visibleEntities.sort((a, b) => b.depth - a.depth);
 
+        // 같은 위치(depth, sideDist)에 있는 엔티티들을 그룹화
+        const positionGroups = new Map();
         for (const entity of visibleEntities) {
-            this.drawEntity(buffer, entity);
+            const key = `${entity.depth},${Math.round(entity.sideDist * 10)}`;
+            if (!positionGroups.has(key)) {
+                positionGroups.set(key, { main: [], floor: [] });
+            }
+            const group = positionGroups.get(key);
+            if (entity.isFloorItem) {
+                group.floor.push(entity);
+            } else {
+                group.main.push(entity);
+            }
+        }
+
+        // 그룹별로 렌더링 (뒤에서 앞으로)
+        const sortedKeys = [...positionGroups.keys()].sort((a, b) => {
+            const depthA = parseInt(a.split(',')[0]);
+            const depthB = parseInt(b.split(',')[0]);
+            return depthB - depthA;
+        });
+
+        for (const key of sortedKeys) {
+            const group = positionGroups.get(key);
+
+            // 1. 바닥 아이템/시체 먼저 그리기 (좌우로 분산)
+            const floorCount = group.floor.length;
+            for (let i = 0; i < floorCount; i++) {
+                const entity = group.floor[i];
+                // 여러 개일 때 좌우로 분산 오프셋
+                const spreadOffset = floorCount > 1
+                    ? (i - (floorCount - 1) / 2) * 0.2
+                    : 0;
+                this.drawEntity(buffer, entity, spreadOffset);
+            }
+
+            // 2. 메인 엔티티 (몬스터/NPC) 그리기
+            for (const entity of group.main) {
+                this.drawEntity(buffer, entity, 0);
+            }
         }
     }
 
-    drawEntity(buffer, entity) {
+    drawEntity(buffer, entity, horizontalSpread = 0) {
         const depth = entity.depth;
         const vp = this.viewports[depth];
 
@@ -374,10 +413,19 @@ class ASCII3DRenderer {
 
         const viewWidth = (vp.r - vp.l) * this.width;
         const sideOffset = Math.floor(entity.sideDist * viewWidth * 0.4);
-        const entityCenterX = midX + sideOffset;
+        // 좌우 분산 오프셋 적용
+        const spreadPixels = Math.floor(horizontalSpread * viewWidth * 0.5);
+        const entityCenterX = midX + sideOffset + spreadPixels;
 
         const scaleLevel = depth <= 1 ? 5 : (depth <= 2 ? 4 : (depth <= 3 ? 3 : 2));
-        const pattern = this.getEntityPattern(entity.char || '?', scaleLevel);
+
+        // 바닥 아이템/시체는 작은 심볼로 표시
+        let pattern;
+        if (entity.isFloorItem) {
+            pattern = this.getFloorItemPattern(entity, scaleLevel);
+        } else {
+            pattern = this.getEntityPattern(entity.char || '?', scaleLevel);
+        }
 
         if (!pattern) return;
 
@@ -385,10 +433,11 @@ class ASCII3DRenderer {
         let yOffset = 0;
         if (entity.isFlying) {
             // 비행 몬스터: 위쪽에 표시 (공중에 떠있음)
-            yOffset = -Math.floor(pattern.length * 0.4);
-        } else if (entity.isItem) {
-            // 아이템: 바닥에 놓여있음
-            yOffset = Math.floor(pattern.length * 0.6);
+            yOffset = -Math.floor(pattern.length * 0.5);
+        } else if (entity.isFloorItem) {
+            // 바닥 아이템/시체: 화면 하단에 표시
+            const bottomArea = Math.floor(this.height * 0.35);
+            yOffset = bottomArea;
         } else if (entity.isGrounded) {
             // 지상 몬스터: 약간 아래쪽에 표시 (바닥에 서있음)
             yOffset = Math.floor(pattern.length * 0.2);
@@ -411,6 +460,42 @@ class ASCII3DRenderer {
                     buffer[bufY][bufX] = { char, color: this.dimColor(baseColor, brightness) };
                 }
             }
+        }
+    }
+
+    // 바닥 아이템/시체용 간단한 패턴
+    getFloorItemPattern(entity, scaleLevel) {
+        const char = entity.char || '?';
+
+        // 시체는 특별한 패턴
+        if (entity.isCorpse) {
+            if (scaleLevel >= 4) {
+                return [
+                    "  ___  ",
+                    " /%%%\\ ",
+                    " \\___/ "
+                ];
+            } else if (scaleLevel >= 3) {
+                return [
+                    " _%_ ",
+                    " \\%/ "
+                ];
+            } else {
+                return ["%"];
+            }
+        }
+
+        // 일반 아이템은 작은 크기로 표시
+        if (scaleLevel >= 4) {
+            return [
+                ` [${char}] `
+            ];
+        } else if (scaleLevel >= 3) {
+            return [
+                `[${char}]`
+            ];
+        } else {
+            return [char];
         }
     }
 
