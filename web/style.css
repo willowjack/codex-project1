@@ -467,6 +467,52 @@ body {
 }
 
 /* 상점 */
+.shop-tabs {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 15px;
+}
+
+.shop-tab {
+    flex: 1;
+    padding: 8px 15px;
+    background: #333;
+    border: 1px solid #555;
+    color: #aaa;
+    cursor: pointer;
+    font-family: inherit;
+    font-size: 14px;
+    border-radius: 3px;
+    transition: all 0.2s;
+}
+
+.shop-tab:hover {
+    background: #444;
+    color: #fff;
+}
+
+.shop-tab.active {
+    background: #4a4;
+    border-color: #6c6;
+    color: #fff;
+}
+
+.shop-gold {
+    text-align: center;
+    margin: 10px 0;
+    font-size: 16px;
+}
+
+.gold-amount {
+    color: #ffd700;
+    font-weight: bold;
+}
+
+.shop-items {
+    max-height: 200px;
+    overflow-y: auto;
+}
+
 .shop-item {
     display: flex;
     align-items: center;
@@ -474,11 +520,46 @@ body {
     margin: 5px 0;
     background-color: #222;
     border-radius: 3px;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.shop-item:hover {
+    background-color: #333;
+}
+
+.shop-item.disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.shop-item.sellable:hover {
+    background-color: #432;
+}
+
+.shop-item .item-name {
+    flex: 1;
 }
 
 .shop-item .price {
     color: #ffd700;
     margin-left: auto;
+}
+
+.shop-item .sell-price {
+    color: #8f8;
+}
+
+.shop-hint {
+    color: #666;
+    margin-top: 15px;
+    text-align: center;
+}
+
+.empty-msg {
+    color: #888;
+    text-align: center;
+    padding: 20px;
 }
 
 /* 대화 */
