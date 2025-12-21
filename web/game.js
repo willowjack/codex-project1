@@ -1867,62 +1867,91 @@ class Game {
         const mapDisplay = document.getElementById('map-display');
         if (!mapContainer || !mapDisplay) return;
 
-        // 마우스 드래그 이벤트
-        mapContainer.addEventListener('mousedown', (e) => {
+        const DRAG_THRESHOLD = 5; // 드래그로 인식하는 최소 이동 거리
+        let isDragStarted = false;
+
+        // 마우스 드래그 이벤트 (mapDisplay에만 적용)
+        mapDisplay.addEventListener('mousedown', (e) => {
             if (e.button !== 0) return; // 왼쪽 버튼만
-            this.mapDragging = true;
+            this.mapDragging = false; // 아직 드래그 시작 아님
+            isDragStarted = true;
             this.mapDragStart = { x: e.clientX, y: e.clientY };
             this.mapPanStart = { ...this.mapPan };
-            mapContainer.style.cursor = 'grabbing';
-            e.preventDefault();
         });
 
-        document.addEventListener('mousemove', (e) => {
-            if (!this.mapDragging) return;
+        mapDisplay.addEventListener('mousemove', (e) => {
+            if (!isDragStarted) return;
             const dx = e.clientX - this.mapDragStart.x;
             const dy = e.clientY - this.mapDragStart.y;
-            this.mapPan.x = this.mapPanStart.x + dx;
-            this.mapPan.y = this.mapPanStart.y + dy;
-            this.applyMapPan();
+
+            // 임계값 이상 이동해야 드래그로 인식
+            if (!this.mapDragging && (Math.abs(dx) > DRAG_THRESHOLD || Math.abs(dy) > DRAG_THRESHOLD)) {
+                this.mapDragging = true;
+                mapDisplay.style.cursor = 'grabbing';
+            }
+
+            if (this.mapDragging) {
+                this.mapPan.x = this.mapPanStart.x + dx;
+                this.mapPan.y = this.mapPanStart.y + dy;
+                this.applyMapPan();
+            }
         });
 
-        document.addEventListener('mouseup', () => {
+        mapDisplay.addEventListener('mouseup', () => {
+            isDragStarted = false;
             if (this.mapDragging) {
                 this.mapDragging = false;
-                mapContainer.style.cursor = 'grab';
+                mapDisplay.style.cursor = 'grab';
+            }
+        });
+
+        mapDisplay.addEventListener('mouseleave', () => {
+            isDragStarted = false;
+            if (this.mapDragging) {
+                this.mapDragging = false;
+                mapDisplay.style.cursor = 'grab';
             }
         });
 
         // 터치 드래그 이벤트
-        mapContainer.addEventListener('touchstart', (e) => {
+        mapDisplay.addEventListener('touchstart', (e) => {
             if (e.touches.length === 1) {
-                this.mapDragging = true;
+                isDragStarted = true;
+                this.mapDragging = false;
                 this.mapDragStart = { x: e.touches[0].clientX, y: e.touches[0].clientY };
                 this.mapPanStart = { ...this.mapPan };
             }
         }, { passive: true });
 
-        mapContainer.addEventListener('touchmove', (e) => {
-            if (!this.mapDragging || e.touches.length !== 1) return;
+        mapDisplay.addEventListener('touchmove', (e) => {
+            if (!isDragStarted || e.touches.length !== 1) return;
             const dx = e.touches[0].clientX - this.mapDragStart.x;
             const dy = e.touches[0].clientY - this.mapDragStart.y;
-            this.mapPan.x = this.mapPanStart.x + dx;
-            this.mapPan.y = this.mapPanStart.y + dy;
-            this.applyMapPan();
+
+            if (!this.mapDragging && (Math.abs(dx) > DRAG_THRESHOLD || Math.abs(dy) > DRAG_THRESHOLD)) {
+                this.mapDragging = true;
+            }
+
+            if (this.mapDragging) {
+                this.mapPan.x = this.mapPanStart.x + dx;
+                this.mapPan.y = this.mapPanStart.y + dy;
+                this.applyMapPan();
+            }
         }, { passive: true });
 
-        mapContainer.addEventListener('touchend', () => {
+        mapDisplay.addEventListener('touchend', () => {
+            isDragStarted = false;
             this.mapDragging = false;
         });
 
         // 더블클릭으로 맵 위치 초기화
-        mapContainer.addEventListener('dblclick', () => {
+        mapDisplay.addEventListener('dblclick', () => {
             this.mapPan = { x: 0, y: 0 };
             this.applyMapPan();
         });
 
         // 초기 커서 스타일
-        mapContainer.style.cursor = 'grab';
+        mapDisplay.style.cursor = 'grab';
     }
 
     applyMapPan() {
