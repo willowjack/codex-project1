@@ -445,13 +445,41 @@ class Religion {
 // ============================================================================
 
 const ITEM_PRICES = {
+    // 음식
     '마른 고기': 10,
     '빵': 5,
+    '사과': 3,
+    // 음료
     '물병': 5,
+    '포도주': 15,
+    // 물약
     '치료 물약': 50,
+    '마나 물약': 40,
+    '해독 물약': 30,
+    // 무기
     '단검': 30,
     '숏소드': 60,
+    '롱소드': 120,
+    '배틀액스': 150,
+    '스태프': 80,
+    // 방어구
     '가죽 갑옷': 50,
+    '체인메일': 100,
+    '플레이트 아머': 200,
+    // 시체 (몬스터별 가격)
+    '쥐의 시체': 2,
+    '박쥐의 시체': 3,
+    '고블린의 시체': 8,
+    '오크의 시체': 15,
+    '트롤의 시체': 30,
+    '늑대의 시체': 12,
+    '뱀의 시체': 5,
+    '거미의 시체': 6,
+    '해골의 시체': 10,
+    '좀비의 시체': 8,
+    '유령의 시체': 20,
+    // 기타 시체 (기본값)
+    '시체': 5,
 };
 
 class Shop {
@@ -1209,18 +1237,115 @@ class Game {
 
     openShop(merchant) {
         this.currentModal = 'shop';
+        this.currentMerchant = merchant;
+        this.shopMode = 'buy'; // 'buy' or 'sell'
         document.getElementById('shop-modal').classList.remove('hidden');
+        this.renderShop();
+    }
+
+    renderShop() {
+        const merchant = this.currentMerchant;
         document.getElementById('shop-title').textContent = `${merchant.name}의 상점`;
 
         const shopDiv = document.getElementById('shop-inventory');
-        shopDiv.innerHTML = `
-            <p>당신의 골드: ${this.player.gold}G</p>
-            <h3>구매 가능한 물품:</h3>
-            <div class="shop-item"><span>마른 고기</span><span class="price">10G</span></div>
-            <div class="shop-item"><span>물병</span><span class="price">5G</span></div>
-            <div class="shop-item"><span>치료 물약</span><span class="price">50G</span></div>
-            <p style="color: #666; margin-top: 15px;">[ESC] 닫기</p>
+
+        // 탭 버튼
+        let html = `
+            <div class="shop-tabs">
+                <button class="shop-tab ${this.shopMode === 'buy' ? 'active' : ''}" onclick="game.setShopMode('buy')">구매</button>
+                <button class="shop-tab ${this.shopMode === 'sell' ? 'active' : ''}" onclick="game.setShopMode('sell')">판매</button>
+            </div>
+            <p class="shop-gold">당신의 골드: <span class="gold-amount">${this.player.gold}G</span></p>
         `;
+
+        if (this.shopMode === 'buy') {
+            // 구매 모드
+            html += '<h3>구매 가능한 물품:</h3><div class="shop-items">';
+            const shopItems = [
+                { name: '마른 고기', char: '%', price: 10 },
+                { name: '물병', char: '!', price: 5 },
+                { name: '치료 물약', char: '!', price: 50 },
+                { name: '빵', char: '%', price: 5 },
+            ];
+            shopItems.forEach((item, idx) => {
+                const canAfford = this.player.gold >= item.price;
+                html += `
+                    <div class="shop-item ${canAfford ? '' : 'disabled'}" onclick="game.buyItem(${idx})">
+                        <span class="item-name">${item.char} ${item.name}</span>
+                        <span class="price">${item.price}G</span>
+                    </div>
+                `;
+            });
+            html += '</div>';
+        } else {
+            // 판매 모드
+            html += '<h3>판매할 아이템:</h3><div class="shop-items">';
+            if (this.player.inventory.length === 0) {
+                html += '<p class="empty-msg">판매할 아이템이 없습니다.</p>';
+            } else {
+                this.player.inventory.forEach((item, idx) => {
+                    const sellPrice = this.getItemSellPrice(item.name);
+                    html += `
+                        <div class="shop-item sellable" onclick="game.sellItem(${idx})">
+                            <span class="item-name">${item.char} ${item.name}</span>
+                            <span class="price sell-price">${sellPrice}G</span>
+                        </div>
+                    `;
+                });
+            }
+            html += '</div>';
+        }
+
+        html += '<p class="shop-hint">[ESC] 닫기</p>';
+        shopDiv.innerHTML = html;
+    }
+
+    setShopMode(mode) {
+        this.shopMode = mode;
+        this.renderShop();
+    }
+
+    getItemSellPrice(itemName) {
+        // 시체인 경우 특별 처리
+        if (itemName.includes('의 시체')) {
+            return ITEM_PRICES[itemName] || ITEM_PRICES['시체'] || 5;
+        }
+        return Math.floor((ITEM_PRICES[itemName] || 10) * 0.5);
+    }
+
+    buyItem(index) {
+        const shopItems = [
+            { name: '마른 고기', char: '%', price: 10, options: { consumable: true, nutrition: 200, itemType: 'food' } },
+            { name: '물병', char: '!', price: 5, options: { consumable: true, hydration: 300, itemType: 'drink' } },
+            { name: '치료 물약', char: '!', price: 50, options: { consumable: true, healAmount: 20, itemType: 'potion' } },
+            { name: '빵', char: '%', price: 5, options: { consumable: true, nutrition: 150, itemType: 'food' } },
+        ];
+
+        const item = shopItems[index];
+        if (!item) return;
+
+        if (this.player.gold < item.price) {
+            this.addMessage('골드가 부족합니다!', 'system');
+            return;
+        }
+
+        this.player.gold -= item.price;
+        const newItem = new Item(0, 0, item.char, 'tile-item', item.name, item.options);
+        this.player.inventory.push(newItem);
+        this.addMessage(`${item.name}을(를) ${item.price}G에 구매했습니다.`, 'item');
+        this.renderShop();
+    }
+
+    sellItem(index) {
+        if (index < 0 || index >= this.player.inventory.length) return;
+
+        const item = this.player.inventory[index];
+        const sellPrice = this.getItemSellPrice(item.name);
+
+        this.player.gold += sellPrice;
+        this.player.inventory.splice(index, 1);
+        this.addMessage(`${item.name}을(를) ${sellPrice}G에 판매했습니다.`, 'item');
+        this.renderShop();
     }
 
     // ========================================================================

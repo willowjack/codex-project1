@@ -501,7 +501,81 @@ class ASCII3DRenderer {
             }
         }
 
-        // 일반 아이템은 작은 크기로 표시
+        // 아이템 유형별 패턴
+        if (char === '!' || entity.name?.includes('물약') || entity.name?.includes('물병')) {
+            // 물약/음료
+            if (scaleLevel >= 4) {
+                return [
+                    "  __  ",
+                    " |!!| ",
+                    " |__| "
+                ];
+            } else if (scaleLevel >= 3) {
+                return [
+                    " !! ",
+                    " ▀▀ "
+                ];
+            } else {
+                return ["!"];
+            }
+        } else if (char === '%' || entity.name?.includes('고기') || entity.name?.includes('빵')) {
+            // 음식
+            if (scaleLevel >= 4) {
+                return [
+                    " ~~~ ",
+                    " %%% ",
+                    " ~~~ "
+                ];
+            } else if (scaleLevel >= 3) {
+                return [
+                    " %% ",
+                    " ▀▀ "
+                ];
+            } else {
+                return ["%"];
+            }
+        } else if (char === ')' || char === '(' || entity.name?.includes('검') || entity.name?.includes('칼')) {
+            // 무기
+            if (scaleLevel >= 4) {
+                return [
+                    "  │  ",
+                    "══╪══",
+                    "  │  "
+                ];
+            } else if (scaleLevel >= 3) {
+                return [
+                    " ┼ "
+                ];
+            } else {
+                return [")"];
+            }
+        } else if (char === '[' || char === ']' || entity.name?.includes('갑옷')) {
+            // 방어구
+            if (scaleLevel >= 4) {
+                return [
+                    " ┌─┐ ",
+                    " │█│ ",
+                    " └─┘ "
+                ];
+            } else if (scaleLevel >= 3) {
+                return [
+                    "[█]"
+                ];
+            } else {
+                return ["["];
+            }
+        } else if (char === '$' || entity.name?.includes('골드') || entity.name?.includes('금화')) {
+            // 금화
+            if (scaleLevel >= 4) {
+                return [
+                    " $$$ "
+                ];
+            } else {
+                return ["$"];
+            }
+        }
+
+        // 기본 아이템 패턴
         if (scaleLevel >= 4) {
             return [
                 ` [${char}] `
