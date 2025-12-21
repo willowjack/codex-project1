@@ -1,4 +1,4 @@
-name: Auto Create, Merge PR and Deploy
+name: Auto Merge Logic
 
 on:
   push:
@@ -11,8 +11,6 @@ jobs:
     permissions:
       contents: write
       pull-requests: write
-    outputs:
-      merged: ${{ steps.merge.outputs.merged }}
 
     steps:
       - name: Checkout
@@ -48,7 +46,6 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Merge PR
-        id: merge
         run: |
           if [ "${{ steps.check-pr.outputs.pr_exists }}" == "true" ]; then
             PR_URL="${{ steps.check-pr.outputs.pr_url }}"
@@ -57,36 +54,5 @@ jobs:
           fi
           sleep 3
           gh pr merge "$PR_URL" --squash --delete-branch
-          echo "merged=true" >> $GITHUB_OUTPUT
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-  deploy:
-    needs: create-and-merge
-    if: needs.create-and-merge.outputs.merged == 'true'
-    runs-on: ubuntu-latest
-    permissions:
-      contents: read
-      pages: write
-      id-token: write
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
-
-    steps:
-      - name: Checkout main
-        uses: actions/checkout@v4
-        with:
-          ref: main
-
-      - name: Setup Pages
-        uses: actions/configure-pages@v4
-
-      - name: Upload artifact
-        uses: actions/upload-pages-artifact@v3
-        with:
-          path: './web'
-
-      - name: Deploy to GitHub Pages
-        id: deployment
-        uses: actions/deploy-pages@v4
