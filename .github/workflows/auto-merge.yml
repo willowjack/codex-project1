@@ -21,14 +21,12 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Enable auto-merge
-        run: gh pr merge --auto --squash "$PR_URL"
-        env:
-          PR_URL: ${{ github.event.pull_request.html_url }}
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Auto-approve PR
-        run: gh pr review --approve "$PR_URL"
+      - name: Merge PR directly
+        run: |
+          # 잠시 대기 (PR이 완전히 생성될 때까지)
+          sleep 5
+          # 바로 머지 (branch protection 없으므로 --auto 불필요)
+          gh pr merge "$PR_URL" --squash --delete-branch
         env:
           PR_URL: ${{ github.event.pull_request.html_url }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
