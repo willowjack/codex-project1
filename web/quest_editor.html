@@ -1,0 +1,953 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>퀘스트 에디터</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Consolas', 'Courier New', monospace;
+            background-color: #1a1a2e;
+            color: #eee;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        /* 네비게이션 바 */
+        .nav-bar {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-bottom: 20px;
+            padding: 15px;
+            background: #16213e;
+            border-radius: 10px;
+            border: 1px solid #0f3460;
+        }
+
+        .nav-btn {
+            padding: 10px 20px;
+            background: #0f3460;
+            border: 2px solid transparent;
+            border-radius: 5px;
+            color: #eee;
+            cursor: pointer;
+            font-family: inherit;
+            font-size: 14px;
+            text-decoration: none;
+            transition: all 0.2s;
+        }
+
+        .nav-btn:hover {
+            background: #1a4a7a;
+            transform: translateY(-2px);
+        }
+
+        .nav-btn.active {
+            border-color: #ffd700;
+            background: #1a4a7a;
+            color: #ffd700;
+        }
+
+        .nav-btn.game-btn {
+            background: #2d5016;
+        }
+
+        .nav-btn.game-btn:hover {
+            background: #3d6a1e;
+        }
+
+        h1 {
+            text-align: center;
+            color: #ffd700;
+            margin-bottom: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: 300px 1fr;
+            gap: 20px;
+        }
+
+        .panel {
+            background: #16213e;
+            border-radius: 10px;
+            padding: 15px;
+            border: 1px solid #0f3460;
+        }
+
+        .panel h2 {
+            color: #ffd700;
+            margin-bottom: 15px;
+            font-size: 16px;
+            border-bottom: 1px solid #0f3460;
+            padding-bottom: 10px;
+        }
+
+        /* 퀘스트 목록 */
+        .quest-list {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            max-height: 500px;
+            overflow-y: auto;
+        }
+
+        .quest-btn {
+            padding: 10px;
+            background: #0f3460;
+            border: 2px solid transparent;
+            border-radius: 5px;
+            color: #eee;
+            cursor: pointer;
+            text-align: left;
+            font-family: inherit;
+            font-size: 14px;
+        }
+
+        .quest-btn:hover {
+            background: #1a4a7a;
+        }
+
+        .quest-btn.active {
+            border-color: #ffd700;
+            background: #1a4a7a;
+        }
+
+        .quest-btn .status {
+            font-size: 12px;
+            color: #888;
+        }
+
+        /* 입력 필드 */
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        .form-group label {
+            display: block;
+            font-size: 12px;
+            color: #888;
+            margin-bottom: 5px;
+        }
+
+        .form-group input,
+        .form-group textarea,
+        .form-group select {
+            width: 100%;
+            padding: 10px;
+            background: #0f3460;
+            border: 1px solid #1a4a7a;
+            border-radius: 5px;
+            color: #eee;
+            font-family: inherit;
+            font-size: 14px;
+        }
+
+        .form-group textarea {
+            min-height: 80px;
+            resize: vertical;
+        }
+
+        .form-group input:focus,
+        .form-group textarea:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: #ffd700;
+        }
+
+        /* 목표 리스트 */
+        .objectives-list {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin-bottom: 10px;
+        }
+
+        .objective-item {
+            background: #0f3460;
+            padding: 10px;
+            border-radius: 5px;
+            display: grid;
+            grid-template-columns: 100px 1fr 80px 40px;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .objective-item select,
+        .objective-item input {
+            padding: 8px;
+            background: #16213e;
+            border: 1px solid #1a4a7a;
+            border-radius: 3px;
+            color: #eee;
+            font-family: inherit;
+        }
+
+        .objective-item .btn-remove {
+            padding: 5px 10px;
+            background: #aa3333;
+            border: none;
+            border-radius: 3px;
+            color: #fff;
+            cursor: pointer;
+        }
+
+        .objective-item .btn-remove:hover {
+            background: #cc4444;
+        }
+
+        /* 보상 입력 */
+        .rewards-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+        }
+
+        .reward-input {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+
+        .reward-input label {
+            font-size: 12px;
+            color: #888;
+        }
+
+        .reward-input input {
+            padding: 8px;
+            background: #0f3460;
+            border: 1px solid #1a4a7a;
+            border-radius: 5px;
+            color: #eee;
+            font-family: inherit;
+        }
+
+        /* 버튼 */
+        .btn-group {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 10px 20px;
+            background: #0f3460;
+            border: none;
+            border-radius: 5px;
+            color: #eee;
+            cursor: pointer;
+            font-family: inherit;
+            font-size: 14px;
+        }
+
+        .btn:hover {
+            background: #1a4a7a;
+        }
+
+        .btn-primary {
+            background: #00aa55;
+        }
+
+        .btn-primary:hover {
+            background: #00cc66;
+        }
+
+        .btn-danger {
+            background: #aa3333;
+        }
+
+        .btn-danger:hover {
+            background: #cc4444;
+        }
+
+        .btn-warning {
+            background: #aa8800;
+        }
+
+        .btn-warning:hover {
+            background: #ccaa00;
+        }
+
+        /* 코드 출력 */
+        .code-output {
+            background: #000;
+            padding: 15px;
+            border-radius: 10px;
+            font-size: 12px;
+            white-space: pre-wrap;
+            word-break: break-all;
+            max-height: 300px;
+            overflow-y: auto;
+            margin-top: 15px;
+            color: #0f0;
+            display: none;
+        }
+
+        /* 미리보기 */
+        .preview-section {
+            margin-top: 20px;
+            padding-top: 15px;
+            border-top: 1px solid #0f3460;
+        }
+
+        .preview-box {
+            background: #000;
+            padding: 15px;
+            border-radius: 10px;
+            color: #ffd700;
+        }
+
+        .preview-box h3 {
+            margin-bottom: 10px;
+        }
+
+        .preview-box .description {
+            color: #aaa;
+            margin-bottom: 10px;
+        }
+
+        .preview-box .objective {
+            color: #0f0;
+            margin: 5px 0;
+        }
+
+        .preview-box .reward {
+            color: #ffd700;
+            margin-top: 10px;
+        }
+
+        /* 도움말 */
+        .help-text {
+            font-size: 12px;
+            color: #888;
+            margin-top: 15px;
+            line-height: 1.5;
+        }
+
+        /* 새 퀘스트 버튼 */
+        .new-quest-btn {
+            width: 100%;
+            padding: 15px;
+            background: #0f3460;
+            border: 2px dashed #1a4a7a;
+            border-radius: 5px;
+            color: #888;
+            cursor: pointer;
+            font-family: inherit;
+            font-size: 14px;
+            margin-top: 10px;
+        }
+
+        .new-quest-btn:hover {
+            border-color: #ffd700;
+            color: #ffd700;
+        }
+
+        /* 가져오기 영역 */
+        #importArea {
+            margin-top: 15px;
+        }
+
+        #importArea textarea {
+            width: 100%;
+            height: 150px;
+            background: #000;
+            color: #0f0;
+            border: 1px solid #0f3460;
+            border-radius: 5px;
+            padding: 10px;
+            font-family: monospace;
+            font-size: 12px;
+            resize: vertical;
+        }
+    </style>
+</head>
+<body>
+    <!-- 네비게이션 바 -->
+    <div class="nav-bar">
+        <a href="pattern_editor.html" class="nav-btn">🎨 몬스터 아트 에디터</a>
+        <a href="item_editor.html" class="nav-btn">🎒 아이템 에디터</a>
+        <a href="quest_editor.html" class="nav-btn active">📜 퀘스트 에디터</a>
+        <a href="index.html" class="nav-btn game-btn">🎮 게임으로</a>
+    </div>
+
+    <h1>📜 퀘스트 에디터</h1>
+
+    <div class="container">
+        <!-- 왼쪽: 퀘스트 목록 -->
+        <div class="panel">
+            <h2>📋 퀘스트 목록</h2>
+            <div class="quest-list" id="questList"></div>
+            <button class="new-quest-btn" onclick="createNewQuest()">+ 새 퀘스트 추가</button>
+        </div>
+
+        <!-- 오른쪽: 에디터 -->
+        <div class="panel">
+            <h2>✏️ 퀘스트 편집</h2>
+
+            <div class="form-group">
+                <label>퀘스트 ID (영문, 고유값)</label>
+                <input type="text" id="questId" placeholder="예: rat_hunt">
+            </div>
+
+            <div class="form-group">
+                <label>퀘스트 이름</label>
+                <input type="text" id="questName" placeholder="예: 쥐 사냥">
+            </div>
+
+            <div class="form-group">
+                <label>설명</label>
+                <textarea id="questDescription" placeholder="퀘스트 설명을 입력하세요..."></textarea>
+            </div>
+
+            <h3 style="color: #ffd700; margin: 20px 0 10px 0;">🎯 목표</h3>
+            <div class="objectives-list" id="objectivesList"></div>
+            <button class="btn" onclick="addObjective()">+ 목표 추가</button>
+
+            <h3 style="color: #ffd700; margin: 20px 0 10px 0;">🎁 보상</h3>
+            <div class="rewards-grid">
+                <div class="reward-input">
+                    <label>💰 골드</label>
+                    <input type="number" id="rewardGold" value="0" min="0">
+                </div>
+                <div class="reward-input">
+                    <label>⭐ 경험치</label>
+                    <input type="number" id="rewardXp" value="0" min="0">
+                </div>
+                <div class="reward-input">
+                    <label>🔑 출현 층</label>
+                    <input type="number" id="questFloor" value="1" min="1" max="15">
+                </div>
+            </div>
+
+            <div class="btn-group">
+                <button class="btn btn-primary" onclick="saveQuest()">💾 저장</button>
+                <button class="btn" onclick="exportCode()">📋 코드 복사</button>
+                <button class="btn" onclick="exportAllQuests()">📄 전체 내보내기</button>
+                <button class="btn" onclick="toggleImportArea()">📥 가져오기</button>
+                <button class="btn btn-danger" onclick="deleteQuest()">🗑️ 삭제</button>
+            </div>
+
+            <div id="importArea" style="display: none;">
+                <textarea id="importCode" placeholder="여기에 퀘스트 코드를 붙여넣으세요..."></textarea>
+                <div style="display: flex; gap: 10px; margin-top: 10px;">
+                    <button class="btn btn-primary" onclick="importCode()">✅ 가져오기</button>
+                    <button class="btn" onclick="toggleImportArea()">취소</button>
+                </div>
+            </div>
+
+            <div class="code-output" id="codeOutput"></div>
+
+            <div class="preview-section">
+                <h3 style="color: #ffd700; margin-bottom: 10px;">👁️ 미리보기</h3>
+                <div class="preview-box" id="previewBox">
+                    <div id="previewContent">퀘스트를 선택하세요</div>
+                </div>
+            </div>
+
+            <div class="help-text">
+                <strong>사용법:</strong><br>
+                1. 왼쪽에서 퀘스트 선택 또는 새로 추가<br>
+                2. ID, 이름, 설명 입력<br>
+                3. 목표 추가 (처치, 수집, 도달 등)<br>
+                4. 보상 설정<br>
+                5. 저장 후 코드 복사하여 game.js에 적용
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 몬스터 목록 (game.js의 MONSTER_DATA 기반)
+        const MONSTERS = [
+            '쥐', '박쥐', '거미', '고블린', '슬라임', '스켈레톤',
+            '오크', '좀비', '늑대', '트롤', '곰', '미노타우로스', '드래곤'
+        ];
+
+        // 아이템 목록
+        const ITEMS = [
+            '체력 물약', '마나 물약', '열쇠', '금화', '무기', '방어구', '스크롤'
+        ];
+
+        // 목표 타입
+        const OBJECTIVE_TYPES = {
+            'kill': '처치',
+            'collect': '수집',
+            'reach': '도달',
+            'talk': '대화',
+            'use': '사용'
+        };
+
+        // 퀘스트 데이터
+        let quests = {};
+        let currentQuestId = null;
+
+        // 기본 퀘스트 데이터
+        const DEFAULT_QUESTS = {
+            'rat_hunt': {
+                id: 'rat_hunt',
+                name: '쥐 사냥',
+                description: '마을 창고의 쥐를 처치하라.',
+                objectives: [{ type: 'kill', target: '쥐', required: 5 }],
+                rewards: { gold: 50, xp: 0 },
+                floor: 1
+            },
+            'goblin_threat': {
+                id: 'goblin_threat',
+                name: '고블린의 위협',
+                description: '던전에 출몰하는 고블린을 처치하라.',
+                objectives: [{ type: 'kill', target: '고블린', required: 3 }],
+                rewards: { gold: 100, xp: 50 },
+                floor: 3
+            },
+            'spider_nest': {
+                id: 'spider_nest',
+                name: '거미 소굴',
+                description: '거미굴의 거미들을 소탕하라.',
+                objectives: [{ type: 'kill', target: '거미', required: 5 }],
+                rewards: { gold: 80, xp: 40 },
+                floor: 2
+            },
+            'undead_purge': {
+                id: 'undead_purge',
+                name: '언데드 정화',
+                description: '스켈레톤과 좀비를 처치하여 던전을 정화하라.',
+                objectives: [
+                    { type: 'kill', target: '스켈레톤', required: 3 },
+                    { type: 'kill', target: '좀비', required: 2 }
+                ],
+                rewards: { gold: 150, xp: 80 },
+                floor: 4
+            },
+            'dragon_slayer': {
+                id: 'dragon_slayer',
+                name: '드래곤 슬레이어',
+                description: '던전 깊은 곳의 드래곤을 처치하라.',
+                objectives: [{ type: 'kill', target: '드래곤', required: 1 }],
+                rewards: { gold: 500, xp: 300 },
+                floor: 13
+            },
+            'deep_exploration': {
+                id: 'deep_exploration',
+                name: '심층 탐험',
+                description: '던전 10층에 도달하라.',
+                objectives: [{ type: 'reach', target: '10층', required: 1 }],
+                rewards: { gold: 200, xp: 150 },
+                floor: 1
+            }
+        };
+
+        // 초기화
+        function init() {
+            // 저장된 퀘스트 불러오기
+            const saved = localStorage.getItem('quest_editor_data');
+            if (saved) {
+                try {
+                    quests = JSON.parse(saved);
+                } catch (e) {
+                    console.error('저장된 데이터 로드 실패:', e);
+                    quests = JSON.parse(JSON.stringify(DEFAULT_QUESTS));
+                }
+            } else {
+                quests = JSON.parse(JSON.stringify(DEFAULT_QUESTS));
+            }
+
+            renderQuestList();
+
+            // 첫 번째 퀘스트 선택
+            const firstId = Object.keys(quests)[0];
+            if (firstId) {
+                selectQuest(firstId);
+            }
+        }
+
+        // 퀘스트 목록 렌더링
+        function renderQuestList() {
+            const container = document.getElementById('questList');
+            container.innerHTML = '';
+
+            for (const [id, quest] of Object.entries(quests)) {
+                const btn = document.createElement('button');
+                btn.className = `quest-btn ${id === currentQuestId ? 'active' : ''}`;
+                btn.innerHTML = `
+                    <div>${quest.name}</div>
+                    <div class="status">${quest.floor}층 | ${quest.objectives.length}개 목표</div>
+                `;
+                btn.onclick = () => selectQuest(id);
+                container.appendChild(btn);
+            }
+        }
+
+        // 퀘스트 선택
+        function selectQuest(id) {
+            currentQuestId = id;
+            const quest = quests[id];
+
+            document.getElementById('questId').value = quest.id;
+            document.getElementById('questName').value = quest.name;
+            document.getElementById('questDescription').value = quest.description;
+            document.getElementById('rewardGold').value = quest.rewards.gold || 0;
+            document.getElementById('rewardXp').value = quest.rewards.xp || 0;
+            document.getElementById('questFloor').value = quest.floor || 1;
+
+            renderObjectives(quest.objectives);
+            renderQuestList();
+            updatePreview();
+        }
+
+        // 목표 렌더링
+        function renderObjectives(objectives) {
+            const container = document.getElementById('objectivesList');
+            container.innerHTML = '';
+
+            objectives.forEach((obj, index) => {
+                const item = document.createElement('div');
+                item.className = 'objective-item';
+
+                // 타입 선택
+                let typeOptions = Object.entries(OBJECTIVE_TYPES)
+                    .map(([val, label]) => `<option value="${val}" ${obj.type === val ? 'selected' : ''}>${label}</option>`)
+                    .join('');
+
+                // 대상 선택 (타입에 따라)
+                let targetOptions = '';
+                if (obj.type === 'kill') {
+                    targetOptions = MONSTERS.map(m =>
+                        `<option value="${m}" ${obj.target === m ? 'selected' : ''}>${m}</option>`
+                    ).join('');
+                } else if (obj.type === 'collect') {
+                    targetOptions = ITEMS.map(i =>
+                        `<option value="${i}" ${obj.target === i ? 'selected' : ''}>${i}</option>`
+                    ).join('');
+                } else {
+                    targetOptions = `<option value="${obj.target}">${obj.target}</option>`;
+                }
+
+                item.innerHTML = `
+                    <select onchange="updateObjectiveType(${index}, this.value)">
+                        ${typeOptions}
+                    </select>
+                    <select onchange="updateObjectiveTarget(${index}, this.value)" id="target_${index}">
+                        ${targetOptions}
+                    </select>
+                    <input type="number" value="${obj.required}" min="1"
+                           onchange="updateObjectiveRequired(${index}, this.value)">
+                    <button class="btn-remove" onclick="removeObjective(${index})">✕</button>
+                `;
+
+                // 도달/대화 등은 텍스트 입력으로
+                if (obj.type === 'reach' || obj.type === 'talk' || obj.type === 'use') {
+                    const targetSelect = item.querySelector(`#target_${index}`);
+                    const textInput = document.createElement('input');
+                    textInput.type = 'text';
+                    textInput.value = obj.target;
+                    textInput.placeholder = obj.type === 'reach' ? '예: 10층' : '대상 이름';
+                    textInput.onchange = (e) => updateObjectiveTarget(index, e.target.value);
+                    targetSelect.replaceWith(textInput);
+                }
+
+                container.appendChild(item);
+            });
+        }
+
+        // 목표 추가
+        function addObjective() {
+            if (!currentQuestId) return;
+            quests[currentQuestId].objectives.push({
+                type: 'kill',
+                target: '쥐',
+                required: 1
+            });
+            renderObjectives(quests[currentQuestId].objectives);
+            updatePreview();
+        }
+
+        // 목표 제거
+        function removeObjective(index) {
+            if (!currentQuestId) return;
+            quests[currentQuestId].objectives.splice(index, 1);
+            renderObjectives(quests[currentQuestId].objectives);
+            updatePreview();
+        }
+
+        // 목표 타입 업데이트
+        function updateObjectiveType(index, value) {
+            if (!currentQuestId) return;
+            quests[currentQuestId].objectives[index].type = value;
+
+            // 타입에 따라 기본 대상 설정
+            if (value === 'kill') {
+                quests[currentQuestId].objectives[index].target = '쥐';
+            } else if (value === 'collect') {
+                quests[currentQuestId].objectives[index].target = '체력 물약';
+            } else if (value === 'reach') {
+                quests[currentQuestId].objectives[index].target = '10층';
+            } else {
+                quests[currentQuestId].objectives[index].target = '';
+            }
+
+            renderObjectives(quests[currentQuestId].objectives);
+            updatePreview();
+        }
+
+        // 목표 대상 업데이트
+        function updateObjectiveTarget(index, value) {
+            if (!currentQuestId) return;
+            quests[currentQuestId].objectives[index].target = value;
+            updatePreview();
+        }
+
+        // 목표 필요 수량 업데이트
+        function updateObjectiveRequired(index, value) {
+            if (!currentQuestId) return;
+            quests[currentQuestId].objectives[index].required = parseInt(value) || 1;
+            updatePreview();
+        }
+
+        // 새 퀘스트 생성
+        function createNewQuest() {
+            const id = 'quest_' + Date.now();
+            quests[id] = {
+                id: id,
+                name: '새 퀘스트',
+                description: '퀘스트 설명을 입력하세요.',
+                objectives: [{ type: 'kill', target: '쥐', required: 1 }],
+                rewards: { gold: 50, xp: 0 },
+                floor: 1
+            };
+            selectQuest(id);
+        }
+
+        // 퀘스트 저장
+        function saveQuest() {
+            if (!currentQuestId) return;
+
+            const newId = document.getElementById('questId').value.trim();
+            const name = document.getElementById('questName').value.trim();
+            const description = document.getElementById('questDescription').value.trim();
+            const gold = parseInt(document.getElementById('rewardGold').value) || 0;
+            const xp = parseInt(document.getElementById('rewardXp').value) || 0;
+            const floor = parseInt(document.getElementById('questFloor').value) || 1;
+
+            if (!newId || !name) {
+                alert('ID와 이름은 필수입니다.');
+                return;
+            }
+
+            // ID가 변경된 경우
+            if (newId !== currentQuestId) {
+                if (quests[newId]) {
+                    alert('이미 존재하는 ID입니다.');
+                    return;
+                }
+                delete quests[currentQuestId];
+                currentQuestId = newId;
+            }
+
+            quests[currentQuestId] = {
+                id: newId,
+                name: name,
+                description: description,
+                objectives: quests[currentQuestId]?.objectives || [{ type: 'kill', target: '쥐', required: 1 }],
+                rewards: { gold, xp },
+                floor: floor
+            };
+
+            localStorage.setItem('quest_editor_data', JSON.stringify(quests));
+            renderQuestList();
+            updatePreview();
+            alert('저장되었습니다!');
+        }
+
+        // 퀘스트 삭제
+        function deleteQuest() {
+            if (!currentQuestId) return;
+
+            if (!confirm(`'${quests[currentQuestId].name}' 퀘스트를 삭제하시겠습니까?`)) {
+                return;
+            }
+
+            delete quests[currentQuestId];
+            localStorage.setItem('quest_editor_data', JSON.stringify(quests));
+
+            const firstId = Object.keys(quests)[0];
+            if (firstId) {
+                selectQuest(firstId);
+            } else {
+                currentQuestId = null;
+                document.getElementById('questId').value = '';
+                document.getElementById('questName').value = '';
+                document.getElementById('questDescription').value = '';
+                document.getElementById('objectivesList').innerHTML = '';
+            }
+
+            renderQuestList();
+        }
+
+        // 미리보기 업데이트
+        function updatePreview() {
+            if (!currentQuestId) return;
+
+            const quest = quests[currentQuestId];
+            const objHtml = quest.objectives.map(obj => {
+                const typeLabel = OBJECTIVE_TYPES[obj.type] || obj.type;
+                return `<div class="objective">▸ ${typeLabel}: ${obj.target} (0/${obj.required})</div>`;
+            }).join('');
+
+            let rewardText = '';
+            if (quest.rewards.gold) rewardText += `💰 ${quest.rewards.gold} 골드 `;
+            if (quest.rewards.xp) rewardText += `⭐ ${quest.rewards.xp} XP`;
+
+            document.getElementById('previewContent').innerHTML = `
+                <h3>📜 ${quest.name}</h3>
+                <div class="description">${quest.description}</div>
+                ${objHtml}
+                ${rewardText ? `<div class="reward">보상: ${rewardText}</div>` : ''}
+                <div style="color: #888; font-size: 12px; margin-top: 10px;">출현: ${quest.floor}층</div>
+            `;
+        }
+
+        // 코드 복사
+        function exportCode() {
+            if (!currentQuestId) return;
+
+            const quest = quests[currentQuestId];
+            const objStr = quest.objectives.map(obj =>
+                `{ type: '${obj.type}', target: '${obj.target}', required: ${obj.required}, current: 0 }`
+            ).join(',\n            ');
+
+            const code = `this.player.questLog.addQuest(new Quest(
+    '${quest.id}', '${quest.name}',
+    '${quest.description}',
+    [${objStr}],
+    { gold: ${quest.rewards.gold || 0}, xp: ${quest.rewards.xp || 0} }
+));`;
+
+            document.getElementById('codeOutput').style.display = 'block';
+            document.getElementById('codeOutput').textContent = code;
+
+            navigator.clipboard.writeText(code).then(() => {
+                alert('코드가 클립보드에 복사되었습니다!');
+            });
+        }
+
+        // 전체 내보내기
+        function exportAllQuests() {
+            let code = '// 퀘스트 데이터 (game.js의 initPlayer 함수에 추가)\n\n';
+
+            // 층별로 정렬
+            const sortedQuests = Object.values(quests).sort((a, b) => a.floor - b.floor);
+
+            for (const quest of sortedQuests) {
+                const objStr = quest.objectives.map(obj =>
+                    `{ type: '${obj.type}', target: '${obj.target}', required: ${obj.required}, current: 0 }`
+                ).join(',\n            ');
+
+                code += `// ${quest.floor}층 - ${quest.name}
+this.player.questLog.addQuest(new Quest(
+    '${quest.id}', '${quest.name}',
+    '${quest.description}',
+    [${objStr}],
+    { gold: ${quest.rewards.gold || 0}, xp: ${quest.rewards.xp || 0} }
+));
+
+`;
+            }
+
+            document.getElementById('codeOutput').style.display = 'block';
+            document.getElementById('codeOutput').textContent = code;
+
+            navigator.clipboard.writeText(code).then(() => {
+                alert('전체 코드가 클립보드에 복사되었습니다!\n\ngame.js의 initPlayer 함수에 붙여넣으세요.');
+            });
+        }
+
+        // 가져오기 토글
+        function toggleImportArea() {
+            const area = document.getElementById('importArea');
+            area.style.display = area.style.display === 'none' ? 'block' : 'none';
+            if (area.style.display === 'block') {
+                document.getElementById('importCode').value = '';
+                document.getElementById('importCode').focus();
+            }
+        }
+
+        // 코드 가져오기
+        function importCode() {
+            const code = document.getElementById('importCode').value.trim();
+            if (!code) {
+                alert('코드를 입력해주세요.');
+                return;
+            }
+
+            try {
+                // Quest 생성자 호출 파싱
+                const matches = code.matchAll(/new Quest\s*\(\s*'([^']+)',\s*'([^']+)',\s*'([^']+)',\s*\[([\s\S]*?)\],\s*\{([^}]+)\}\s*\)/g);
+
+                let importedCount = 0;
+                for (const match of matches) {
+                    const id = match[1];
+                    const name = match[2];
+                    const description = match[3];
+                    const objectivesStr = match[4];
+                    const rewardsStr = match[5];
+
+                    // 목표 파싱
+                    const objectives = [];
+                    const objMatches = objectivesStr.matchAll(/\{\s*type:\s*'([^']+)',\s*target:\s*'([^']+)',\s*required:\s*(\d+)/g);
+                    for (const objMatch of objMatches) {
+                        objectives.push({
+                            type: objMatch[1],
+                            target: objMatch[2],
+                            required: parseInt(objMatch[3])
+                        });
+                    }
+
+                    // 보상 파싱
+                    const goldMatch = rewardsStr.match(/gold:\s*(\d+)/);
+                    const xpMatch = rewardsStr.match(/xp:\s*(\d+)/);
+
+                    quests[id] = {
+                        id,
+                        name,
+                        description,
+                        objectives,
+                        rewards: {
+                            gold: goldMatch ? parseInt(goldMatch[1]) : 0,
+                            xp: xpMatch ? parseInt(xpMatch[1]) : 0
+                        },
+                        floor: 1
+                    };
+                    importedCount++;
+                }
+
+                if (importedCount === 0) {
+                    throw new Error('가져올 수 있는 퀘스트가 없습니다.');
+                }
+
+                localStorage.setItem('quest_editor_data', JSON.stringify(quests));
+                renderQuestList();
+                toggleImportArea();
+                alert(`${importedCount}개의 퀘스트를 가져왔습니다!`);
+
+            } catch (e) {
+                alert('코드 파싱 오류:\n' + e.message);
+                console.error('Import error:', e);
+            }
+        }
+
+        // 초기화
+        window.onload = init;
+    </script>
+</body>
+</html>

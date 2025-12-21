@@ -1456,7 +1456,19 @@ class Game {
                     const items = this.gameMap.getItemsAt(x, y);
 
                     if (entity === this.player) {
-                        char = '@';
+                        // 플레이어 방향에 따른 화살표 표시
+                        const dirArrows = {
+                            '0,-1': '▲',  // 북
+                            '0,1': '▼',   // 남
+                            '-1,0': '◀',  // 서
+                            '1,0': '▶',   // 동
+                            '-1,-1': '◤', // 북서
+                            '1,-1': '◥',  // 북동
+                            '-1,1': '◣',  // 남서
+                            '1,1': '◢'    // 남동
+                        };
+                        const dirKey = `${this.playerDirection.dx},${this.playerDirection.dy}`;
+                        char = dirArrows[dirKey] || '▲';
                         colorClass = 'tile-player';
                     } else if (entity) {
                         char = entity.char;

@@ -204,12 +204,14 @@ body {
     flex: 1;
     font-size: 8px;
     line-height: 1.0;
-    letter-spacing: 0px;
+    letter-spacing: 0.5px;
     white-space: pre;
     font-family: 'Courier New', monospace;
     padding: 5px;
     overflow: hidden;
     color: #888;
+    transform: scaleY(1.1);
+    transform-origin: top center;
 }
 
 /* 나침반 표시 (좌측 하단) */
@@ -736,12 +738,14 @@ body {
     }
 
     #mobile-view3d {
-        font-size: 5px;
-        line-height: 0.9;
-        letter-spacing: 0px;
+        font-size: 4px;
+        line-height: 1.0;
+        letter-spacing: 0.5px;
         white-space: pre;
         font-family: 'Courier New', monospace;
         color: #888;
+        transform: scaleY(1.1);
+        transform-origin: center center;
     }
 
     #mobile-status-panel {
